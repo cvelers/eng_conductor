@@ -1,25 +1,29 @@
 {
+  "source_file": "EN 1993-1-1-2005.json",
   "clauses": [
     {
       "clause_id": "1.1.1",
-      "title": "Scope of Eurocode 3",
+      "title": "Scope of Eurocode",
       "text": "(1) Eurocode 3 applies to the design of buildings and civil engineering works in steel. It complies with the principles and requirements for the safety and serviceability of structures, the basis of their design and verification that are given in EN 1990 – Basis of structural design.\n\n(2) Eurocode 3 is concerned only with requirements for resistance, serviceability, durability and fire resistance of steel structures. Other requirements, e.g. concerning thermal or sound insulation, are not covered.\n\n(3) Eurocode 3 is intended to be used in conjunction with:\n\n- EN 1990 “Basis of structural design”\n- EN 1991 “Actions on structures”\n- ENs, ETAGs and ETAs for construction products relevant for steel structures\n- EN 1090 “Execution of Steel Structures – Technical requirements”\n- EN 1992 to EN 1999 when steel structures or steel components are referred to\n\n(4) Eurocode 3 is subdivided in various parts:\n\nEN 1993-1 Design of Steel Structures: General rules and rules for buildings.\nEN 1993-2 Design of Steel Structures: Steel bridges.\nEN 1993-3 Design of Steel Structures: Towers, masts and chimneys.\nEN 1993-4 Design of Steel Structures: Silos, tanks and pipelines.\nEN 1993-5 Design of Steel Structures: Piling.\nEN 1993-6 Design of Steel Structures: Crane supporting structures.\n\n(5) EN 1993-2 to EN 1993-6 refer to the generic rules in EN 1993-1. The rules in parts EN 1993-2 to EN 1993-6 supplement the generic rules in EN 1993-1.\n\n(6) EN 1993-1 “General rules and rules for buildings” comprises:\n\nEN 1993-1-1 Design of Steel Structures: General rules and rules for buildings.\nEN 1993-1-2 Design of Steel Structures: Structural fire design.\nEN 1993-1-3 Design of Steel Structures: Cold-formed members and sheeting.\nEN 1993-1-4 Design of Steel Structures: Stainless steels.\nEN 1993-1-5 Design of Steel Structures: Plated structural elements.\nEN 1993-1-6 Design of Steel Structures: Strength and stability of shell structures.\nEN 1993-1-7 Design of Steel Structures: Strength and stability of planar plated structures transversely loaded.\nEN 1993-1-8 Design of Steel Structures: Design of joints.\nEN 1993-1-9 Design of Steel Structures: Fatigue strength of steel structures.\nEN 1993-1-10 Design of Steel Structures: Selection of steel for fracture toughness and through-thickness properties.\nEN 1993-1-11 Design of Steel Structures: Design of structures with tension components made of steel.\nEN 1993-1-12 Design of Steel Structures: Supplementary rules for high strength steel.",
       "pointer": "en_1993_1_1_2005#/1.1.1",
       "keywords": [
         "1.1.1",
         "eurocode",
         "fatigue",
+        "fire",
         "fracture",
         "resistance",
         "scope",
         "serviceability",
+        "shell",
         "stability",
+        "stainless",
         "tension"
       ]
     },
     {
       "clause_id": "1.1.2",
-      "title": "Scope of Part 1.1 of Eurocode 3",
+      "title": "Scope of Part 1.1 of Eurocode",
       "text": "(1) EN 1993-1-1 gives basic design rules for steel structures with material thicknesses $t \\geq 3$ mm. It also gives supplementary provisions for the structural design of steel buildings. These supplementary provisions are indicated by the letter “B” after the paragraph number, thus $(\\quad)$B.\n\nNOTE For cold formed members and sheeting, see EN 1993-1-3 $(\\quad)$B.\n\n(2) The following subjects are dealt with in EN 1993-1-1:\n\nSection 1: General\nSection 2: Basis of design\nSection 3: Materials\nSection 4: Durability\nSection 5: Structural analysis\nSection 6: Ultimate limit states\nSection 7: Serviceability limit states\n\n(3) Sections 1 to 2 provide additional clauses to those given in EN 1990 “Basis of structural design”.\n\n(4) Section 3 deals with material properties of products made of low alloy structural steels.\n\n(5) Section 4 gives general rules for durability.\n\n(6) Section 5 refers to the structural analysis of structures, in which the members can be modelled with sufficient accuracy as line elements for global analysis.\n\n(7) Section 6 gives detailed rules for the design of cross sections and members.\n\n(8) Section 7 gives rules for serviceability.",
       "pointer": "en_1993_1_1_2005#/1.1.2",
       "keywords": [
@@ -148,9 +152,71 @@
       ]
     },
     {
+      "clause_id": "Annex A",
+      "title": "Annex A",
+      "text": "$C_{my}$ equivalent uniform moment factor\n$C_{mz}$ equivalent uniform moment factor\n$C_{mLT}$ equivalent uniform moment factor\n$\\mu_y$ factor\n$\\mu_z$ factor\n$N_{cr,y}$ elastic flexural buckling force about the y-y axis\n$N_{cr,z}$ elastic flexural buckling force about the z-z axis\n$C_{yy}$ factor\n$C_{yz}$ factor\n$C_{zy}$ factor\n$C_{zz}$ factor\n$w_y$ factor\n$w_z$ factor\n$n_{pl}$ factor\n$\\bar{\\lambda}_{\\text{max}}$ maximum of $\\bar{\\lambda}_y$ and $\\bar{\\lambda}_z$\n$b_{LT}$ factor\n$c_{LT}$ factor\n$d_{LT}$ factor\n$e_{LT}$ factor\n$\\psi_y$ ratio of end moments (y-y axis)\n$C_{my,0}$ factor\n$C_{mz,0}$ factor\n$a_{LT}$ factor\n$I_T$ St. Venant torsional constant\n$I_y$ second moment of area about y-y axis\n$C_1$ ratio between the critical bending moment (largest value along the member) and the critical constant bending moment for a member with hinged supports\n$M_{i,Ed}(x)$ maximum first order moment\n$|\\delta_x|$ maximum member displacement along the member",
+      "pointer": "en_1993_1_1_2005#/Annex A",
+      "keywords": [
+        "Annex A",
+        "annex",
+        "bending",
+        "buckling",
+        "elastic",
+        "force",
+        "moment",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "Annex B",
+      "title": "Annex B",
+      "text": "$C_2$ $\\alpha_s$ factor; $s = \\text{sagging} C_2$\n$C_2$ $\\alpha_h$ factor; $h = \\text{hogging} C_2$\n$C_m$ equivalent uniform moment factor",
+      "pointer": "en_1993_1_1_2005#/Annex B",
+      "keywords": [
+        "Annex B",
+        "annex",
+        "moment"
+      ]
+    },
+    {
+      "clause_id": "Annex AB",
+      "title": "Annex AB",
+      "text": "$\\gamma_G$ partial factor for permanent loads\n$G_k$ characteristic value of permanent loads\n$\\gamma_Q$ partial factor for variable loads\n$Q_k$ characteristic value of variable loads",
+      "pointer": "en_1993_1_1_2005#/Annex AB",
+      "keywords": [
+        "Annex AB",
+        "annex"
+      ]
+    },
+    {
+      "clause_id": "Annex BB",
+      "title": "Annex BB",
+      "text": "$\\bar{\\lambda}_{\\text{eff,v}}$ effective slenderness ratio for buckling about v-v axis\n$\\bar{\\lambda}_{\\text{eff,y}}$ effective slenderness ratio for buckling about y-y axis\n$\\bar{\\lambda}_{\\text{eff,z}}$ effective slenderness ratio for buckling about z-z axis\nL system length\n$L_{\\text{cr}}$ buckling length\nS shear stiffness provided by sheeting\n$I_{\\text{w}}$ warping constant\n$C_{9,k}$ rotational stiffness provided by stabilizing continuum and connections\n$K_{0}$ factor for considering the type of analysis\n$K_{9}$ factor for considering the moment distribution and the type of restraint\n$C_{9R,k}$ rotational stiffness provided by the stabilizing continuum to the beam assuming a stiff connection to the member\n$C_{9C,k}$ rotational stiffness of the connection between the beam and the stabilizing continuum\n$C_{9D,k}$ rotational stiffness deduced from an analysis of the distorsional deformations of the beam cross sections\n$L_{m}$ stable length between adjacent lateral restraints\n$L_{k}$ stable length between adjacent torsional restraints\n$L_{s}$ stable length between a plastic hinge location and an adjacent torsional restraint\n$C_{1}$ modification factor for moment distribution\n$C_{m}$ modification factor for linear moment gradient\n$C_{n}$ modification factor for non-linear moment gradient\na distance between the centroid of the member with the plastic hinge and the centroid of the restraint members\n$B_{0}$ factor\n$B_{1}$ factor\n$B_{2}$ factor\n\n$\\eta$ ratio of elastic critical values of axial forces\n$i_{s}$ radius of gyration related to centroid of restraining member\n$\\beta_{t}$ ratio of the algebraically smaller end moment to the larger end moment\n$R_{1}$ moment at a specific location of a member\n$R_{2}$ moment at a specific location of a member\n$R_{3}$ moment at a specific location of a member\n$R_{4}$ moment at a specific location of a member\n$R_{5}$ moment at a specific location of a member\n$R_{E}$ maximum of $R_{1}$ or $R_{5}$\n$R_{s}$ maximum value of bending moment anywhere in the length $L_{y}$\nc taper factor\n$h_{h}$ additional depth of the haunch or taper\n$h_{\\max}$ maximum depth of cross-section within the length $L_{y}$\n$h_{\\min}$ minimum depth of cross-section within the length $L_{y}$\n\nBS EN 1993-1-1:2005\nEN 1993-1-1:2005 (E)\n\n$h_s$ vertical depth of the un-haunched section\n$L_h$ length of haunch within the length $L_y$\n$L_y$ length between restraints",
+      "pointer": "en_1993_1_1_2005#/Annex BB",
+      "keywords": [
+        "Annex BB",
+        "annex",
+        "axial",
+        "bending",
+        "buckling",
+        "connection",
+        "cross-section",
+        "elastic",
+        "force",
+        "lateral",
+        "moment",
+        "plastic",
+        "section",
+        "shear",
+        "slenderness",
+        "table",
+        "torsional"
+      ]
+    },
+    {
       "clause_id": "1.7",
       "title": "Conventions for member axes",
-      "text": "(1) The convention for member axes is:\n- $x-x$ - along the member\n- $y-y$ - axis of the cross-section\n- $z-z$ - axis of the cross-section\n\n(2) For steel members, the conventions used for cross-section axes are:\n- generally:\n  - $y-y$ - cross-section axis parallel to the flanges\n  - $z-z$ - cross-section axis perpendicular to the flanges\n- for angle sections:\n  - $y-y$ - axis parallel to the smaller leg\n  - $z-z$ - axis perpendicular to the smaller leg\n- where necessary:\n  - $u-u$ - major principal axis (where this does not coincide with the yy axis)\n  - $v-v$ - minor principal axis (where this does not coincide with the zz axis)\n\n(3) The symbols used for dimensions and axes of rolled steel sections are indicated in Figure 1.1.\n\n(4) The convention used for subscripts that indicate axes for moments is: \"Use the axis about which the moment acts.\"\n\nNOTE All rules in this Eurocode relate to principal axis properties, which are generally defined by the axes $y-y$ and $z-z$ but for sections such as angles are defined by the axes $u-u$ and $v-v$.\n\nFigure 1.1: Dimensions and axes of sections\n\n2 Basis of design",
+      "text": "(1) The convention for member axes is:\n- $x-x$ - along the member\n- $y-y$ - axis of the cross-section\n- $z-z$ - axis of the cross-section\n\n(2) For steel members, the conventions used for cross-section axes are:\n- generally:\n  - $y-y$ - cross-section axis parallel to the flanges\n  - $z-z$ - cross-section axis perpendicular to the flanges\n- for angle sections:\n  - $y-y$ - axis parallel to the smaller leg\n  - $z-z$ - axis perpendicular to the smaller leg\n- where necessary:\n  - $u-u$ - major principal axis (where this does not coincide with the yy axis)\n  - $v-v$ - minor principal axis (where this does not coincide with the zz axis)\n\n(3) The symbols used for dimensions and axes of rolled steel sections are indicated in Figure 1.1.\n\n(4) The convention used for subscripts that indicate axes for moments is: \"Use the axis about which the moment acts.\"\n\nNOTE All rules in this Eurocode relate to principal axis properties, which are generally defined by the axes $y-y$ and $z-z$ but for sections such as angles are defined by the axes $u-u$ and $v-v$.\n\nFigure 1.1: Dimensions and axes of sections",
       "pointer": "en_1993_1_1_2005#/1.7",
       "keywords": [
         "1.7",
@@ -184,6 +250,7 @@
       "pointer": "en_1993_1_1_2005#/2.1.2",
       "keywords": [
         "2.1.2",
+        "annex",
         "management",
         "reliability"
       ]
@@ -196,7 +263,9 @@
       "keywords": [
         "2.1.3.1",
         "fatigue",
-        "general"
+        "general",
+        "stainless",
+        "table"
       ]
     },
     {
@@ -209,6 +278,7 @@
         "buildings",
         "design",
         "life",
+        "table",
         "working"
       ]
     },
@@ -250,6 +320,7 @@
       "keywords": [
         "2.3.1",
         "actions",
+        "annex",
         "environmental",
         "fatigue",
         "influences"
@@ -316,18 +387,21 @@
       "pointer": "en_1993_1_1_2005#/2.4.4",
       "keywords": [
         "2.4.4",
+        "annex",
         "equilibrium",
         "static",
+        "table",
         "verification"
       ]
     },
     {
       "clause_id": "2.5",
       "title": "Design assisted by testing",
-      "text": "(1) The resistances $R_k$ in this standard have been determined using Annex D of EN 1990.\n\n(2) In recommending classes of constant partial factors $\\gamma_Mi$ the characteristic values $R_k$ were obtained from\n\n$$R_k = R_d \\gamma_Mi$$  \\hspace{1cm} (2.2)\n\nwhere $R_d$ are design values according to Annex D of EN 1990\n\n$$\\gamma_Mi$$ are recommended partial factors.\n\nNOTE 1 The numerical values of the recommended partial factors $\\gamma_Mi$ have been determined such that $R_k$ represents approximately the 5%-fractile for an infinite number of tests.\n\nNOTE 2 For characteristic values of fatigue strength and partial factors $\\gamma_Mf$ for fatigue see EN 1993-1-9.\n\nNOTE 3 For characteristic values of toughness resistance and safety elements for the toughness verification see EN 1993-1-10.\n\n(3) Where resistances $R_k$ for prefabricated products should be determined from tests, the procedure in (2) should be followed.\n\n3 Materials",
+      "text": "(1) The resistances $R_k$ in this standard have been determined using Annex D of EN 1990.\n\n(2) In recommending classes of constant partial factors $\\gamma_Mi$ the characteristic values $R_k$ were obtained from\n\n$$R_k = R_d \\gamma_Mi$$  \\hspace{1cm} (2.2)\n\nwhere $R_d$ are design values according to Annex D of EN 1990\n\n$$\\gamma_Mi$$ are recommended partial factors.\n\nNOTE 1 The numerical values of the recommended partial factors $\\gamma_Mi$ have been determined such that $R_k$ represents approximately the 5%-fractile for an infinite number of tests.\n\nNOTE 2 For characteristic values of fatigue strength and partial factors $\\gamma_Mf$ for fatigue see EN 1993-1-9.\n\nNOTE 3 For characteristic values of toughness resistance and safety elements for the toughness verification see EN 1993-1-10.\n\n(3) Where resistances $R_k$ for prefabricated products should be determined from tests, the procedure in (2) should be followed.",
       "pointer": "en_1993_1_1_2005#/2.5",
       "keywords": [
         "2.5",
+        "annex",
         "assisted",
         "design",
         "fatigue",
@@ -342,8 +416,10 @@
       "pointer": "en_1993_1_1_2005#/3.1",
       "keywords": [
         "3.1",
+        "annex",
         "general",
-        "section"
+        "section",
+        "table"
       ]
     },
     {
@@ -353,8 +429,10 @@
       "pointer": "en_1993_1_1_2005#/3.2.1",
       "keywords": [
         "3.2.1",
+        "annex",
         "material",
         "properties",
+        "table",
         "ultimate",
         "yield"
       ]
@@ -366,10 +444,12 @@
       "pointer": "en_1993_1_1_2005#/3.2.2",
       "keywords": [
         "3.2.2",
+        "annex",
         "cross-section",
         "ductility",
         "requirements",
         "section",
+        "table",
         "ultimate",
         "yield"
       ]
@@ -377,17 +457,50 @@
     {
       "clause_id": "3.2.3",
       "title": "Fracture toughness",
-      "text": "(1) P The material shall have sufficient fracture toughness to avoid brittle fracture of tension elements at the lowest service temperature expected to occur within the intended design life of the structure.\n\nNOTE The lowest service temperature to be adopted in design may be given in the National Annex.\n\n(2) No further check against brittle fracture need to be made if the conditions given in EN 1993-1-10 are satisfied for the lowest temperature.\n\n(3)B For building components under compression a minimum toughness property should be selected.\n\nNOTE B The National Annex may give information on the selection of toughness properties for members in compression. The use of Table 2.1 of EN 1993-1-10 for $\\sigma_{\\text{Ed}} = 0.25 \\, \\text{f}_y(t)$ is recommended.\n\n(4) For selecting steels for members with hot dip galvanized coatings see [EN ISO 1461](EN ISO 1461).\n\nTable 3.1: Nominal values of yield strength $f_y$ and ultimate tensile strength $f_u$ for hot rolled structural steel\n\n| Standard and steel grade | Nominal thickness of the element $t$ [mm] |\n| :--- | :--- |\n| | $t \\leq 40 \\text{ mm}$ | $40 \\text{ mm} < t \\leq 80 \\text{ mm}$ |\n| | $f_y [\\text{N/mm}^2]$ $f_u [\\text{N/mm}^2]$ $f_y [\\text{N/mm}^2]$ $f_u [\\text{N/mm}^2]$ |\n| EN 10025-2 | |\n| S 235 | 235 | 360 | 215 | 360 |\n| S 275 | 275 | 430 | 255 | 410 |\n| S 355 | 355 | $\\text{AC}_2$ 490 $\\text{AC}_2$ | 335 | 470 |\n| S 450 | 440 | 550 | 410 | 550 |\n| EN 10025-3 | |\n| S 275 N/NL | 275 | 390 | 255 | 370 |\n| S 355 N/NL | 355 | 490 | 335 | 470 |\n| S 420 N/NL | 420 | 520 | 390 | 520 |\n| S 460 N/NL | 460 | 540 | 430 | 540 |\n| EN 10025-4 | |\n| S 275 M/ML | 275 | 370 | 255 | 360 |\n| S 355 M/ML | 355 | 470 | 335 | 450 |\n| S 420 M/ML | 420 | 520 | 390 | 500 |\n| S 460 M/ML | 460 | 540 | 430 | 530 |\n| EN 10025-5 | |\n| S 235 W | 235 | 360 | 215 | 340 |\n| S 355 W | 355 | $\\text{AC}_2$ 490 $\\text{AC}_2$ | 335 | 490 |\n| EN 10025-6 | |\n| S 460 Q/QL/QL1 | 460 | 570 | 440 | 550 |\n\n### Table 3.1 (continued): Nominal values of yield strength $f_y$ and ultimate tensile strength $f_u$ for structural hollow sections\n\n| Standard and steel grade | Nominal thickness of the element $t$ [mm] |\n| :--- | :--- |\n| | $t \\leq 40$ mm | $40$ mm $< t \\leq 80$ mm |\n| | $f_y [\\text{N/mm}^2]$ | $f_u [\\text{N/mm}^2]$ | $f_u [\\text{N/mm}^2]$ |\n| **EN 10210-1** |\n| S 235 H | 235 | 360 | 215 | 340 |\n| S 275 H | 275 | 430 | 255 | 410 |\n| S 355 H | 355 | 510 | 335 | 490 |\n| S 275 NH/NLH | 275 | 390 | 255 | 370 |\n| S 355 NH/NLH | 355 | 490 | 335 | 470 |\n| S 420 NH/NLH $\\text{AC}_2$ | 420 | 540 | 390 | 520 |\n| S 460 NH/NLH | 460 | 560 | 430 | 550 |\n| **EN 10219-1** |\n| S 235 H | 235 | 360 | | |\n| S 275 H | 275 | 430 | | |\n| S 355 H | 355 | 510 | | |\n| S 275 NH/NLH | 275 | 370 | | |\n| S 355 NH/NLH | 355 | 470 | | |\n| S 460 NH/NLH | 460 | 550 | | |\n| S 275 MH/MLH | 275 | 360 | | |\n| S 355 MH/MLH | 355 | 470 | | |\n| S 420 MH/MLH | 420 | 500 | | |\n| S 460 MH/MLH | 460 | 530 | | |\n\n### 3.2.4 Through-thickness properties\n\n(1) Where steel with impro...",
+      "text": "(1) P The material shall have sufficient fracture toughness to avoid brittle fracture of tension elements at the lowest service temperature expected to occur within the intended design life of the structure.\n\nNOTE The lowest service temperature to be adopted in design may be given in the National Annex.\n\n(2) No further check against brittle fracture need to be made if the conditions given in EN 1993-1-10 are satisfied for the lowest temperature.\n\n(3)B For building components under compression a minimum toughness property should be selected.\n\nNOTE B The National Annex may give information on the selection of toughness properties for members in compression. The use of Table 2.1 of EN 1993-1-10 for $\\sigma_{\\text{Ed}} = 0.25 \\, \\text{f}_y(t)$ is recommended.\n\n(4) For selecting steels for members with hot dip galvanized coatings see [EN ISO 1461](EN ISO 1461).",
       "pointer": "en_1993_1_1_2005#/3.2.3",
       "keywords": [
         "3.2.3",
+        "annex",
         "compression",
         "fracture",
-        "section",
+        "table",
         "tension",
-        "toughness",
+        "toughness"
+      ]
+    },
+    {
+      "clause_id": "Table 3.1",
+      "title": "(continued): Nominal values of yield strength $f_y$ and ultimate tensile strength $f_u$ for structural hollow sections",
+      "text": "| Standard and steel grade | Nominal thickness of the element $t$ [mm] |\n| :--- | :--- |\n| | $t \\leq 40$ mm | $40$ mm $< t \\leq 80$ mm |\n| | $f_y [\\text{N/mm}^2]$ | $f_u [\\text{N/mm}^2]$ | $f_u [\\text{N/mm}^2]$ |\n| **EN 10210-1** |\n| S 235 H | 235 | 360 | 215 | 340 |\n| S 275 H | 275 | 430 | 255 | 410 |\n| S 355 H | 355 | 510 | 335 | 490 |\n| S 275 NH/NLH | 275 | 390 | 255 | 370 |\n| S 355 NH/NLH | 355 | 490 | 335 | 470 |\n| S 420 NH/NLH $\\text{AC}_2$ | 420 | 540 | 390 | 520 |\n| S 460 NH/NLH | 460 | 560 | 430 | 550 |\n| **EN 10219-1** |\n| S 235 H | 235 | 360 | | |\n| S 275 H | 275 | 430 | | |\n| S 355 H | 355 | 510 | | |\n| S 275 NH/NLH | 275 | 370 | | |\n| S 355 NH/NLH | 355 | 470 | | |\n| S 460 NH/NLH | 460 | 550 | | |\n| S 275 MH/MLH | 275 | 360 | | |\n| S 355 MH/MLH | 355 | 470 | | |\n| S 420 MH/MLH | 420 | 500 | | |\n| S 460 MH/MLH | 460 | 530 | | |",
+      "pointer": "en_1993_1_1_2005#/Table 3.1",
+      "keywords": [
+        "Table 3.1",
+        "continued",
+        "hollow",
+        "nominal",
+        "sections",
+        "strength",
+        "structural",
+        "tensile",
         "ultimate",
+        "values",
         "yield"
+      ]
+    },
+    {
+      "clause_id": "3.2.4",
+      "title": "Through-thickness properties",
+      "text": "(1) Where steel with improved through-thickness properties is necessary according to EN 1993-1-10, steel according to the required quality class in EN 10164 should be used.\n\n**NOTE 1** Guidance on the choice of through-thickness properties is given in EN 1993-1-10.\n\n**NOTE 2B** Particular care should be given to welded beam to column connections and welded end plates with tension in the through-thickness direction.\n\n**NOTE 3B** The National Annex may give the relevant allocation of target values $Z_{Ed}$ according to 3.2(2) of EN 1993-1-10 to the quality class in EN 10164. The allocation in Table 3.2 is recommended for buildings:\n\n| Table 3.2: Choice of quality class according to EN 10164 |\n| :--- |\n| Target value of $Z_{Ed}$ according to EN 1993-1-10 |\n| $Z_{Ed} \\leq 10$ |\n| $10 < Z_{Ed} \\leq 20$ |\n| $20 < Z_{Ed} \\leq 30$ |\n| $Z_{Ed} > 30$ |\n\n| Required value of $Z_{Rd}$ expressed in terms of design $Z$-values according to EN 10164 |\n| :--- |\n| — |\n| Z 15 |\n| Z 25 |\n| Z 35 |",
+      "pointer": "en_1993_1_1_2005#/3.2.4",
+      "keywords": [
+        "3.2.4",
+        "annex",
+        "connection",
+        "properties",
+        "table",
+        "tension",
+        "weld"
       ]
     },
     {
@@ -443,15 +556,25 @@
     {
       "clause_id": "3.4",
       "title": "Other prefabricated products in buildings",
-      "text": "(1)B Any semi-finished or finished structural product used in the structural design of buildings should comply with the relevant EN Product Standard or ETAG or ETA.\n\n4 Durability\n\n(1) The basic requirements for durability are set out in EN 1990.\n\n(2)P The means of executing the protective treatment undertaken off-site and on-site shall be in accordance with EN 1090.\n\nNOTE EN 1090 lists the factors affecting execution that need to be specified during design.\n\n(3) Parts susceptible to corrosion, mechanical wear or fatigue should be designed such that inspection, maintenance and reconstruction can be carried out satisfactorily and access is available for in-service inspection and maintenance.\n\n(4)B For building structures no fatigue assessment is normally required except as follows:\na) Members supporting lifting appliances or rolling loads\nb) Members subject to repeated stress cycles from vibrating machinery\nc) Members subject to wind-induced vibrations\nd) Members subject to crowd-induced oscillations\n\n(5)P For elements that cannot be inspected an appropriate corrosion allowance shall be included.\n\n(6)B Corrosion protection does not need to be applied to internal building structures, if the internal relative humidity does not exceed 80%.\n\n5 Structural analysis",
+      "text": "(1)B Any semi-finished or finished structural product used in the structural design of buildings should comply with the relevant EN Product Standard or ETAG or ETA.",
       "pointer": "en_1993_1_1_2005#/3.4",
       "keywords": [
         "3.4",
         "buildings",
-        "fatigue",
         "other",
         "prefabricated",
         "products"
+      ]
+    },
+    {
+      "clause_id": "4",
+      "title": "Durability",
+      "text": "(1) The basic requirements for durability are set out in EN 1990.\n\n(2)P The means of executing the protective treatment undertaken off-site and on-site shall be in accordance with EN 1090.\n\nNOTE EN 1090 lists the factors affecting execution that need to be specified during design.\n\n(3) Parts susceptible to corrosion, mechanical wear or fatigue should be designed such that inspection, maintenance and reconstruction can be carried out satisfactorily and access is available for in-service inspection and maintenance.\n\n(4)B For building structures no fatigue assessment is normally required except as follows:\na) Members supporting lifting appliances or rolling loads\nb) Members subject to repeated stress cycles from vibrating machinery\nc) Members subject to wind-induced vibrations\nd) Members subject to crowd-induced oscillations\n\n(5)P For elements that cannot be inspected an appropriate corrosion allowance shall be included.\n\n(6)B Corrosion protection does not need to be applied to internal building structures, if the internal relative humidity does not exceed 80%.",
+      "pointer": "en_1993_1_1_2005#/4",
+      "keywords": [
+        "4",
+        "durability",
+        "fatigue"
       ]
     },
     {
@@ -499,6 +622,7 @@
       "pointer": "en_1993_1_1_2005#/5.2.1",
       "keywords": [
         "5.2.1",
+        "annex",
         "axial",
         "buckling",
         "compression",
@@ -554,22 +678,44 @@
     {
       "clause_id": "5.3.2",
       "title": "Imperfections for global analysis of frames",
-      "text": "(1) The assumed shape of global imperfections and local imperfections may be derived from the elastic buckling mode of a structure in the plane of buckling considered.\n\n(2) Both in and out of plane buckling including torsional buckling with symmetric and asymmetric buckling shapes should be taken into account in the most unfavourable direction and form.\n\n(3) For frames sensitive to buckling in a sway mode the effect of imperfections should be allowed for in frame analysis by means of an equivalent imperfection in the form of an initial sway imperfection and individual bow imperfections of members. The imperfections may be determined from:\n\na) global initial sway imperfections, see Figure 5.2:\n\n$$\\phi = \\phi_0 \\alpha_h \\alpha_m$$\n\nwhere $\\phi_0$ is the basic value: $\\phi_0 = 1/200$\n\n$\\alpha_h$ is the reduction factor for height $h$ applicable to columns:\n\n$$\\alpha_h = \\frac{2}{\\sqrt{h}} \\text{ but } \\frac{2}{3} \\leq \\alpha_h \\leq 1,0$$\n\n$h$ is the height of the structure in meters\n\n$\\alpha_m$ is the reduction factor for the number of columns in a row: $\\alpha_m = \\sqrt{0.5 \\left(1 + \\frac{1}{m}\\right)}$\n\n$m$ is the number of columns in a row including only those columns which carry a vertical load $N_{Ed}$ not less than 50% of the average value of the column in the vertical plane considered.\n\nFigure 5.2: Equivalent sway imperfections\n\nb) relative initial local bow imperfections of members for flexural buckling\n\n$$e_0 / L$$\n\nwhere $L$ is the member length\n\nNOTE The values $e_0 / L$ may be chosen in the National Annex. Recommended values are given in Table 5.1.\n\nTable 5.1: Design value of initial local bow imperfection $e_0/L$ for members\n\n| Buckling curve according to Table 6.2 | elastic analysis | plastic analysis |\n| :--- | :--- | :--- |\n| $a_0$ | 1 / 350 | 1 / 300 |\n| $a$ | 1 / 300 | 1 / 250 |\n| $b$ | 1 / 250 | 1 / 200 |\n| $c$ | 1 / 200 | 1 / 150 |\n| $d$ | 1 / 150 | 1 / 100 |\n\n(4)B For building frames sway imperfections may be disregarded where\n\n$$H_{Ed} \\geq 0.15 V_{Ed}$$\n\n(5)B For the determination of horizontal forces to floor diaphragms the configuration of imperfections as given in Figure 5.3 should be applied, where $\\phi$ is a sway imperfection obtained from (5.5) assuming a single storey with height $h$, see (3) a).\n\nFigure 5.3: Configuration of sway imperfections $\\phi$ for horizontal forces on floor diaphragms\n\n(6) When performing the global analysis for determining end forces and end moments to be used in member checks according to 6.3 local bow imperfections may be neglected. However for frames sensitive to second order effects local bow imperfections of members additionally to global sway imperfections (see 5.2.1(3)) should be introduced in the structural analysis of the frame for each compressed member where the following conditions are met:\n\n- at least one moment resistant joint at one member end\n\n$$\\bar{\\lambda} > 0.5 \\sqrt{\\frac{A f_y}{N_{Ed}}}$$\n\nwhere $N_{Ed}$ is the design value of the compression force\n\nand $\\bar{\\lambda}$ i...",
+      "text": "(1) The assumed shape of global imperfections and local imperfections may be derived from the elastic buckling mode of a structure in the plane of buckling considered.\n\n(2) Both in and out of plane buckling including torsional buckling with symmetric and asymmetric buckling shapes should be taken into account in the most unfavourable direction and form.\n\n(3) For frames sensitive to buckling in a sway mode the effect of imperfections should be allowed for in frame analysis by means of an equivalent imperfection in the form of an initial sway imperfection and individual bow imperfections of members. The imperfections may be determined from:\n\na) global initial sway imperfections, see Figure 5.2:\n\n$$\\phi = \\phi_0 \\alpha_h \\alpha_m$$\n\nwhere $\\phi_0$ is the basic value: $\\phi_0 = 1/200$\n\n$\\alpha_h$ is the reduction factor for height $h$ applicable to columns:\n\n$$\\alpha_h = \\frac{2}{\\sqrt{h}} \\text{ but } \\frac{2}{3} \\leq \\alpha_h \\leq 1,0$$\n\n$h$ is the height of the structure in meters\n\n$\\alpha_m$ is the reduction factor for the number of columns in a row: $\\alpha_m = \\sqrt{0.5 \\left(1 + \\frac{1}{m}\\right)}$\n\n$m$ is the number of columns in a row including only those columns which carry a vertical load $N_{Ed}$ not less than 50% of the average value of the column in the vertical plane considered.\n\nFigure 5.2: Equivalent sway imperfections\n\nb) relative initial local bow imperfections of members for flexural buckling\n\n$$e_0 / L$$\n\nwhere $L$ is the member length\n\nNOTE The values $e_0 / L$ may be chosen in the National Annex. Recommended values are given in Table 5.1.",
       "pointer": "en_1993_1_1_2005#/5.3.2",
       "keywords": [
         "5.3.2",
         "analysis",
+        "annex",
         "buckling",
-        "compression",
         "elastic",
-        "force",
         "frames",
         "global",
         "imperfection",
         "imperfections",
+        "table",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "Table 5.1",
+      "title": "Design value of initial local bow imperfection $e_0/L$ for members",
+      "text": "| Buckling curve according to Table 6.2 | elastic analysis | plastic analysis |\n| :--- | :--- | :--- |\n| $a_0$ | 1 / 350 | 1 / 300 |\n| $a$ | 1 / 300 | 1 / 250 |\n| $b$ | 1 / 250 | 1 / 200 |\n| $c$ | 1 / 200 | 1 / 150 |\n| $d$ | 1 / 150 | 1 / 100 |\n\n(4)B For building frames sway imperfections may be disregarded where\n\n$$H_{Ed} \\geq 0.15 V_{Ed}$$\n\n(5)B For the determination of horizontal forces to floor diaphragms the configuration of imperfections as given in Figure 5.3 should be applied, where $\\phi$ is a sway imperfection obtained from (5.5) assuming a single storey with height $h$, see (3) a).\n\nFigure 5.3: Configuration of sway imperfections $\\phi$ for horizontal forces on floor diaphragms\n\n(6) When performing the global analysis for determining end forces and end moments to be used in member checks according to 6.3 local bow imperfections may be neglected. However for frames sensitive to second order effects local bow imperfections of members additionally to global sway imperfections (see 5.2.1(3)) should be introduced in the structural analysis of the frame for each compressed member where the following conditions are met:\n\n- at least one moment resistant joint at one member end\n\n$$\\bar{\\lambda} > 0.5 \\sqrt{\\frac{A f_y}{N_{Ed}}}$$\n\nwhere $N_{Ed}$ is the design value of the compression force\n\nand $\\bar{\\lambda}$ is the in-plane non-dimensional slenderness calculated for the member considered as hinged at its ends\n\nNOTE Local bow imperfections are taken into account in member checks, see 5.2.2 (3) and 5.3.4.\n\n(7) The effects of initial sway imperfection and local bow imperfections may be replaced by systems of equivalent horizontal forces, introduced for each column, see Figure 5.3 and Figure 5.4.\n\nFigure 5.4: Replacement of initial imperfections by equivalent horizontal forces\n\n(8) These initial sway imperfections should apply in all relevant horizontal directions, but need only be considered in one direction at a time.\n\n(9) B Where, in multi-storey beam-and-column building frames, equivalent forces are used they should be applied at each floor and roof level.\n\n(10) The possible torsional effects on a structure caused by anti-symmetric sways at the two opposite faces, should also be considered, see Figure 5.5.\n\n(a) Faces A-A and B-B sway in same direction\n\n(b) Faces A-A and B-B sway in opposite direction",
+      "pointer": "en_1993_1_1_2005#/Table 5.1",
+      "keywords": [
+        "Table 5.1",
+        "buckling",
+        "compression",
+        "design",
+        "elastic",
+        "force",
+        "imperfection",
+        "initial",
+        "local",
+        "members",
         "moment",
         "plastic",
-        "torsional"
+        "slenderness",
+        "table",
+        "torsional",
+        "value"
       ]
     },
     {
@@ -599,6 +745,7 @@
       "pointer": "en_1993_1_1_2005#/5.3.4",
       "keywords": [
         "5.3.4",
+        "annex",
         "bending",
         "buckling",
         "compression",
@@ -703,6 +850,7 @@
         "resistance",
         "section",
         "shear",
+        "table",
         "web",
         "yield"
       ]
@@ -710,12 +858,11 @@
     {
       "clause_id": "5.6",
       "title": "Cross-section requirements for plastic global analysis",
-      "text": "(1) At plastic hinge locations, the cross-section of the member which contains the plastic hinge should have a rotation capacity of not less than the required at the plastic hinge location.\n\n(2) In a uniform member sufficient rotation capacity may be assumed at a plastic hinge if both the following requirements are satisfied:\n\na) the member has Class 1 cross-sections at the plastic hinge location;\n\nb) where a transverse force that exceeds 10 % of the shear resistance of the cross section, see 6.2.6, is applied to the web at the plastic hinge location, web stiffeners should be provided within a distance along the member of h/2 from the plastic hinge location, where h is the height of the cross section.\n\n(3) Where the cross-section of the member vary along its length, the following additional criteria should be satisfied:\n\na) Adjacent to plastic hinge locations, the thickness of the web should not be reduced for a distance each way along the member from the plastic hinge location of at least 2d, where d is the clear depth of the web at the plastic hinge location.\n\nb) Adjacent to plastic hinge locations, the compression flange should be Class 1 for a distance each way along the member from the plastic hinge location of not less than the greater of:\n\n- 2d, where d is as defined in (3)a)\n\n- the distance to the adjacent point at which the moment in the member has fallen to 0,8 times the plastic moment resistance at the point concerned.\n\nc) Elsewhere in the member the compression flange should be class 1 or class 2 and the web should be class 1, class 2 or class 3.\n\n(4) Adjacent to plastic hinge locations, any fastener holes in tension should satisfy 6.2.5(4) for a distance such as defined in (3)b) each way along the member from the plastic hinge location.\n\n(5) For plastic design of a frame, regarding cross section requirements, the capacity of plastic redistribution of moments may be assumed sufficient if the requirements in (2) to (4) are satisfied for all members where plastic hinges exist, may occur or have occurred under design loads.\n\n(6) In cases where methods of plastic global analysis are used which consider the real stress and strain behaviour along the member including the combined effect of local, member and global buckling the requirements (2) to (5) need not be applied.\n\nTable 5.2 (sheet 1 of 3): Maximum width-to-thickness ratios for compression parts\n\nInternal compression parts\n\nClass | Part subject to bending | Part subject to compression | Part subject to bending and compression\n--- | --- | --- | ---\n\nStress distribution in parts (compression positive)\n\n1 | c/t ≤ 72ε | c/t ≤ 33ε | when α > 0,5: c/t ≤ $\\frac{396\\varepsilon}{13\\alpha - 1}$\nwhen α ≤ 0,5: c/t ≤ $\\frac{36\\varepsilon}{\\alpha}$\n\n2 | c/t ≤ 83ε | c/t ≤ 38ε | when α > 0,5: c/t ≤ $\\frac{456\\varepsilon}{13\\alpha - 1}$\nwhen α ≤ 0,5: c/t ≤ $\\frac{41,5\\varepsilon}{\\alpha}$\n\nStress distribution in parts (compression positive)\n\n3 | c/t ≤ 124ε | c/t ≤ 42ε | when ψ > -1: c/t ≤ $\\frac{42\\v...",
+      "text": "(1) At plastic hinge locations, the cross-section of the member which contains the plastic hinge should have a rotation capacity of not less than the required at the plastic hinge location.\n\n(2) In a uniform member sufficient rotation capacity may be assumed at a plastic hinge if both the following requirements are satisfied:\n\na) the member has Class 1 cross-sections at the plastic hinge location;\n\nb) where a transverse force that exceeds 10 % of the shear resistance of the cross section, see 6.2.6, is applied to the web at the plastic hinge location, web stiffeners should be provided within a distance along the member of h/2 from the plastic hinge location, where h is the height of the cross section.\n\n(3) Where the cross-section of the member vary along its length, the following additional criteria should be satisfied:\n\na) Adjacent to plastic hinge locations, the thickness of the web should not be reduced for a distance each way along the member from the plastic hinge location of at least 2d, where d is the clear depth of the web at the plastic hinge location.\n\nb) Adjacent to plastic hinge locations, the compression flange should be Class 1 for a distance each way along the member from the plastic hinge location of not less than the greater of:\n\n- 2d, where d is as defined in (3)a)\n\n- the distance to the adjacent point at which the moment in the member has fallen to 0,8 times the plastic moment resistance at the point concerned.\n\nc) Elsewhere in the member the compression flange should be class 1 or class 2 and the web should be class 1, class 2 or class 3.\n\n(4) Adjacent to plastic hinge locations, any fastener holes in tension should satisfy 6.2.5(4) for a distance such as defined in (3)b) each way along the member from the plastic hinge location.\n\n(5) For plastic design of a frame, regarding cross section requirements, the capacity of plastic redistribution of moments may be assumed sufficient if the requirements in (2) to (4) are satisfied for all members where plastic hinges exist, may occur or have occurred under design loads.\n\n(6) In cases where methods of plastic global analysis are used which consider the real stress and strain behaviour along the member including the combined effect of local, member and global buckling the requirements (2) to (5) need not be applied.",
       "pointer": "en_1993_1_1_2005#/5.6",
       "keywords": [
         "5.6",
         "analysis",
-        "bending",
         "buckling",
         "compression",
         "cross-section",
@@ -733,12 +880,52 @@
       ]
     },
     {
+      "clause_id": "2",
+      "title": "| c/t ≤ 83ε | c/t ≤ 38ε | when α > 0,5: c/t ≤ $\\frac{456\\varepsilon}{13\\alpha - 1}$",
+      "text": "when α ≤ 0,5: c/t ≤ $\\frac{41,5\\varepsilon}{\\alpha}$\n\nStress distribution in parts (compression positive)",
+      "pointer": "en_1993_1_1_2005#/2",
+      "keywords": [
+        "2",
+        "compression",
+        "when"
+      ]
+    },
+    {
+      "clause_id": "3",
+      "title": "| c/t ≤ 124ε | c/t ≤ 42ε | when ψ > -1: c/t ≤ $\\frac{42\\varepsilon}{0,67 + 0,33\\psi}$",
+      "text": "when ψ ≤ -1$^*$: c/t ≤ 62ε(1-ψ)$\\sqrt{(-\\psi)}$\n\n$$\\varepsilon = \\sqrt{235/f_y}$$\n\n| $f_y$ | 235 | 275 | 355 | 420 | 460 |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| $\\varepsilon$ | 1,00 | 0,92 | 0,81 | 0,75 | 0,71 |\n\n*) ψ ≤ -1 applies where either the compression stress σ ≤ $f_y$ or the tensile strain $\\varepsilon_y > f_y$/E",
+      "pointer": "en_1993_1_1_2005#/3",
+      "keywords": [
+        "3",
+        "compression",
+        "when"
+      ]
+    },
+    {
+      "clause_id": "Table 5.2",
+      "title": "(sheet 3 of 3): Maximum width-to-thickness ratios for compression parts",
+      "text": "Angles\n\nRefer also to “Outstand flanges” (see sheet 2 of 3)\n\nDoes not apply to angles in continuous contact with other components\n\nClass\n\nSection in compression\n\nStress distribution across section (compression positive)\n\n$$h/t \\leq 15\\varepsilon$$ and $$\\frac{b+h}{2t} \\leq 11,5\\varepsilon$$\n\nTubular sections\n\nClass\n\nSection in bending and/or compression\n\n$$d/t \\leq 50\\varepsilon^2$$\n\n$$d/t \\leq 70\\varepsilon^2$$\n\n$$d/t \\leq 90\\varepsilon^2$$\n\nNOTE For $d/t > 90\\varepsilon^2$ see EN 1993-1-6.\n\n$$\\varepsilon = \\sqrt{235/f_y}$$\n\n$$f_y$$ 235 275 355 420 460\n\n$$\\varepsilon$$ 1,00 0,92 0,81 0,75 0,71\n\n$$\\varepsilon^2$$ 1,00 0,85 0,66 0,56 0,51",
+      "pointer": "en_1993_1_1_2005#/Table 5.2",
+      "keywords": [
+        "Table 5.2",
+        "bending",
+        "compression",
+        "flange",
+        "maximum",
+        "parts",
+        "ratios",
+        "section",
+        "sheet"
+      ]
+    },
+    {
       "clause_id": "6.1",
       "title": "General",
       "text": "(1) The partial factors $\\gamma_M$ as defined in 2.4.3 should be applied to the various characteristic values of resistance in this section as follows:\n\n- resistance of cross-sections whatever the class is: $\\gamma_M_0$\n- resistance of members to instability assessed by member checks: $\\gamma_M_1$\n- resistance of cross-sections in tension to fracture: $\\gamma_M_2$\n- resistance of joints: see EN 1993-1-8\n\nNOTE 1 For other recommended numerical values see EN 1993 Part 2 to Part 6. For structures not covered by EN 1993 Part 2 to Part 6 the National Annex may define the partial factors $\\gamma_{Mi}$; it is recommended to take the partial factors $\\gamma_{Mi}$ from EN 1993-2.\n\nNOTE 2B Partial factors $\\gamma_{Mi}$ for buildings may be defined in the National Annex. The following numerical values are recommended for buildings:\n\n$$\\gamma_{M0} = 1.00$$\n$$\\gamma_{M1} = 1.00$$\n$$\\gamma_{M2} = 1.25$$",
       "pointer": "en_1993_1_1_2005#/6.1",
       "keywords": [
         "6.1",
+        "annex",
         "cross-section",
         "fracture",
         "general",
@@ -799,19 +986,37 @@
     {
       "clause_id": "6.2.2.3",
       "title": "Shear lag effects",
-      "text": "(1) The calculation of the effective widths is covered in EN 1993-1-5.\n\n(2) In class 4 sections the interaction between shear lag and local buckling should be considered according to EN 1993-1-5.\n\nNOTE For cold formed members see EN 1993-1-3.\n\n6.2.2.4 Effective properties of cross sections with class 3 webs and class 1 or 2 flanges\n\n(1) Where cross-sections with a class 3 web and class 1 or 2 flanges are classified as effective Class 2 cross-sections, see 5.5.2(11), the proportion of the web in compression should be replaced by a part of $20\\varepsilon t_w$ adjacent to the compression flange, with another part of $20\\varepsilon t_w$ adjacent to the plastic neutral axis of the effective cross-section in accordance with Figure 6.3.\n\nFigure 6.3: Effective class 2 web",
+      "text": "(1) The calculation of the effective widths is covered in EN 1993-1-5.\n\n(2) In class 4 sections the interaction between shear lag and local buckling should be considered according to EN 1993-1-5.\n\nNOTE For cold formed members see EN 1993-1-3.",
       "pointer": "en_1993_1_1_2005#/6.2.2.3",
       "keywords": [
         "6.2.2.3",
         "buckling",
-        "compression",
-        "cross-section",
         "effects",
-        "flange",
-        "plastic",
         "section",
-        "shear",
-        "web"
+        "shear"
+      ]
+    },
+    {
+      "clause_id": "6.2.2.4",
+      "title": "Effective properties of cross sections with class 3 webs and class 1 or 2 flanges",
+      "text": "(1) Where cross-sections with a class 3 web and class 1 or 2 flanges are classified as effective Class 2 cross-sections, see 5.5.2(11), the proportion of the web in compression should be replaced by a part of $20\\varepsilon t_w$ adjacent to the compression flange, with another part of $20\\varepsilon t_w$ adjacent to the plastic neutral axis of the effective cross-section in accordance with Figure 6.3.\n\nFigure 6.3: Effective class 2 web",
+      "pointer": "en_1993_1_1_2005#/6.2.2.4",
+      "keywords": [
+        "6.2.2.4",
+        "class",
+        "compression",
+        "cross",
+        "cross-section",
+        "effective",
+        "flange",
+        "flanges",
+        "plastic",
+        "properties",
+        "section",
+        "sections",
+        "web",
+        "webs",
+        "with"
       ]
     },
     {
@@ -1040,7 +1245,7 @@
     {
       "clause_id": "6.3.1.2",
       "title": "Buckling curves",
-      "text": "(1) For axial compression in members the value of $\\chi$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}$ should be determined from the relevant buckling curve according to:\n\n$$\\chi = \\frac{1}{\\Phi + \\sqrt{\\Phi^2 - \\bar{\\lambda}^2}}$$  but $\\chi \\leq 1,0$\n\nwhere $\\Phi = 0,5 \\left[ 1 + \\alpha \\left( \\bar{\\lambda} - 0,2 \\right) + \\bar{\\lambda}^2 \\right]$\n\n$$\\bar{\\lambda} = \\sqrt{\\frac{A f_y}{N_{\\text{cr}}}}$$  for Class 1, 2 and 3 cross-sections\n\n$$\\bar{\\lambda} = \\sqrt{\\frac{A_{\\text{eff}} f_y}{N_{\\text{cr}}}}$$  for Class 4 cross-sections\n\n$\\alpha$ is an imperfection factor\n\n$N_{\\text{cr}}$ is the elastic critical force for the relevant buckling mode based on the gross cross sectional properties.\n\n(2) The imperfection factor $\\alpha$ corresponding to the appropriate buckling curve should be obtained from Table 6.1 and Table 6.2.\n\nTable 6.1: Imperfection factors for buckling curves\n\n| Buckling curve | $a_0$ | a | b | c | d |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| Imperfection factor $\\alpha$ | 0,13 | 0,21 | 0,34 | 0,49 | 0,76 |\n\n(3) Values of the reduction factor $\\chi$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}$ may be obtained from Figure 6.4.\n\n(4) For slenderness $\\bar{\\lambda} \\leq 0,2$ or for $\\frac{N_{\\text{Ed}}}{N_{\\text{cr}}} \\leq 0,04$ the buckling effects may be ignored and only cross sectional checks apply.\n\n<table><thead><tr><th rowspan=\"2\" colspan=\"2\">Cross section</th><th rowspan=\"2\" colspan=\"2\">Limits</th><th rowspan=\"2\">Buckling about axis</th><th colspan=\"2\">Buckling curve</th></tr><tr><th>S 235 S 275 S 355 S 420</th><th>S 460</th></tr></thead><tbody><tr><td rowspan=\"4\">Rolled sections</td><td rowspan=\"4\"></td><td rowspan=\"2\">h/b &gt; 1,2</td><td>$t_f \\leq 40\\text{ mm}$</td><td>$y - y z - z$</td><td>a b</td><td>$a_0 a_0$</td></tr><tr><td>40\\text{ mm} &lt; t_f \\leq 100$</td><td>y - y z - z</td><td>b c</td><td>a a</td></tr><tr><td rowspan=\"2\">h/b \\leq 1,2</td><td>$t_f \\leq 100\\text{ mm}$</td><td>$y - y z - z$</td><td>b c</td><td>a a</td></tr><tr><td>$t_f > 100\\text{ mm}$</td><td>y - y z - z</td><td>d d</td><td>c c</td></tr><tr><td rowspan=\"2\">Welded I-sections</td><td rowspan=\"2\"></td><td colspan=\"2\">$t_f \\leq 40\\text{ mm}$</td><td>$y - y z - z$</td><td>b c</td><td>b c</td></tr><tr><td colspan=\"2\">$t_f > 40\\text{ mm}$</td><td>$y - y z - z$</td><td>c d</td><td>c d</td></tr><tr><td rowspan=\"2\">Hollow sections</td><td rowspan=\"2\"></td><td colspan=\"2\">hot finished</td><td>any</td><td>a</td><td>$a_0$</td></tr><tr><td colspan=\"2\">cold formed</td><td>any</td><td>c</td><td>c</td></tr><tr><td rowspan=\"2\">Welded box sections</td><td rowspan=\"2\"></td><td colspan=\"2\">generally (except as below)</td><td>any</td><td>b</td><td>b</td></tr><tr><td colspan=\"2\">thick welds: a &gt; 0,5t_f b/t_f &lt; 30 h/t_w &lt; 30</td><td>any</td><td>c</td><td>c</td></tr><tr><td>U-, T- and solid sections</td><td colspan=\"2\"></td><td>any</td><td>c</td><td>c</td><td></td></tr><tr><td>L-sections</td><td colspan=\"2\"></td><td>any<...",
+      "text": "(1) For axial compression in members the value of $\\chi$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}$ should be determined from the relevant buckling curve according to:\n\n$$\\chi = \\frac{1}{\\Phi + \\sqrt{\\Phi^2 - \\bar{\\lambda}^2}}$$  but $\\chi \\leq 1,0$\n\nwhere $\\Phi = 0,5 \\left[ 1 + \\alpha \\left( \\bar{\\lambda} - 0,2 \\right) + \\bar{\\lambda}^2 \\right]$\n\n$$\\bar{\\lambda} = \\sqrt{\\frac{A f_y}{N_{\\text{cr}}}}$$  for Class 1, 2 and 3 cross-sections\n\n$$\\bar{\\lambda} = \\sqrt{\\frac{A_{\\text{eff}} f_y}{N_{\\text{cr}}}}$$  for Class 4 cross-sections\n\n$\\alpha$ is an imperfection factor\n\n$N_{\\text{cr}}$ is the elastic critical force for the relevant buckling mode based on the gross cross sectional properties.\n\n(2) The imperfection factor $\\alpha$ corresponding to the appropriate buckling curve should be obtained from Table 6.1 and Table 6.2.",
       "pointer": "en_1993_1_1_2005#/6.3.1.2",
       "keywords": [
         "6.3.1.2",
@@ -1054,6 +1259,23 @@
         "imperfection",
         "section",
         "slenderness",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "Table 6.1",
+      "title": "Imperfection factors for buckling curves",
+      "text": "| Buckling curve | $a_0$ | a | b | c | d |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| Imperfection factor $\\alpha$ | 0,13 | 0,21 | 0,34 | 0,49 | 0,76 |\n\n(3) Values of the reduction factor $\\chi$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}$ may be obtained from Figure 6.4.\n\n(4) For slenderness $\\bar{\\lambda} \\leq 0,2$ or for $\\frac{N_{\\text{Ed}}}{N_{\\text{cr}}} \\leq 0,04$ the buckling effects may be ignored and only cross sectional checks apply.\n\n<table><thead><tr><th rowspan=\"2\" colspan=\"2\">Cross section</th><th rowspan=\"2\" colspan=\"2\">Limits</th><th rowspan=\"2\">Buckling about axis</th><th colspan=\"2\">Buckling curve</th></tr><tr><th>S 235 S 275 S 355 S 420</th><th>S 460</th></tr></thead><tbody><tr><td rowspan=\"4\">Rolled sections</td><td rowspan=\"4\"></td><td rowspan=\"2\">h/b &gt; 1,2</td><td>$t_f \\leq 40\\text{ mm}$</td><td>$y - y z - z$</td><td>a b</td><td>$a_0 a_0$</td></tr><tr><td>40\\text{ mm} &lt; t_f \\leq 100$</td><td>y - y z - z</td><td>b c</td><td>a a</td></tr><tr><td rowspan=\"2\">h/b \\leq 1,2</td><td>$t_f \\leq 100\\text{ mm}$</td><td>$y - y z - z$</td><td>b c</td><td>a a</td></tr><tr><td>$t_f > 100\\text{ mm}$</td><td>y - y z - z</td><td>d d</td><td>c c</td></tr><tr><td rowspan=\"2\">Welded I-sections</td><td rowspan=\"2\"></td><td colspan=\"2\">$t_f \\leq 40\\text{ mm}$</td><td>$y - y z - z$</td><td>b c</td><td>b c</td></tr><tr><td colspan=\"2\">$t_f > 40\\text{ mm}$</td><td>$y - y z - z$</td><td>c d</td><td>c d</td></tr><tr><td rowspan=\"2\">Hollow sections</td><td rowspan=\"2\"></td><td colspan=\"2\">hot finished</td><td>any</td><td>a</td><td>$a_0$</td></tr><tr><td colspan=\"2\">cold formed</td><td>any</td><td>c</td><td>c</td></tr><tr><td rowspan=\"2\">Welded box sections</td><td rowspan=\"2\"></td><td colspan=\"2\">generally (except as below)</td><td>any</td><td>b</td><td>b</td></tr><tr><td colspan=\"2\">thick welds: a &gt; 0,5t_f b/t_f &lt; 30 h/t_w &lt; 30</td><td>any</td><td>c</td><td>c</td></tr><tr><td>U-, T- and solid sections</td><td colspan=\"2\"></td><td>any</td><td>c</td><td>c</td><td></td></tr><tr><td>L-sections</td><td colspan=\"2\"></td><td>any</td><td>b</td><td>b</td><td></td></tr></tbody></table>",
+      "pointer": "en_1993_1_1_2005#/Table 6.1",
+      "keywords": [
+        "Table 6.1",
+        "buckling",
+        "curves",
+        "factors",
+        "imperfection",
+        "section",
+        "slenderness",
+        "table",
         "weld"
       ]
     },
@@ -1064,12 +1286,14 @@
       "pointer": "en_1993_1_1_2005#/6.3.1.3",
       "keywords": [
         "6.3.1.3",
+        "annex",
         "buckling",
         "cross-section",
         "elastic",
         "flexural",
         "section",
-        "slenderness"
+        "slenderness",
+        "table"
       ]
     },
     {
@@ -1086,6 +1310,7 @@
         "resistance",
         "section",
         "slenderness",
+        "table",
         "torsional"
       ]
     },
@@ -1096,6 +1321,7 @@
       "pointer": "en_1993_1_1_2005#/6.3.2.1",
       "keywords": [
         "6.3.2.1",
+        "annex",
         "bending",
         "buckling",
         "compression",
@@ -1111,11 +1337,12 @@
     },
     {
       "clause_id": "6.3.2.2",
-      "title": "Lateral torsional buckling curves – General case",
-      "text": "(1) Unless otherwise specified, see 6.3.2.3, for bending members of constant cross-section, the value of $\\chi_{LT}$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}_{LT}$, should be determined from:\n\n$$\\chi_{LT} = \\frac{1}{\\Phi_{LT} + \\sqrt{\\Phi_{LT}^2 - \\bar{\\lambda}_{LT}^2}} \\text{ but } \\chi_{LT} \\leq 1,0$$\n\n(6.56)\n\nwhere $\\Phi_{LT} = 0,5\\left[1 + \\alpha_{LT}\\left(\\bar{\\lambda}_{LT} - 0,2\\right) + \\bar{\\lambda}_{LT}^2\\right]$\n\n$\\alpha_{LT}$ is an imperfection factor\n\n$$\\bar{\\lambda}_{LT} = \\sqrt{\\frac{W_y f_y}{M_{cr}}}$$\n\n$M_{cr}$ is the elastic critical moment for lateral-torsional buckling\n\n(2) $M_{cr}$ is based on gross cross sectional properties and takes into account the loading conditions, the real moment distribution and the lateral restraints.\n\nNOTE The imperfection factor $\\alpha_{LT}$ corresponding to the appropriate buckling curve may be obtained from the National Annex. The recommended values $\\alpha_{LT}$ are given in Table 6.3.\n\nTable 6.3: Recommended values for imperfection factors for lateral torsional buckling curves\n\n| Buckling curve | a | b | c | d |\n| :--- | :--- | :--- | :--- | :--- |\n| Imperfection factor $\\alpha_{LT}$ | 0,21 | 0,34 | 0,49 | 0,76 |\n\nThe recommendations for buckling curves are given in Table 6.4.\n\nTable 6.4: Recommended values for lateral torsional buckling curves for cross-sections using equation (6.56)\n\n| Cross-section | Limits | Buckling curve |\n| :--- | :--- | :--- |\n| Rolled I-sections | h/b $\\leq$ 2 | a |\n| | h/b $>$ 2 | b |\n| Welded I-sections | h/b $\\leq$ 2 | c |\n| | h/b $>$ 2 | d |\n| Other cross-sections | - | d |\n\n(3) Values of the reduction factor $\\chi_{LT}$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}_{LT}$ may be obtained from Figure 6.4.\n\n(4) For slendernesses $\\bar{\\lambda}_{LT} \\leq \\bar{\\lambda}_{LT,0}$ (see 6.3.2.3) or for $\\frac{M_{Ed}}{M_{cr}} \\leq \\bar{\\lambda}_{LT,0}^2$ (see 6.3.2.3) lateral torsional buckling effects may be ignored and only cross sectional checks apply.\n\n6.3.2.3 Lateral torsional buckling curves for rolled sections or equivalent welded sections\n\n(1) For rolled or equivalent welded sections in bending the values of $\\chi_{LT}$ for the appropriate non-dimensional slenderness may be determined from\n\n$$\\chi_{LT} = \\frac{1}{\\Phi_{LT} + \\sqrt{\\Phi_{LT}^2 - \\beta \\bar{\\lambda}_{LT}^2}} \\text{ but } \\begin{cases} \\chi_{LT} \\leq 1, 0 \\\\ \\chi_{LT} \\leq \\frac{1}{\\bar{\\lambda}_{LT}^2} \\end{cases}$$\n\n$$\\Phi_{LT} = 0, 5 \\left[ 1 + \\alpha_{LT} \\left( \\bar{\\lambda}_{LT} - \\bar{\\lambda}_{LT,0} \\right) + \\beta \\bar{\\lambda}_{LT}^2 \\right]$$\n\nNOTE The parameters $\\bar{\\lambda}_{LT,0}$ and $\\beta$ and any limitation of validity concerning the beam depth or h/b ratio may be given in the National Annex. The following values are recommended for rolled sections or equivalent welded sections:\n\n$$\\bar{\\lambda}_{LT,0} = 0, 4 \\text{ (maximum value)}$$\n$$\\beta = 0, 75 \\text{ (minimum value)}$$\n\nThe recommendations for buckling curves are given in Table 6.5.\n\nTab...",
+      "title": "Lateral torsional buckling curves - General case",
+      "text": "(1) Unless otherwise specified, see 6.3.2.3, for bending members of constant cross-section, the value of $\\chi_{LT}$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}_{LT}$, should be determined from:\n\n$$\\chi_{LT} = \\frac{1}{\\Phi_{LT} + \\sqrt{\\Phi_{LT}^2 - \\bar{\\lambda}_{LT}^2}} \\text{ but } \\chi_{LT} \\leq 1,0$$\n\n(6.56)\n\nwhere $\\Phi_{LT} = 0,5\\left[1 + \\alpha_{LT}\\left(\\bar{\\lambda}_{LT} - 0,2\\right) + \\bar{\\lambda}_{LT}^2\\right]$\n\n$\\alpha_{LT}$ is an imperfection factor\n\n$$\\bar{\\lambda}_{LT} = \\sqrt{\\frac{W_y f_y}{M_{cr}}}$$\n\n$M_{cr}$ is the elastic critical moment for lateral-torsional buckling\n\n(2) $M_{cr}$ is based on gross cross sectional properties and takes into account the loading conditions, the real moment distribution and the lateral restraints.\n\nNOTE The imperfection factor $\\alpha_{LT}$ corresponding to the appropriate buckling curve may be obtained from the National Annex. The recommended values $\\alpha_{LT}$ are given in Table 6.3.",
       "pointer": "en_1993_1_1_2005#/6.3.2.2",
       "keywords": [
         "6.3.2.2",
+        "annex",
         "bending",
         "buckling",
         "case",
@@ -1128,19 +1355,106 @@
         "moment",
         "section",
         "slenderness",
+        "table",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "Table 6.3",
+      "title": "Recommended values for imperfection factors for lateral torsional buckling curves",
+      "text": "| Buckling curve | a | b | c | d |\n| :--- | :--- | :--- | :--- | :--- |\n| Imperfection factor $\\alpha_{LT}$ | 0,21 | 0,34 | 0,49 | 0,76 |\n\nThe recommendations for buckling curves are given in Table 6.4.",
+      "pointer": "en_1993_1_1_2005#/Table 6.3",
+      "keywords": [
+        "Table 6.3",
+        "buckling",
+        "curves",
+        "factors",
+        "imperfection",
+        "lateral",
+        "recommended",
+        "table",
         "torsional",
+        "values"
+      ]
+    },
+    {
+      "clause_id": "Table 6.4",
+      "title": "Recommended values for lateral torsional buckling curves for cross-sections using equation (6.56)",
+      "text": "| Cross-section | Limits | Buckling curve |\n| :--- | :--- | :--- |\n| Rolled I-sections | h/b $\\leq$ 2 | a |\n| | h/b $>$ 2 | b |\n| Welded I-sections | h/b $\\leq$ 2 | c |\n| | h/b $>$ 2 | d |\n| Other cross-sections | - | d |\n\n(3) Values of the reduction factor $\\chi_{LT}$ for the appropriate non-dimensional slenderness $\\bar{\\lambda}_{LT}$ may be obtained from Figure 6.4.\n\n(4) For slendernesses $\\bar{\\lambda}_{LT} \\leq \\bar{\\lambda}_{LT,0}$ (see 6.3.2.3) or for $\\frac{M_{Ed}}{M_{cr}} \\leq \\bar{\\lambda}_{LT,0}^2$ (see 6.3.2.3) lateral torsional buckling effects may be ignored and only cross sectional checks apply.",
+      "pointer": "en_1993_1_1_2005#/Table 6.4",
+      "keywords": [
+        "Table 6.4",
+        "buckling",
+        "cross-section",
+        "curves",
+        "equation",
+        "lateral",
+        "recommended",
+        "section",
+        "slenderness",
+        "torsional",
+        "using",
+        "values",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "6.3.2.3",
+      "title": "Lateral torsional buckling curves for rolled sections or equivalent welded sections",
+      "text": "(1) For rolled or equivalent welded sections in bending the values of $\\chi_{LT}$ for the appropriate non-dimensional slenderness may be determined from\n\n$$\\chi_{LT} = \\frac{1}{\\Phi_{LT} + \\sqrt{\\Phi_{LT}^2 - \\beta \\bar{\\lambda}_{LT}^2}} \\text{ but } \\begin{cases} \\chi_{LT} \\leq 1, 0 \\\\ \\chi_{LT} \\leq \\frac{1}{\\bar{\\lambda}_{LT}^2} \\end{cases}$$\n\n$$\\Phi_{LT} = 0, 5 \\left[ 1 + \\alpha_{LT} \\left( \\bar{\\lambda}_{LT} - \\bar{\\lambda}_{LT,0} \\right) + \\beta \\bar{\\lambda}_{LT}^2 \\right]$$\n\nNOTE The parameters $\\bar{\\lambda}_{LT,0}$ and $\\beta$ and any limitation of validity concerning the beam depth or h/b ratio may be given in the National Annex. The following values are recommended for rolled sections or equivalent welded sections:\n\n$$\\bar{\\lambda}_{LT,0} = 0, 4 \\text{ (maximum value)}$$\n$$\\beta = 0, 75 \\text{ (minimum value)}$$\n\nThe recommendations for buckling curves are given in Table 6.5.",
+      "pointer": "en_1993_1_1_2005#/6.3.2.3",
+      "keywords": [
+        "6.3.2.3",
+        "annex",
+        "bending",
+        "buckling",
+        "curves",
+        "equivalent",
+        "lateral",
+        "rolled",
+        "section",
+        "sections",
+        "slenderness",
+        "table",
+        "torsional",
+        "weld",
+        "welded"
+      ]
+    },
+    {
+      "clause_id": "Table 6.5",
+      "title": "Recommendation for the selection of lateral torsional buckling curve for cross sections using equation (6.57)",
+      "text": "| Cross-section | Limits | Buckling curve |\n| :--- | :--- | :--- |\n| Rolled I-sections | h/b $\\leq 2$ | b |\n| | h/b $> 2$ | c |\n| Welded I-sections | h/b $\\leq 2$ | c |\n| | h/b $> 2$ | d |\n\n(2) For taking into account the moment distribution between the lateral restraints of members the reduction factor $\\chi_{LT}$ may be modified as follows:\n\n$$\\chi_{LT,mod} = \\frac{\\chi_{LT}}{f} \\text{ but } \\begin{cases} \\chi_{LT,mod} \\leq 1 \\\\ \\chi_{LT,mod} \\leq \\frac{1}{\\bar{\\lambda}_{LT}^2} \\end{cases}$$\n\nNOTE The values $f$ may be defined in the National Annex. The following minimum values are recommended:\n\n$$f = 1 - 0, 5 \\left( 1 - k_c \\right) \\left[ 1 - 2, 0 \\left( \\bar{\\lambda}_{LT} - 0, 8 \\right)^2 \\right] \\text{ but } f \\leq 1, 0$$\n\n$k_c$ is a correction factor according to Table 6.6.",
+      "pointer": "en_1993_1_1_2005#/Table 6.5",
+      "keywords": [
+        "Table 6.5",
+        "annex",
+        "buckling",
+        "cross",
+        "cross-section",
+        "curve",
+        "equation",
+        "lateral",
+        "moment",
+        "recommendation",
+        "section",
+        "sections",
+        "selection",
+        "table",
+        "torsional",
+        "using",
         "weld"
       ]
     },
     {
       "clause_id": "6.3.2.4",
       "title": "Simplified assessment methods for beams with restraints in buildings",
-      "text": "(1)B Members with discrete lateral restraint to the compression flange are not susceptible to lateral-torsional buckling if the length $L_c$ between restraints or the resulting slenderness $\\bar{\\lambda}_f$ of the equivalent compression flange satisfies:\n\n$$\\bar{\\lambda}_f = \\frac{k_c L_c}{i_{f,z} \\lambda_1} \\leq \\bar{\\lambda}_c 0 \\frac{M_{c,Rd}}{M_{y,Ed}}$$\n\n(6.59)\n\nwhere $M_{y,Ed}$ is the maximum design value of the bending moment within the restraint spacing.\n\n$$M_{c,Rd} = W_y \\frac{f_y}{\\gamma_{M1}}$$\n\n$W_y$ is the appropriate section modulus corresponding to the compression flange.\n\n$k_c$ is a slenderness correction factor for moment distribution between restraints, see Table 6.6.\n\n$i_{f,z}$ is the radius of gyration of the equivalent compression flange composed of the compression flange plus 1/3 of the compressed part of the web area, about the minor axis of the section.\n\n$\\bar{\\lambda}_{c,0}$ is a slenderness limit of the equivalent compression flange defined above.\n\n$$\\lambda_1 = \\pi \\sqrt{\\frac{E}{f_y}} = 93.9\\varepsilon$$\n\n$$\\varepsilon = \\sqrt{\\frac{235}{f_y}} \\quad (f_y \\text{ in N/mm}^2)$$\n\n**NOTE 1B** For Class 4 cross-sections $i_{f,z}$ may be taken as\n\n$$i_{f,z} = \\sqrt{\\frac{I_{eff,f}}{A_{eff,f} + \\frac{1}{3} A_{eff,w,e}}}$$\n\nwhere $I_{eff,f}$ is the effective second moment of area of the compression flange about the minor axis of the section\n\n$$A_{eff,f} \\text{ is the effective area of the compression flange}$$\n\n$$A_{eff,w,e} \\text{ is the effective area of the compressed part of the web}$$\n\n**NOTE 2B** The slenderness limit $\\bar{\\lambda}_{c0}$ may be given in the National Annex. A limit value $\\bar{\\lambda}_{c0} = \\bar{\\lambda}_{LT,0} + 0,1$ is recommended, see 6.3.2.3.\n\n(2)B If the slenderness of the compression flange $\\bar{\\lambda}_{f}$ exceeds the limit given in (1)B, the design buckling resistance moment may be taken as:\n\n$$M_{b,Rd} = k_{f'} \\chi M_{c,Rd} \\quad \\text{but} \\quad M_{b,Rd} \\leq M_{c,Rd} \\quad (6.60)$$\n\nwhere $\\chi$ is the reduction factor of the equivalent compression flange determined with $\\bar{\\lambda}_{f}$\n\n$$k_{f'} \\text{ is the modification factor accounting for the conservatism of the equivalent compression flange method}$$\n\n**NOTE B** The modification factor may be given in the National Annex. A value $k_{f'} = 1,10$ is recommended.\n\n(3)B The buckling curves to be used in (2)B should be taken as follows:\n\ncurve d for welded sections provided that: $\\frac{h}{t_f} \\leq 44\\varepsilon$\n\ncurve c for all other sections\n\nwhere $h$ is the overall depth of the cross-section\n\n$$t_f \\text{ is the thickness of the compression flange}$$\n\n**NOTE B** For lateral torsional buckling of components of building structures with restraints see also Annex BB.3.\n\n### 6.3.3 Uniform members in bending and axial compression\n\n(1) Unless second order analysis is carried out using the imperfections as given in 5.3.2, the stability of uniform members with double symmetric cross sections for sections not susceptible to distortional...",
+      "text": "(1)B Members with discrete lateral restraint to the compression flange are not susceptible to lateral-torsional buckling if the length $L_c$ between restraints or the resulting slenderness $\\bar{\\lambda}_f$ of the equivalent compression flange satisfies:\n\n$$\\bar{\\lambda}_f = \\frac{k_c L_c}{i_{f,z} \\lambda_1} \\leq \\bar{\\lambda}_c 0 \\frac{M_{c,Rd}}{M_{y,Ed}}$$\n\n(6.59)\n\nwhere $M_{y,Ed}$ is the maximum design value of the bending moment within the restraint spacing.\n\n$$M_{c,Rd} = W_y \\frac{f_y}{\\gamma_{M1}}$$\n\n$W_y$ is the appropriate section modulus corresponding to the compression flange.\n\n$k_c$ is a slenderness correction factor for moment distribution between restraints, see Table 6.6.\n\n$i_{f,z}$ is the radius of gyration of the equivalent compression flange composed of the compression flange plus 1/3 of the compressed part of the web area, about the minor axis of the section.\n\n$\\bar{\\lambda}_{c,0}$ is a slenderness limit of the equivalent compression flange defined above.\n\n$$\\lambda_1 = \\pi \\sqrt{\\frac{E}{f_y}} = 93.9\\varepsilon$$\n\n$$\\varepsilon = \\sqrt{\\frac{235}{f_y}} \\quad (f_y \\text{ in N/mm}^2)$$\n\n**NOTE 1B** For Class 4 cross-sections $i_{f,z}$ may be taken as\n\n$$i_{f,z} = \\sqrt{\\frac{I_{eff,f}}{A_{eff,f} + \\frac{1}{3} A_{eff,w,e}}}$$\n\nwhere $I_{eff,f}$ is the effective second moment of area of the compression flange about the minor axis of the section\n\n$$A_{eff,f} \\text{ is the effective area of the compression flange}$$\n\n$$A_{eff,w,e} \\text{ is the effective area of the compressed part of the web}$$\n\n**NOTE 2B** The slenderness limit $\\bar{\\lambda}_{c0}$ may be given in the National Annex. A limit value $\\bar{\\lambda}_{c0} = \\bar{\\lambda}_{LT,0} + 0,1$ is recommended, see 6.3.2.3.\n\n(2)B If the slenderness of the compression flange $\\bar{\\lambda}_{f}$ exceeds the limit given in (1)B, the design buckling resistance moment may be taken as:\n\n$$M_{b,Rd} = k_{f'} \\chi M_{c,Rd} \\quad \\text{but} \\quad M_{b,Rd} \\leq M_{c,Rd} \\quad (6.60)$$\n\nwhere $\\chi$ is the reduction factor of the equivalent compression flange determined with $\\bar{\\lambda}_{f}$\n\n$$k_{f'} \\text{ is the modification factor accounting for the conservatism of the equivalent compression flange method}$$\n\n**NOTE B** The modification factor may be given in the National Annex. A value $k_{f'} = 1,10$ is recommended.\n\n(3)B The buckling curves to be used in (2)B should be taken as follows:\n\ncurve d for welded sections provided that: $\\frac{h}{t_f} \\leq 44\\varepsilon$\n\ncurve c for all other sections\n\nwhere $h$ is the overall depth of the cross-section\n\n$$t_f \\text{ is the thickness of the compression flange}$$\n\n**NOTE B** For lateral torsional buckling of components of building structures with restraints see also Annex BB.3.",
       "pointer": "en_1993_1_1_2005#/6.3.2.4",
       "keywords": [
         "6.3.2.4",
+        "annex",
         "assessment",
-        "axial",
         "beams",
         "bending",
         "buckling",
@@ -1148,7 +1462,6 @@
         "compression",
         "cross-section",
         "flange",
-        "imperfection",
         "lateral",
         "methods",
         "modulus",
@@ -1158,11 +1471,75 @@
         "section",
         "simplified",
         "slenderness",
-        "stability",
+        "table",
         "torsional",
         "web",
         "weld",
         "with"
+      ]
+    },
+    {
+      "clause_id": "6.3.3",
+      "title": "Uniform members in bending and axial compression",
+      "text": "(1) Unless second order analysis is carried out using the imperfections as given in 5.3.2, the stability of uniform members with double symmetric cross sections for sections not susceptible to distortional deformations should be checked as given in the following clauses, where a distinction is made for:\n\n- members that are not susceptible to torsional deformations, e.g. circular hollow sections or sections restraint from torsion\n- members that are susceptible to torsional deformations, e.g. members with open cross-sections and not restraint from torsion.\n\n(2) In addition, the resistance of the cross-sections at each end of the member should satisfy the requirements given in 6.2.\n\n**NOTE 1** The interaction formulae are based on the modelling of simply supported single span members with end fork conditions and with or without continuous lateral restraints, which are subjected to compression forces, end moments and/or transverse loads.\n\nNOTE 2 In case the conditions of application expressed in (1) and (2) are not fulfilled, see 6.3.4.\n\n(3) For members of structural systems the resistance check may be carried out on the basis of the individual single span members regarded as cut out of the system. Second order effects of the sway system (P-Δ-effects) have to be taken into account, either by the end moments of the member or by means of appropriate buckling lengths respectively, see 5.2.2(3)c) and 5.2.2(8).\n\n(4) Members which are subjected to combined bending and axial compression should satisfy:\n\n$$\\frac{N_{Ed}}{\\chi_y N_{Rk}} + k_{yy} \\frac{M_{y,Ed} + \\Delta M_{y,Ed}}{\\chi_{LT} M_{y,Rk}} + k_{yz} \\frac{M_{z,Ed} + \\Delta M_{z,Ed}}{\\chi_{z,Rk}} \\leq 1$$\n\n$$\\frac{N_{Ed}}{\\chi_z N_{Rk}} + k_{zy} \\frac{M_{y,Ed} + \\Delta M_{y,Ed}}{\\chi_{LT} M_{y,Rk}} + k_{zz} \\frac{M_{z,Ed} + \\Delta M_{z,Ed}}{\\chi_{z,Rk}} \\leq 1$$\n\nwhere $N_{Ed}, M_{y,Ed}$ and $M_{z,Ed}$ are the design values of the compression force and the maximum moments about the y-y and z-z axis along the member, respectively.\n\n$$\\Delta M_{y,Ed}, \\Delta M_{z,Ed}$$ are the moments due to the shift of the centroidal axis according to 6.2.9.3 for class 4 sections, see Table 6.7,\n\n$$\\chi_y$$ and $$\\chi_z$$ are the reduction factors due to flexural buckling from 6.3.1\n\n$$\\chi_{LT}$$ is the reduction factor due to lateral torsional buckling from 6.3.2\n\n$$k_{yy}, k_{yz}, k_{zy}, k_{zz}$$ are the interaction factors",
+      "pointer": "en_1993_1_1_2005#/6.3.3",
+      "keywords": [
+        "6.3.3",
+        "axial",
+        "bending",
+        "buckling",
+        "compression",
+        "cross-section",
+        "force",
+        "imperfection",
+        "lateral",
+        "members",
+        "moment",
+        "resistance",
+        "section",
+        "stability",
+        "table",
+        "torsional",
+        "uniform"
+      ]
+    },
+    {
+      "clause_id": "Table 6.7",
+      "title": "Values for $N_{Rk} = f_y A_i, M_{i,Rk} = f_y W_i$ and $\\Delta M_{i,Ed}$",
+      "text": "| Class | 1 | 2 | 3 | 4 |\n| :--- | :--- | :--- | :--- | :--- |\n| $A_i$ | A | A | A | $A_{eff}$ |\n| $W_y$ | $W_{pl,y}$ | $W_{pl,v}$ | $W_{el,v}$ | $W_{eff,v}$ |\n| $W_z$ | $W_{pl,z}$ | $W_{pl,z}$ | $W_{el,z}$ | $W_{eff,z}$ |\n| $\\Delta M_{y,Ed}$ | 0 | 0 | 0 | $e_{N,y} N_{Ed}$ |\n| $\\Delta M_{z,Ed}$ | 0 | 0 | 0 | $e_{N,z} N_{Ed}$ |\n\nNOTE For members not susceptible to torsional deformation $\\chi_{LT}$ would be $\\chi_{LT} = 1,0$.\n\n(5) The interaction factors $k_{yy}, k_{yz}, k_{zy}, k_{zz}$ depend on the method which is chosen.\n\nNOTE 1 The interaction factors $k_{yy}, k_{yz}, k_{zy}, k_{zz}$ have been derived from two alternative approaches. Values of these factors may be obtained from Annex A (alternative method 1) or from Annex B (alternative method 2).\n\nNOTE 2 The National Annex may give a choice from alternative method 1 or alternative method 2.\n\nNOTE 3 For simplicity verifications may be performed in the elastic range only.",
+      "pointer": "en_1993_1_1_2005#/Table 6.7",
+      "keywords": [
+        "Table 6.7",
+        "annex",
+        "elastic",
+        "torsional",
+        "values"
+      ]
+    },
+    {
+      "clause_id": "6.3.4",
+      "title": "General method for lateral and lateral torsional buckling of structural components",
+      "text": "(1) The following method may be used where the methods given in 6.3.1, 6.3.2 and 6.3.3 do not apply. It allows the verification of the resistance to lateral and lateral torsional buckling for structural components such as\n\n- single members with mono symmetric cross sections, built-up or not $\\langle AC_2 \\rangle$, uniform or not, with complex support conditions or not, or\n- plane frames or subframes composed of such members,\n\nwhich are subject to compression and/or mono-axial bending in the plane, but which do not contain rotative plastic hinges.\n\n**NOTE** The National Annex may specify the field and limits of application of this method.\n\n(2) Overall resistance to out-of-plane buckling for any structural component conforming to the scope in\n(1) can be verified by ensuring that:\n\n$$\\frac{\\chi_{\\text{op}} \\alpha_{\\text{ult,k}}}{\\gamma_{\\text{M1}}} \\geq 1,0$$\n\n(6.63)\n\nwhere $\\alpha_{\\text{ult,k}}$ is the minimum load amplifier of the design loads to reach the characteristic resistance of the most critical cross section of the structural component considering its in plane behaviour without taking lateral or lateral torsional buckling into account however accounting for all effects due to in plane geometrical deformation and imperfections, global and local, where relevant;\n\n$\\chi_{\\text{op}}$ is the reduction factor for the non-dimensional slenderness $\\bar{\\lambda}_{\\text{op}}$, see (3), to take account of lateral and lateral torsional buckling.\n\n(3) The global non-dimensional slenderness $\\bar{\\lambda}_{\\text{op}}$ for the structural component should be determined from\n\n$$\\bar{\\lambda}_{\\text{op}} = \\sqrt{\\frac{\\alpha_{\\text{ult,k}}}{\\alpha_{\\text{cr,op}}}}$$\n\n(6.64)\n\nwhere $\\alpha_{\\text{ult,k}}$ is defined in (2)\n\n$\\alpha_{\\text{cr,op}}$ is the minimum amplifier for the in plane design loads to reach the elastic critical load of the structural component with regards to lateral or lateral torsional buckling without accounting for in plane flexural buckling.\n\n**NOTE** In determining $\\alpha_{\\text{cr,op}}$ and $\\alpha_{\\text{ult,k}}$ Finite Element analysis may be used.\n\n(4) The reduction factor $\\chi_{\\text{op}}$ may be determined from either of the following methods:\n\na) the minimum value of\n\n$$\\chi$$ for lateral buckling according to 6.3.1\n\n$$\\chi_{\\text{LT}}$$ for lateral torsional buckling according to 6.3.2\n\neach calculated for the global non-dimensional slenderness $\\bar{\\lambda}_{\\text{op}}$.\n\n**NOTE** For example where $\\alpha_{\\text{ult,k}}$ is determined by the cross section check\n\n$$\\frac{1}{\\alpha_{\\text{ult,k}}} = \\frac{N_{\\text{Ed}}}{N_{\\text{Rk}}} + \\frac{M_{y,Ed}}{M_{y,Rk}}$$\n\nthis method leads to:\n\n$$\\frac{N_{\\text{Ed}}}{N_{\\text{Rk}}} + \\frac{M_{y,Ed}}{M_{y,Rk}} \\leq \\chi_{\\text{op}}$$\n\n(6.65)\n\nb) a value interpolated between the values $\\chi$ and $\\chi_{\\text{LT}}$ as determined in a) by using the formula for $\\alpha_{\\text{ult,k}}$ corresponding to the critical cross section.\n\n**NOTE** For example where $\\alpha_{\\text{ult,k}}$ i...",
+      "pointer": "en_1993_1_1_2005#/6.3.4",
+      "keywords": [
+        "6.3.4",
+        "annex",
+        "axial",
+        "bending",
+        "buckling",
+        "components",
+        "compression",
+        "elastic",
+        "general",
+        "imperfection",
+        "lateral",
+        "method",
+        "plastic",
+        "resistance",
+        "section",
+        "slenderness",
+        "structural",
+        "torsional"
       ]
     },
     {
@@ -1176,6 +1553,7 @@
         "general",
         "lateral",
         "plastic",
+        "table",
         "torsional",
         "ultimate"
       ]
@@ -1183,19 +1561,16 @@
     {
       "clause_id": "6.3.5.2",
       "title": "Restraints at rotated plastic hinges",
-      "text": "(1)B At each rotated plastic hinge location the cross section should have an effective lateral and torsional restraint with appropriate resistance to lateral forces and torsion induced by local plastic deformations of the member at this location.\n\n(2)B Effective restraint should be provided\n\n- for members carrying either moment or moment and axial force by lateral restraint to both flanges. This may be provided by lateral restraint to one flange and a stiff torsional restraint to the cross-section preventing the lateral displacement of the compression flange relative to the tension flange, see Figure 6.5.\n\n- for members carrying either moment alone or moment and axial tension in which the compression flange is in contact with a floor slab, by lateral and torsional restraint to the compression flange (e.g. by connecting it to a slab, see Figure 6.6). For cross-sections that are more slender than rolled I and H sections the distorsion of the cross section should be prevented at the plastic hinge location (e.g. by means of a web stiffener also connected to the compression flange with a stiff joint from the compression flange into the slab).\n\nFigure 6.5: Typical stiff torsional restraint\n\n1 compression flange\n\nFigure 6.6: Typical lateral and torsional restraint by a slab to the compression flange\n\n(3)B At each plastic hinge location, the connection (e.g. bolts) of the compression flange to the resisting element at that point (e.g. purlin), and any intermediate element (e.g. diagonal brace) should be designed to resist to a local force of at least 2.5% of $N_{f,Ed}$ (defined in 6.3.5.2(5)B) transmitted by the flange in its plane and perpendicular to the web plane, without any combination with other loads.\n\n(4)B Where it is not practicable providing such a restraint directly at the hinge location, it should be provided within a distance of h/2 along the length of the member, where h is its overall depth at the plastic hinge location.\n\n(5)B For the design of bracing systems, see 5.3.3, it should be verified by a check in addition to the check for imperfection according to 5.3.3 that the bracing system is able to resist the effects of local forces $Q_m$ applied at each stabilized member at the plastic hinge locations, where;\n\n$$Q_m = 1.5 \\alpha_m \\frac{N_{f,Ed}}{100}$$\n\nwhere $N_{f,Ed}$ is the axial force in the compressed flange of the stabilized member at the plastic hinge location;\n\n$$\\alpha_m \\text{ is according to 5.3.3(1).}$$\n\nNOTE For combination with external loads see also 5.3.3(5).",
+      "text": "(1)B At each rotated plastic hinge location the cross section should have an effective lateral and torsional restraint with appropriate resistance to lateral forces and torsion induced by local plastic deformations of the member at this location.\n\n(2)B Effective restraint should be provided\n\n- for members carrying either moment or moment and axial force by lateral restraint to both flanges. This may be provided by lateral restraint to one flange and a stiff torsional restraint to the cross-section preventing the lateral displacement of the compression flange relative to the tension flange, see Figure 6.5.\n\n- for members carrying either moment alone or moment and axial tension in which the compression flange is in contact with a floor slab, by lateral and torsional restraint to the compression flange (e.g. by connecting it to a slab, see Figure 6.6). For cross-sections that are more slender than rolled I and H sections the distorsion of the cross section should be prevented at the plastic hinge location (e.g. by means of a web stiffener also connected to the compression flange with a stiff joint from the compression flange into the slab).\n\nFigure 6.5: Typical stiff torsional restraint",
       "pointer": "en_1993_1_1_2005#/6.3.5.2",
       "keywords": [
         "6.3.5.2",
         "axial",
-        "bolt",
         "compression",
-        "connection",
         "cross-section",
         "flange",
         "force",
         "hinges",
-        "imperfection",
         "lateral",
         "moment",
         "plastic",
@@ -1209,12 +1584,33 @@
       ]
     },
     {
+      "clause_id": "1",
+      "title": "compression flange",
+      "text": "Figure 6.6: Typical lateral and torsional restraint by a slab to the compression flange\n\n(3)B At each plastic hinge location, the connection (e.g. bolts) of the compression flange to the resisting element at that point (e.g. purlin), and any intermediate element (e.g. diagonal brace) should be designed to resist to a local force of at least 2.5% of $N_{f,Ed}$ (defined in 6.3.5.2(5)B) transmitted by the flange in its plane and perpendicular to the web plane, without any combination with other loads.\n\n(4)B Where it is not practicable providing such a restraint directly at the hinge location, it should be provided within a distance of h/2 along the length of the member, where h is its overall depth at the plastic hinge location.\n\n(5)B For the design of bracing systems, see 5.3.3, it should be verified by a check in addition to the check for imperfection according to 5.3.3 that the bracing system is able to resist the effects of local forces $Q_m$ applied at each stabilized member at the plastic hinge locations, where;\n\n$$Q_m = 1.5 \\alpha_m \\frac{N_{f,Ed}}{100}$$\n\nwhere $N_{f,Ed}$ is the axial force in the compressed flange of the stabilized member at the plastic hinge location;\n\n$$\\alpha_m \\text{ is according to 5.3.3(1).}$$\n\nNOTE For combination with external loads see also 5.3.3(5).",
+      "pointer": "en_1993_1_1_2005#/1",
+      "keywords": [
+        "1",
+        "axial",
+        "bolt",
+        "compression",
+        "connection",
+        "flange",
+        "force",
+        "imperfection",
+        "lateral",
+        "plastic",
+        "torsional",
+        "web"
+      ]
+    },
+    {
       "clause_id": "6.3.5.3",
       "title": "Verification of stable length of segment",
       "text": "(1)B The lateral torsional buckling verification of segments between restraints may be performed by checking that the length between restraints is not greater than the stable length.\n\nFor uniform beam segments with I or H cross sections with $\\frac{h}{t_f} \\leq 40\\varepsilon$ under linear moment and without significant axial compression the stable length may be taken from\n\n$$L_{\\text{stable}} = 35\\varepsilon i_z \\quad \\text{for } 0,625 \\leq \\psi \\leq 1$$\n\n$$L_{\\text{stable}} = (60 - 40\\psi)\\varepsilon i_z \\quad \\text{for } -1 \\leq \\psi \\leq 0,625$$\n\nwhere $\\varepsilon = \\sqrt{\\frac{235}{f_y[N/mm^2]}}$\n\n$$\\psi = \\frac{M_{\\text{Ed,min}}}{M_{\\text{pl,Rd}}} = \\text{ratio of end moments in the segment}$$\n\nNOTE B For the stable length of a segment see also Annex BB.3.\n\n(2)B Where a rotated plastic hinge location occurs immediately adjacent to one end of a haunch, the tapered segment need not be treated as a segment adjacent to a plastic hinge location if the following criteria are satisfied:\n\na) the restraint at the plastic hinge location should be within a distance h/2 along the length of the tapered segment, not the uniform segment;\n\nb) the compression flange of the haunch remains elastic throughout its length.\n\nNOTE B For more information see Annex BB.3.",
       "pointer": "en_1993_1_1_2005#/6.3.5.3",
       "keywords": [
         "6.3.5.3",
+        "annex",
         "axial",
         "buckling",
         "compression",
@@ -1227,6 +1623,7 @@
         "section",
         "segment",
         "stable",
+        "table",
         "torsional",
         "verification"
       ]
@@ -1284,7 +1681,7 @@
     {
       "clause_id": "6.4.3.1",
       "title": "Resistance of components of battened compression members",
-      "text": "(1) The chords and the battens and their joints to the chords should be checked for the actual moments and forces in an end panel and at mid-span as indicated in Figure 6.11.\n\nNOTE For simplicity the maximum chord forces $N_{ch,Ed}$ may be combined with the maximum shear force $V_{Ed}$.\n\nFigure 6.11: Moments and forces in an end panel of a battened built-up member\n\n(2) The shear stiffness $S_v$ should be taken as follows:\n\n$$S_v = \\frac{24EI_{ch}}{a^2 \\left[ 1 + \\frac{2I_{ch}}{nI_b} \\frac{h_0}{a} \\right]} \\leq \\frac{2\\pi^2 EI_{ch}}{a^2}$$\n\n(3) The effective second moments of area of battened built-up members may be taken as:\n\n$$I_{\\text{eff}} = 0.5h_0^2 A_{ch} + 2\\mu I_{ch}$$\n\nwhere $I_{ch}$ is in plane second moment of area of one chord\n$I_b$ is in plane second moment of area of one batten\n$\\mu$ is efficiency factor from Table 6.8\n\n$$\\text{AC}_2$$ $n$ = number of planes of battens\n\nTable 6.8: Efficiency factor $\\mu$\n\n| Criterion | Efficiency factor $\\mu$ |\n| :--- | :--- |\n| $\\lambda \\ge 150$ | 0 |\n| $75 < \\lambda < 150$ | $\\mu = 2 - \\frac{\\lambda}{75}$ |\n| $\\lambda \\leq 75$ | 1.0 |\n| where $\\lambda = \\frac{L}{i_0}$; $i_0 = \\sqrt{\\frac{I_1}{2A_{ch}}}$; $I_1 = 0.5h_0^2 A_{ch} + 2I_{ch}$ | |",
+      "text": "(1) The chords and the battens and their joints to the chords should be checked for the actual moments and forces in an end panel and at mid-span as indicated in Figure 6.11.\n\nNOTE For simplicity the maximum chord forces $N_{ch,Ed}$ may be combined with the maximum shear force $V_{Ed}$.\n\nFigure 6.11: Moments and forces in an end panel of a battened built-up member\n\n(2) The shear stiffness $S_v$ should be taken as follows:\n\n$$S_v = \\frac{24EI_{ch}}{a^2 \\left[ 1 + \\frac{2I_{ch}}{nI_b} \\frac{h_0}{a} \\right]} \\leq \\frac{2\\pi^2 EI_{ch}}{a^2}$$\n\n(3) The effective second moments of area of battened built-up members may be taken as:\n\n$$I_{\\text{eff}} = 0.5h_0^2 A_{ch} + 2\\mu I_{ch}$$\n\nwhere $I_{ch}$ is in plane second moment of area of one chord\n$I_b$ is in plane second moment of area of one batten\n$\\mu$ is efficiency factor from Table 6.8\n\n$$\\text{AC}_2$$ $n$ = number of planes of battens",
       "pointer": "en_1993_1_1_2005#/6.4.3.1",
       "keywords": [
         "6.4.3.1",
@@ -1295,7 +1692,19 @@
         "members",
         "moment",
         "resistance",
-        "shear"
+        "shear",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "Table 6.8",
+      "title": "Efficiency factor $\\mu$",
+      "text": "| Criterion | Efficiency factor $\\mu$ |\n| :--- | :--- |\n| $\\lambda \\ge 150$ | 0 |\n| $75 < \\lambda < 150$ | $\\mu = 2 - \\frac{\\lambda}{75}$ |\n| $\\lambda \\leq 75$ | 1.0 |\n| where $\\lambda = \\frac{L}{i_0}$; $i_0 = \\sqrt{\\frac{I_1}{2A_{ch}}}$; $I_1 = 0.5h_0^2 A_{ch} + 2I_{ch}$ | |",
+      "pointer": "en_1993_1_1_2005#/Table 6.8",
+      "keywords": [
+        "Table 6.8",
+        "efficiency",
+        "factor"
       ]
     },
     {
@@ -1313,20 +1722,40 @@
     {
       "clause_id": "6.4.4",
       "title": "Closely spaced built-up members",
-      "text": "(1) Built-up compression members with chords in contact or closely spaced and connected through packing plates, see Figure 6.12, or star battened angle members connected by pairs of battens in two perpendicular planes, see Figure 6.13 should be checked for buckling as a single integral member ignoring the effect of shear stiffness ($S_V = \\infty$), when the conditions in Table 6.9 are met.\n\nFigure 6.12: Closely spaced built-up members\n\nTable 6.9: Maximum spacings for interconnections in closely spaced built-up or star battened angle members\n\n| Type of built-up member | Maximum spacing between interconnections * |\n| :--- | :--- |\n| Members according to Figure 6.12 connected by bolts or welds | $15 i_{\\text{min}}$ |\n| Members according to Figure 6.13 connected by pair of battens | $70 i_{\\text{min}}$ |\n| *) centre-to-centre distance of interconnections $i_{\\text{min}}$ is the minimum radius of gyration of one chord or one angle |\n\n(2) The shear forces to be transmitted by the battens should be determined from 6.4.3.1(1).\n\n(3) In the case of unequal-leg angles, see Figure 6.13, buckling about the y-y axis may be verified with:\n\n$$i_y = \\frac{i_0}{1,15}$$\n\nwhere $i_0$ is the minimum radius of gyration of the built-up member.\n\n7 Serviceability limit states",
+      "text": "(1) Built-up compression members with chords in contact or closely spaced and connected through packing plates, see Figure 6.12, or star battened angle members connected by pairs of battens in two perpendicular planes, see Figure 6.13 should be checked for buckling as a single integral member ignoring the effect of shear stiffness ($S_V = \\infty$), when the conditions in Table 6.9 are met.\n\nFigure 6.12: Closely spaced built-up members",
       "pointer": "en_1993_1_1_2005#/6.4.4",
       "keywords": [
         "6.4.4",
-        "bolt",
         "buckling",
         "closely",
         "compression",
-        "connection",
-        "force",
         "members",
-        "serviceability",
         "shear",
         "spaced",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "Table 6.9",
+      "title": "Maximum spacings for interconnections in closely spaced built-up or star battened angle members",
+      "text": "| Type of built-up member | Maximum spacing between interconnections * |\n| :--- | :--- |\n| Members according to Figure 6.12 connected by bolts or welds | $15 i_{\\text{min}}$ |\n| Members according to Figure 6.13 connected by pair of battens | $70 i_{\\text{min}}$ |\n| *) centre-to-centre distance of interconnections $i_{\\text{min}}$ is the minimum radius of gyration of one chord or one angle |\n\n(2) The shear forces to be transmitted by the battens should be determined from 6.4.3.1(1).\n\n(3) In the case of unequal-leg angles, see Figure 6.13, buckling about the y-y axis may be verified with:\n\n$$i_y = \\frac{i_0}{1,15}$$\n\nwhere $i_0$ is the minimum radius of gyration of the built-up member.",
+      "pointer": "en_1993_1_1_2005#/Table 6.9",
+      "keywords": [
+        "Table 6.9",
+        "angle",
+        "battened",
+        "bolt",
+        "buckling",
+        "closely",
+        "connection",
+        "force",
+        "interconnections",
+        "maximum",
+        "members",
+        "shear",
+        "spaced",
+        "spacings",
+        "star",
         "weld"
       ]
     },
@@ -1352,6 +1781,7 @@
       "pointer": "en_1993_1_1_2005#/7.2.1",
       "keywords": [
         "7.2.1",
+        "annex",
         "deflection",
         "deflections",
         "vertical"
@@ -1364,6 +1794,7 @@
       "pointer": "en_1993_1_1_2005#/7.2.2",
       "keywords": [
         "7.2.2",
+        "annex",
         "deflection",
         "deflections",
         "horizontal"
@@ -1372,20 +1803,389 @@
     {
       "clause_id": "7.2.3",
       "title": "Dynamic effects",
-      "text": "(1) B With reference to EN 1990 – Annex A1.4.4 the vibrations of structures on which the public can walk should be limited to avoid significant discomfort to users, and limits should be specified for each project and agreed with the client.\n\nNOTE B The National Annex may specify limits for vibration of floors.\n\nAnnex A [informative] – Method 1: Interaction factors $k_{ij}$ for interaction formula in 6.3.3(4)\n\nTable A.1: Interaction factors $k_{ij}$ (6.3.3(4))\n\n| Interaction factors | Design assumptions |\n| :--- | :--- |\n| $k_{yy}$ | $C_{my}C_{mLT} \\frac{\\mu_y}{1 - \\frac{N_{Ed}}{N_{cr,y}}} \\frac{1}{C_{yy}}$ |\n| $k_{yz}$ | $C_{mz} \\frac{\\mu_y}{1 - \\frac{N_{Ed}}{N_{cr,z}}} \\frac{1}{C_{yz}} 0.6 \\sqrt{\\frac{W_z}{W_y}}$ |\n| $k_{zy}$ | $C_{my}C_{mLT} \\frac{\\mu_z}{1 - \\frac{N_{Ed}}{N_{cr,y}}} \\frac{1}{C_{zy}} 0.6 \\sqrt{\\frac{W_y}{W_z}}$ |\n| $k_{zz}$ | $C_{mz} \\frac{\\mu_z}{1 - \\frac{N_{Ed}}{N_{cr,z}}} \\frac{1}{C_{zz}}$ |\n\nAuxiliary terms:\n\n$$\\mu_y = \\frac{1 - \\frac{N_{Ed}}{N_{cr,y}}}{1 - \\chi_y \\frac{N_{Ed}}{N_{cr,y}}}$$\n\n$$\\mu_z = \\frac{1 - \\frac{N_{Ed}}{N_{cr,z}}}{1 - \\chi_z \\frac{N_{Ed}}{N_{cr,z}}}$$\n\n$$w_y = \\frac{W_{pl,y}}{W_{el,y}} \\leq 1.5$$\n\n$$w_z = \\frac{W_{pl,z}}{W_{el,z}} \\leq 1.5$$\n\n$$n_{pl} = \\frac{N_{Ed}}{N_{Rk} / \\gamma_{M0}}$$\n\n$C_{my}$ see Table A.2\n\n$$a_{LT} = 1 - \\frac{I_T}{I_y} \\geq 0$$\n\n$$C_{zz} = 1 + (w_z - 1) \\left[ 2 - \\frac{1.6}{w_z} \\cdot C_{mz}^2 \\bar{\\lambda}_{\\max} - \\frac{1.6}{w_z} \\cdot C_{mz}^2 \\bar{\\lambda}_{\\max} - e_{LT} \\right] n_{pl} \\geq \\frac{W_{el,z}}{W_{pl,z}}$$\n\n$$e_{LT} = 1.7 a_{LT} \\frac{\\bar{\\lambda}_0}{0.1 + \\bar{\\lambda}_0} \\frac{M_{y,Ed}}{C_{my} \\chi_{LT} M_{pl,y,Rd}}$$\n\n$$\\bar{\\lambda}_{\\text{max}} = \\max \\begin{cases} \\frac{\\bar{\\lambda}_y}{\\bar{\\lambda}_z} \\\\ \\end{cases}$$\n\n$$\\bar{\\lambda}_0 = \\text{non-dimensional slenderness for lateral-torsional buckling due to uniform bending moment, i.e. } \\psi_y = 1,0 \\text{ in Table A.2}$$\n\n$$\\bar{\\lambda}_{\\text{LT}} = \\text{non-dimensional slenderness for lateral-torsional buckling}$$\n\nIf $$\\bar{\\lambda}_0 \\leq 0, 2\\sqrt{C_1} \\sqrt{\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,z}}}\\right)\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,TF}}}\\right)}:$$\n\n$$C_{\\text{my}} = C_{\\text{my,0}}$$\n\n$$C_{\\text{mz}} = C_{\\text{mz,0}}$$\n\n$$C_{\\text{mLT}} = 1,0$$\n\nIf $$\\bar{\\lambda}_0 > 0, 2\\sqrt{C_1} \\sqrt{\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,z}}}\\right)\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,TF}}}\\right)}:$$\n\n$$C_{\\text{my}} = C_{\\text{my,0}} + \\left(1 - C_{\\text{my,0}}\\right) \\frac{\\sqrt{\\varepsilon_y} a_{\\text{LT}}}{1 + \\sqrt{\\varepsilon_y} a_{\\text{LT}}}$$\n\n$$C_{\\text{mz}} = C_{\\text{mz,0}}$$\n\n$$C_{\\text{mLT}} = C_{\\text{my}}^2 \\frac{a_{\\text{LT}}}{\\sqrt{\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,z}}}\\right)\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,TF}}}\\right)}} \\geq 1$$\n\n$$\\varepsilon_y = \\frac{M_{\\text{y,Ed}}}{N_{\\text{Ed}}} \\frac{A}{W_{\\text{el,y}}} \\text{ for class 1, 2 and 3 cross-sections}$$\n\n$$\\varepsilon_y = \\frac{M_{\\text{y,Ed}}}{N_{\\text{Ed}}} \\frac{A_{\\text{...",
+      "text": "(1) B With reference to EN 1990 – Annex A1.4.4 the vibrations of structures on which the public can walk should be limited to avoid significant discomfort to users, and limits should be specified for each project and agreed with the client.\n\nNOTE B The National Annex may specify limits for vibration of floors.",
       "pointer": "en_1993_1_1_2005#/7.2.3",
       "keywords": [
         "7.2.3",
+        "annex",
+        "dynamic",
+        "effects"
+      ]
+    },
+    {
+      "clause_id": "Table A.1",
+      "title": "Interaction factors $k_{ij}$ (6.3.3(4))",
+      "text": "| Interaction factors | Design assumptions |\n| :--- | :--- |\n| $k_{yy}$ | $C_{my}C_{mLT} \\frac{\\mu_y}{1 - \\frac{N_{Ed}}{N_{cr,y}}} \\frac{1}{C_{yy}}$ |\n| $k_{yz}$ | $C_{mz} \\frac{\\mu_y}{1 - \\frac{N_{Ed}}{N_{cr,z}}} \\frac{1}{C_{yz}} 0.6 \\sqrt{\\frac{W_z}{W_y}}$ |\n| $k_{zy}$ | $C_{my}C_{mLT} \\frac{\\mu_z}{1 - \\frac{N_{Ed}}{N_{cr,y}}} \\frac{1}{C_{zy}} 0.6 \\sqrt{\\frac{W_y}{W_z}}$ |\n| $k_{zz}$ | $C_{mz} \\frac{\\mu_z}{1 - \\frac{N_{Ed}}{N_{cr,z}}} \\frac{1}{C_{zz}}$ |\n\nAuxiliary terms:\n\n$$\\mu_y = \\frac{1 - \\frac{N_{Ed}}{N_{cr,y}}}{1 - \\chi_y \\frac{N_{Ed}}{N_{cr,y}}}$$\n\n$$\\mu_z = \\frac{1 - \\frac{N_{Ed}}{N_{cr,z}}}{1 - \\chi_z \\frac{N_{Ed}}{N_{cr,z}}}$$\n\n$$w_y = \\frac{W_{pl,y}}{W_{el,y}} \\leq 1.5$$\n\n$$w_z = \\frac{W_{pl,z}}{W_{el,z}} \\leq 1.5$$\n\n$$n_{pl} = \\frac{N_{Ed}}{N_{Rk} / \\gamma_{M0}}$$\n\n$C_{my}$ see Table A.2\n\n$$a_{LT} = 1 - \\frac{I_T}{I_y} \\geq 0$$\n\n$$C_{zz} = 1 + (w_z - 1) \\left[ 2 - \\frac{1.6}{w_z} \\cdot C_{mz}^2 \\bar{\\lambda}_{\\max} - \\frac{1.6}{w_z} \\cdot C_{mz}^2 \\bar{\\lambda}_{\\max} - e_{LT} \\right] n_{pl} \\geq \\frac{W_{el,z}}{W_{pl,z}}$$\n\n$$e_{LT} = 1.7 a_{LT} \\frac{\\bar{\\lambda}_0}{0.1 + \\bar{\\lambda}_0} \\frac{M_{y,Ed}}{C_{my} \\chi_{LT} M_{pl,y,Rd}}$$\n\n$$\\bar{\\lambda}_{\\text{max}} = \\max \\begin{cases} \\frac{\\bar{\\lambda}_y}{\\bar{\\lambda}_z} \\\\ \\end{cases}$$\n\n$$\\bar{\\lambda}_0 = \\text{non-dimensional slenderness for lateral-torsional buckling due to uniform bending moment, i.e. } \\psi_y = 1,0 \\text{ in Table A.2}$$\n\n$$\\bar{\\lambda}_{\\text{LT}} = \\text{non-dimensional slenderness for lateral-torsional buckling}$$\n\nIf $$\\bar{\\lambda}_0 \\leq 0, 2\\sqrt{C_1} \\sqrt{\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,z}}}\\right)\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,TF}}}\\right)}:$$\n\n$$C_{\\text{my}} = C_{\\text{my,0}}$$\n\n$$C_{\\text{mz}} = C_{\\text{mz,0}}$$\n\n$$C_{\\text{mLT}} = 1,0$$\n\nIf $$\\bar{\\lambda}_0 > 0, 2\\sqrt{C_1} \\sqrt{\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,z}}}\\right)\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,TF}}}\\right)}:$$\n\n$$C_{\\text{my}} = C_{\\text{my,0}} + \\left(1 - C_{\\text{my,0}}\\right) \\frac{\\sqrt{\\varepsilon_y} a_{\\text{LT}}}{1 + \\sqrt{\\varepsilon_y} a_{\\text{LT}}}$$\n\n$$C_{\\text{mz}} = C_{\\text{mz,0}}$$\n\n$$C_{\\text{mLT}} = C_{\\text{my}}^2 \\frac{a_{\\text{LT}}}{\\sqrt{\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,z}}}\\right)\\left(1 - \\frac{N_{\\text{Ed}}}{N_{\\text{cr,TF}}}\\right)}} \\geq 1$$\n\n$$\\varepsilon_y = \\frac{M_{\\text{y,Ed}}}{N_{\\text{Ed}}} \\frac{A}{W_{\\text{el,y}}} \\text{ for class 1, 2 and 3 cross-sections}$$\n\n$$\\varepsilon_y = \\frac{M_{\\text{y,Ed}}}{N_{\\text{Ed}}} \\frac{A_{\\text{eff}}}{W_{\\text{eff,y}}} \\text{ for class 4 cross-sections}$$\n\n$$C_1 \\text{ is a factor depending on the loading and end conditions and may be taken as } C_1 = k_c^{-2} \\text{ where } k_c \\text{ is to be taken from Table 6.6.}$$\n\n$$N_{\\text{cr,y}} = \\text{elastic flexural buckling force about the y-y axis}$$\n\n$$N_{\\text{cr,z}} = \\text{elastic flexural buckling force about the z-z axis}$$\n\n$$N_{\\text{cr,T}} = \\text{elastic torsional buckling force}$$\n\n$$I_T = \\t...",
+      "pointer": "en_1993_1_1_2005#/Table A.1",
+      "keywords": [
+        "Table A.1",
         "bending",
         "buckling",
         "cross-section",
-        "dynamic",
-        "effects",
+        "elastic",
+        "factors",
+        "force",
+        "interaction",
         "lateral",
         "moment",
         "section",
         "slenderness",
+        "table",
         "torsional"
+      ]
+    },
+    {
+      "clause_id": "Table A.2",
+      "title": "Equivalent uniform moment factors $C_{\\text{mi,0}}$",
+      "text": "| Moment diagram | $C_{\\text{mi,0}}$ |\n| :--- | :--- |\n| $M_1$ with $\\psi M_1 - 1 \\leq \\psi \\leq 1$ | $C_{\\text{mi,0}} = 0.79 + 0.21\\psi_i + 0.36(\\psi_i - 0.33)\\frac{N_{\\text{Ed}}}{N_{\\text{cr,i}}}$ |\n| $M(x)$ with $M(x)$ | $C_{\\text{mi,0}} = 1 + \\left(\\frac{\\pi^2 E I_i |\\delta_x|}{L^2 |M_{\\text{i,Ed}}(x)|} - 1\\right)\\frac{N_{\\text{Ed}}}{N_{\\text{cr,i}}}$ |\n| $M_{\\text{i,Ed}}(x)$ is the maximum moment $M_{\\text{y,Ed}}$ or $M_{\\text{z,Ed}}$ according to the first order analyses $|\\delta_x|$ is the maximum member $|\\delta_y|$ deflection along the member |\n| $C_{\\text{mi,0}} = 1 - 0.18\\frac{N_{\\text{Ed}}}{N_{\\text{cr,i}}}$ |\n| $C_{\\text{mi,0}} = 1 + 0.03\\frac{N_{\\text{Ed}}}{N_{\\text{cr,i}}}$ |",
+      "pointer": "en_1993_1_1_2005#/Table A.2",
+      "keywords": [
+        "Table A.2",
+        "deflection",
+        "equivalent",
+        "factors",
+        "moment",
+        "uniform"
+      ]
+    },
+    {
+      "clause_id": "Table B.1",
+      "title": "Interaction factors $k_{ij}$ for members not susceptible to torsional deformations",
+      "text": "| Interaction factors | Type of sections | Design assumptions |\n| :--- | :--- | :--- |\n| $k_{yy}$ | I-sections RHS-sections | $C_{my}\\left(1 + 0,6\\bar{\\lambda}_y\\frac{N_{Ed}}{\\chi_y N_{Rk}/\\gamma_{M1}}\\right) \\leq C_{my}\\left(1 + 0,6\\frac{N_{Ed}}{\\chi_y N_{Rk}/\\gamma_{M1}}\\right)$ |\n| $k_{yz}$ | I-sections RHS-sections | $k_{zz}$ |\n| $k_{zy}$ | I-sections RHS-sections | $0,8 k_{yy}$ |\n| $k_{zz}$ | I-sections | $C_{mz}\\left(1 + 0,6\\bar{\\lambda}_z\\frac{N_{Ed}}{\\chi_z N_{Rk}/\\gamma_{M1}}\\right) \\leq C_{mz}\\left(1 + 1,4\\frac{N_{Ed}}{\\chi_z N_{Rk}/\\gamma_{M1}}\\right)$ |\n| $k_{zz}$ | RHS-sections | $C_{mz}\\left(1 + 0,6\\bar{\\lambda}_z\\frac{N_{Ed}}{\\chi_z N_{Rk}/\\gamma_{M1}}\\right) \\leq C_{mz}\\left(1 + 0,8\\frac{N_{Ed}}{\\chi_z N_{Rk}/\\gamma_{M1}}\\right)$ |\n\nFor I- and H-sections and rectangular hollow sections under axial compression and uniaxial bending $M_{y,Ed}$ the coefficient $k_{zy}$ may be $k_{zy} = 0$.\n\nBS EN 1993-1-1:2005\nEN 1993-1-1:2005 (E)\n\n$$k_{zz} \\quad k_{zz} \\text{ from Table B.1} \\quad k_{zz} \\text{ from Table B.1}$$",
+      "pointer": "en_1993_1_1_2005#/Table B.1",
+      "keywords": [
+        "Table B.1",
+        "axial",
+        "bending",
+        "compression",
+        "deformations",
+        "factors",
+        "interaction",
+        "members",
+        "section",
+        "susceptible",
+        "table",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "Table B.3",
+      "title": "Equivalent uniform moment factors $C_m$ in Tables B.1 and B.2",
+      "text": "| Moment diagram | range | $C_{mv}$ and $C_{mz}$ and $C_{mLT}$ | |\n| :--- | :--- | :--- | :--- |\n| | | uniform loading | concentrated load |\n| $\\psi M$ | $-1 \\leq \\psi \\leq 1$ | $0,6 + 0,4\\psi \\geq 0,4$ | |\n| $\\psi M_h$ | $0 \\leq \\alpha_s \\leq 1$ | $-1 \\leq \\psi \\leq 1$ | $0,2 + 0,8\\alpha_s \\geq 0,4$ |\n| | $-1 \\leq \\alpha_s < 0$ | $0 \\leq \\psi \\leq 1$ | $0,1 - 0,8\\alpha_s \\geq 0,4$ |\n| | | $-1 \\leq \\psi < 0$ | $0,1(1-\\psi) - 0,8\\alpha_s \\geq 0,4$ |\n| $\\psi M_h$ | $0 \\leq \\alpha_h \\leq 1$ | $-1 \\leq \\psi \\leq 1$ | $0,95 + 0,05\\alpha_h$ |\n| | $-1 \\leq \\alpha_h < 0$ | $0 \\leq \\psi \\leq 1$ | $0,95 + 0,05\\alpha_h$ |\n| | | $-1 \\leq \\psi < 0$ | $0,95 + 0,05\\alpha_h(1+2\\psi)$ |\n\nFor members with sway buckling mode the equivalent uniform moment factor should be taken $C_{my} = 0,9$ or $C_{mz} = 0,9$ respectively.\n\n$C_{my}$, $C_{mz}$ and $C_{mLT}$ should be obtained according to the bending moment diagram between the relevant braced points as follows:\n\n| moment factor | bending axis | points braced in direction |\n| :--- | :--- | :--- |\n| $C_{my}$ | y-y | z-z |\n| $C_{mz}$ | z-z | y-y |\n| $C_{mLT}$ | y-y | y-y |",
+      "pointer": "en_1993_1_1_2005#/Table B.3",
+      "keywords": [
+        "Table B.3",
+        "bending",
+        "buckling",
+        "equivalent",
+        "factors",
+        "moment",
+        "tables",
+        "uniform"
+      ]
+    },
+    {
+      "clause_id": "AB.1",
+      "title": "Structural analysis taking account of material non-linearities",
+      "text": "(1)B In case of material non-linearities the action effects in a structure may be determined by incremental approach to the design loads to be considered for the relevant design situation.\n\n(2)B In this incremental approach each permanent or variable action should be increased proportionally.",
+      "pointer": "en_1993_1_1_2005#/AB.1",
+      "keywords": [
+        "AB.1",
+        "account",
+        "analysis",
+        "material",
+        "structural",
+        "taking"
+      ]
+    },
+    {
+      "clause_id": "AB.2",
+      "title": "Simplified provisions for the design of continuous floor beams",
+      "text": "(1)B For continuous beams with slabs in buildings without cantilevers on which uniformly distributed loads are dominant, it is sufficient to consider only the following load arrangements:\n\na) alternative spans carrying the design permanent and variable load ($\\gamma_{\\text{G}} G_k + \\gamma_{\\text{Q}} Q_k$), other spans carrying only the design permanent load $\\gamma_{\\text{G}} G_k$\n\nb) any two adjacent spans carrying the design permanent and variable loads ($\\gamma_{\\text{G}} G_k + \\gamma_{\\text{Q}} Q_k$), all other spans carrying only the design permanent load $\\gamma_{\\text{G}} G_k$\n\nNOTE 1 a) applies to sagging moments, b) to hogging moments.\n\nNOTE 2 This annex is intended to be transferred to EN 1990 in a later stage.",
+      "pointer": "en_1993_1_1_2005#/AB.2",
+      "keywords": [
+        "AB.2",
+        "annex",
+        "beams",
+        "continuous",
+        "design",
+        "floor",
+        "moment",
+        "provisions",
+        "simplified"
+      ]
+    },
+    {
+      "clause_id": "BB.1.1",
+      "title": "General",
+      "text": "(1)B For chord members generally and for out-of-plane buckling of web members, the buckling length $L_{cr}$ may be taken as equal to the system length $L$, see BB.1.3(1)B, unless a smaller value can be justified by analysis.\n\n(2)B The buckling length $L_{cr}$ of an I or H section chord member may be taken as 0.9L for in-plane buckling and 1.0L for out-of-plane buckling, unless a smaller value is justified by analysis.\n\n(3)B Web members may be designed for in-plane buckling using a buckling length smaller than the system length, provided the chords supply appropriate end restraint and the end connections supply appropriate fixity (at least 2 bolts if bolted).\n\n(4)B Under these conditions, in normal triangulated structures the buckling length $L_{cr}$ of web members for in-plane buckling may be taken as 0.9L, except for angle sections, see BB.1.2.",
+      "pointer": "en_1993_1_1_2005#/BB.1.1",
+      "keywords": [
+        "BB.1.1",
+        "bolt",
+        "buckling",
+        "connection",
+        "general",
+        "section",
+        "web"
+      ]
+    },
+    {
+      "clause_id": "BB.1.2",
+      "title": "Angles as web members",
+      "text": "(1)B Provided that the chords supply appropriate end restraint to web members made of angles and the end connections of such web members supply appropriate fixity (at least two bolts if bolted), the eccentricities may be neglected and end fixities allowed for in the design of angles as web members in compression. The effective slenderness ratio $\\bar{\\lambda}_{eff}$ may be obtained as follows:\n\n$$\\bar{\\lambda}_{eff,v} = 0.35 + 0.7\\bar{\\lambda}_{v} \\quad \\text{for buckling about v-v axis}$$\n\n$$\\bar{\\lambda}_{eff,y} = 0.50 + 0.7\\bar{\\lambda}_{y} \\quad \\text{for buckling about y-y axis}$$\n\n(BB.1)\n\n$$\\bar{\\lambda}_{eff,z} = 0.50 + 0.7\\bar{\\lambda}_{z} \\quad \\text{for buckling about z-z axis}$$\n\nwhere $\\bar{\\lambda}$ is as defined in 6.3.1.2.\n\n(2)B When only one bolt is used for end connections of angle web members the eccentricity should be taken into account using 6.2.9 and the buckling length $L_{cr}$ should be taken as equal to the system length $L$.",
+      "pointer": "en_1993_1_1_2005#/BB.1.2",
+      "keywords": [
+        "BB.1.2",
+        "angles",
+        "bolt",
+        "buckling",
+        "compression",
+        "connection",
+        "members",
+        "slenderness",
+        "web"
+      ]
+    },
+    {
+      "clause_id": "BB.1.3",
+      "title": "Hollow sections as members",
+      "text": "(1)B The buckling length $L_{cr}$ of a hollow section chord member may be taken as 0.9L for both in-plane and out-of-plane buckling, where $L$ is the system length for the relevant plane. The in-plane system length is the distance between the joints. The out-of-plane system length is the distance between the lateral supports, unless a smaller value is justified by analysis.\n\n(2)B The buckling length $L_{cr}$ of a hollow section brace member (web member) with bolted connections may be taken as 1.0L for both in-plane and out-of-plane buckling.\n\n(3)B The buckling length $L_{cr}$ of a hollow section brace member without cropping or flattening, welded around its perimeter to hollow section chords, may be generally taken as 0.75L for both in-plane and out-of-plane buckling. Lower buckling lengths may be used based on testing or calculations. In this case the buckling length of the cord may not be reduced.\n\nNOTE The National Annex may give more information on buckling lengths.",
+      "pointer": "en_1993_1_1_2005#/BB.1.3",
+      "keywords": [
+        "BB.1.3",
+        "annex",
+        "bolt",
+        "buckling",
+        "connection",
+        "hollow",
+        "lateral",
+        "members",
+        "section",
+        "sections",
+        "web",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "BB.2.1",
+      "title": "Continuous lateral restraints",
+      "text": "(1)B If trapezoidal sheeting according to EN 1993-1-3 is connected to a beam and the condition expressed by formula (BB.2) $\\langle AC_2 \\rangle$ is met, the beam at the connection may be regarded as being laterally restrained in the plane of the sheeting.\n\n$$S \\geq \\left( EI_w \\frac{\\pi^2}{L^2} + GI_T + EI_z \\frac{\\pi^2}{L^2} 0.25h^2 \\right) \\frac{70}{h^2} \\langle AC_2 \\rangle$$\n\nwhere $S$ is the shear stiffness (per unit of beam length) provided by the sheeting to the beam regarding its deformation in the plane of the sheeting $\\langle AC_2 \\rangle$ to be connected to the beam at the bottom at each rib $\\langle AC_2 \\rangle$.\n\n$I_w$ is the warping constant\n\n$I_z$ is the second moment of area of the cross section about the minor axis of the cross section\n\n$L$ is the beam length\n\n$h$ is the depth of the beam\n\nIf the sheeting is connected to a beam at every second rib only, $S$ should be substituted by 0,20S.\n\nNOTE Formula (BB.2) $\\langle AC_2 \\rangle$ may also be used to determine the lateral stability of beam flanges used in combination with other types of cladding than trapezoidal sheeting, provided that the connections are of suitable design.",
+      "pointer": "en_1993_1_1_2005#/BB.2.1",
+      "keywords": [
+        "BB.2.1",
+        "connection",
+        "continuous",
+        "flange",
+        "lateral",
+        "moment",
+        "restraints",
+        "section",
+        "shear",
+        "stability",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "BB.2.2",
+      "title": "Continuous torsional restraints",
+      "text": "(1)B A beam may be considered as sufficiently restraint from torsional deformations if\n\n$$C_{9,k} > \\frac{M_{pl,k}^2}{EI_z} K_{9,k}$$\n\nwhere $C_{9,k} =$ rotational stiffness (per unit of beam length) provided to the beam by the stabilizing continuum (e.g. roof structure) and the connections\n\n$K_v = 0.35$ for elastic analysis\n\n$K_v = 1.00$ for plastic analysis\n\n$K_{9} =$ factor for considering the moment distribution see Table BB.1 and the type of restraint\n\n$M_{pl,k} =$ characteristic value of the plastic moment of the beam",
+      "pointer": "en_1993_1_1_2005#/BB.2.2",
+      "keywords": [
+        "BB.2.2",
+        "connection",
+        "continuous",
+        "elastic",
+        "moment",
+        "plastic",
+        "restraints",
+        "table",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "Table BB.1",
+      "title": "Factor $K_9$ for considering the moment distribution and the type of restraint",
+      "text": "| Case | Moment distribution | without translational restraint | with translational restraint |\n| :--- | :--- | :--- | :--- |\n| 1 | | 4,0 | 0 |\n| 2a | | 3,5 | 0,12 |\n| 2b | | | 0,23 |\n| 3 | | 2,8 | 0 |\n| 4 | | 1,6 | 1,0 |\n| 5 | | 1,0 | 0,7 |\n\n(2)B The rotational stiffness provided by the stabilizing continuum to the beam may be calculated from\n\n$$\\frac{1}{C_{9,k}} = \\frac{1}{C_{9R,k}} + \\frac{1}{C_{9C,k}} + \\frac{1}{C_{9D,k}}$$\n\n(BB.4)\n\nwhere $C_{9R,k} =$ rotational stiffness (per unit of the beam length) provided by the stabilizing continuum to the beam assuming a stiff connection to the member\n\n$C_{9C,k} =$ rotational stiffness (per unit of the beam length) of the connection between the beam and the stabilizing continuum\n\n$C_{9D,k} =$ rotational stiffness (per unit of the beam length) deduced from an analysis of the distorsional deformations of the beam cross sections, where the flange in compression is the free one; where the compression flange is the connected one or where distorsional deformations of the cross sections may be neglected (e.g. for usual rolled profiles)\n\n$C_{9D,k} = \\infty$\n\nNOTE For more information see EN 1993-1-3.",
+      "pointer": "en_1993_1_1_2005#/Table BB.1",
+      "keywords": [
+        "Table BB.1",
+        "compression",
+        "connection",
+        "considering",
+        "distribution",
+        "factor",
+        "flange",
+        "moment",
+        "restraint",
+        "section",
+        "torsional",
+        "type"
+      ]
+    },
+    {
+      "clause_id": "BB.3.1.1",
+      "title": "Stable lengths between adjacent lateral restraints",
+      "text": "(1)B Lateral torsional buckling effects may be ignored where the length $L$ of the segment of a member between the restrained section at a plastic hinge location and the adjacent lateral restraint is not greater than $L_m$, where:\n\n$$L_m = \\frac{38i_z}{\\sqrt{\\frac{1}{57.4} \\left( \\frac{N_{Ed}}{A} \\right) + \\frac{1}{756 C_1^2} \\left( \\frac{W_{pl,y}^2}{A I_T} \\right) \\left( \\frac{f_y}{235} \\right)^2}}$$\n\nwhere $N_{Ed}$ is the design value of the compression force $[N]$ in the member\nA is the cross section area $[mm^2]$ of the member\n$W_{pl,y}$ is the plastic section modulus of the member\n$I_T$ is the torsion constant of the member\n$f_y$ is the yield strength in $[N/mm^2]$\n$C_1$ is a factor depending on the loading and end conditions and may be taken as $C_1 = k_c^{-2}$ where $k_c$ is to be taken from Table 6.6.\n\nprovided that the member is restrained at the hinge as required by 6.3.5 and that the other end of the segment is restrained\n\n- either by a lateral restraint to the compression flange where one flange is in compression throughout the length of the segment,\n- or by a torsional restraint,\n- or by a lateral restraint at the end of the segment and a torsional restraint to the member at a distance that satisfies the requirements for $L_s$,\n\nsee Figure BB.1, Figure BB.2 and Figure BB3.\n\n**NOTE** In general $L_s$ is greater than $L_m$.\n\n![Figure BB.1: Checks in a member without a haunch](image)\n\n1. tension flange\n2. plastic stable length (see BB.3.1.1)\n3. elastic section (see 6.3)\n4. plastic hinge\n5. restraints\n6. bending moment diagram\n7. compression flange\n8. plastic with tension flange restraint, stable length $L_s$ (see BB.3.1.2, equation (BB.7) or (BB.8))\n9. elastic with tension flange restraint (see 6.3), $\\chi$ and $\\chi_{LT}$ from $N_{cr}$ and $M_{cr}$ including tension flange restraint\n\nFigure BB.2: Checks in a member with a three flange haunch",
+      "pointer": "en_1993_1_1_2005#/BB.3.1.1",
+      "keywords": [
+        "BB.3.1.1",
+        "adjacent",
+        "bending",
+        "between",
+        "buckling",
+        "compression",
+        "elastic",
+        "flange",
+        "force",
+        "lateral",
+        "lengths",
+        "modulus",
+        "moment",
+        "plastic",
+        "restraints",
+        "section",
+        "stable",
+        "table",
+        "tension",
+        "torsional",
+        "yield"
+      ]
+    },
+    {
+      "clause_id": "12",
+      "title": "elastic section (see 6.3), $\\chi$ and $\\chi_{LT}$ from $N_{cr}$ and $M_{cr}$ including tension flange restraint",
+      "text": "Figure BB.3: Checks in a member with a two flange haunch",
+      "pointer": "en_1993_1_1_2005#/12",
+      "keywords": [
+        "12",
+        "elastic",
+        "flange",
+        "from",
+        "including",
+        "restraint",
+        "section",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "BB.3.1.2",
+      "title": "Stable length between torsional restraints",
+      "text": "(1)B Lateral torsional buckling effects may be ignored where the length $L$ of the segment of a member between the restrained section at a plastic hinge location and the adjacent torsional restraint subject to a constant moment is not greater than $L_k$, provided that\n\n- the member is restrained at the hinge as required by 6.3.5 and\n- there are one or more intermediate lateral restraints between the torsional restraints at a spacing that satisfies the requirements for $L_m$, see BB.3.1.1,\n\nwhere\n\n$$L_k = \\frac{5,4 + \\frac{600f_y}{E}}{\\sqrt{5,4\\left(\\frac{f_y}{E}\\right)\\left(\\frac{h}{t_f}\\right)^2} - 1}$$\n\n(BB.6)\n\n(2)B Lateral torsional buckling effects may be ignored where the length $L$ of the segment of a member between the restrained section at a plastic hinge location and the adjacent torsional restraint subject to a linear moment gradient and axial compression is not greater than $L_s$, provided that\n\n- the member is restrained at the hinge as required by 6.3.5 and\n- there are one or more intermediate lateral restraints between the torsional restraints at a spacing that satisfies the requirements for $L_m$, see BB.3.1.1,\n\nwhere\n\n$$L_s = \\sqrt{C_m} L_k \\left(\\frac{M_{pl,y,Rk}}{M_{N,y,Rk} + aN_{Ed}}\\right)$$\n\n(BB.7)\n\n$C_m$ is the modification factor for linear moment gradient, see BB.3.3.1;\n\n$a$ is the distance between the centroid of the member with the plastic hinge and the centroid of the restraint members;\n\n$M_{pl,y,Rk}$ is the characteristic plastic moment resistance of the cross section about the y-y axis;\n\n$M_{N,y,Rk}$ is the characteristic plastic moment resistance of the cross section about the y-y axis with reduction due to the axial force $N_{Ed}$\n\n(3)B Lateral torsional buckling effects may be ignored where the length $L$ of a segment of a member between the restrained section at a plastic hinge location and the adjacent torsional restraint subject to a non linear moment gradient and axial compression is not greater than $L_s$, provided that\n\n- the member is restrained at the hinge as required by 6.3.5 and\n- there are one or more intermediate lateral restraints between the torsional restraints at a spacing that satisfies the requirements for $L_m$, see BB.3.1.1\n\nwhere\n\n$$L_s = \\sqrt{C_n} L_k$$\n\n(BB.8)\n\n$C_n$ is the modification factor for non-linear moment gradient, see BB.3.3.2,\n\nsee Figure BB.1, Figure BB.2 and Figure BB.3.",
+      "pointer": "en_1993_1_1_2005#/BB.3.1.2",
+      "keywords": [
+        "BB.3.1.2",
+        "axial",
+        "between",
+        "buckling",
+        "compression",
+        "force",
+        "lateral",
+        "length",
+        "moment",
+        "plastic",
+        "resistance",
+        "restraints",
+        "section",
+        "stable",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "BB.3.2.1",
+      "title": "Stable length between adjacent lateral restraints",
+      "text": "(1)B Lateral torsional buckling effects may be ignored where the length $L$ of the segment of a member between the restrained section at a plastic hinge location and the adjacent lateral restraint is not greater than $L_m$, where\n\n- for three flange haunches (see Figure BB.2)\n\n$$L_m = \\frac{38i_z}{\\sqrt{\\frac{1}{57.4}\\left(\\frac{N_{Ed}}{A}\\right) + \\frac{1}{756C_1^2}\\left(\\frac{W_{pl,y}^2}{AI_T}\\right)\\frac{f_y}{235}}}$$\n\n(BB.9)\n\n- for two flange haunches (see Figure BB.3)\n\n$$L_m = 0.85 \\frac{38i_z}{\\sqrt{\\frac{1}{57.4}\\left(\\frac{N_{Ed}}{A}\\right) + \\frac{1}{756C_1^2}\\left(\\frac{W_{pl,y}^2}{AI_T}\\right)\\frac{f_y}{235}}}$$\n\n(BB.10)\n\nwhere $N_{Ed}$ is the design value of the compression force $[N]$ in the member\n\n$$\\frac{W_{pl,y}^2}{AI_T}$$ is the maximum value in the segment\n\nA is the cross sectional area $[mm^2]$ at the location where $$\\frac{W_{pl,y}^2}{AI_T}$$ is a maximum of the tapered member\n\n$C_1$ is a factor depending on the loading and end conditions and may be taken as $C_1 = k_c^{-2}$ where $k_c$ is to be taken from Table 6.6.\n\n$W_{pl,y}$ is the plastic section modulus of the member\n\n$$I_T$$ is the torsional constant of the member\n\n$f_y$ is the yield strength in $[N/mm^2]$\n\n$i_z$ is the minimum value of the radius of gyration in the segment\n\nprovided that the member is restrained at the hinge as required by 6.3.5 and that the other end of segment is restrained\n\n- either by a lateral restraint to the compression flange where one flange is in compression throughout the length of the segment,\n- or by a torsional restraint,\n- or by a lateral restraint at the end of the segment and a torsional restraint to the member at a distance that satisfies the requirements for $L_s$.",
+      "pointer": "en_1993_1_1_2005#/BB.3.2.1",
+      "keywords": [
+        "BB.3.2.1",
+        "adjacent",
+        "between",
+        "buckling",
+        "compression",
+        "flange",
+        "force",
+        "lateral",
+        "length",
+        "modulus",
+        "plastic",
+        "restraints",
+        "section",
+        "stable",
+        "table",
+        "torsional",
+        "yield"
+      ]
+    },
+    {
+      "clause_id": "BB.3.2.2",
+      "title": "Stable length between torsional restraints",
+      "text": "(1)B For non uniform members with constant flanges under linear or non-linear moment gradient and axial compression, lateral torsional buckling effects may be ignored where the length $L$ of the segment of a member between the restrained section at a plastic hinge location and the adjacent torsional restraint is not greater than $L_s$, provided that\n\n- the member is restrained at the hinge as required by 6.3.5 and\n- there are one or more intermediate lateral restraints between the torsional restraints at a spacing that satisfies the requirements for $L_m$, see BB.3.2.1,\n\nwhere\n\n- for three flange haunches (see Figure BB.2)\n  $$L_s = \\frac{\\sqrt{C_n} L_k}{c}$$  (BB.11)\n\n- for two flange haunches (see Figure BB.3)\n  $$L_s = 0.85 \\frac{\\sqrt{C_n} L_k}{c}$$  (BB.12)\n\nwhere $L_k$ is the length derived for a uniform member with a cross-section equal to the shallowest section, see BB.3.1.2\n  $$C_n \\text{ see BB.3.3.2}$$\n  $c$ is the taper factor defined in BB.3.3.3",
+      "pointer": "en_1993_1_1_2005#/BB.3.2.2",
+      "keywords": [
+        "BB.3.2.2",
+        "axial",
+        "between",
+        "buckling",
+        "compression",
+        "cross-section",
+        "flange",
+        "lateral",
+        "length",
+        "moment",
+        "plastic",
+        "restraints",
+        "section",
+        "stable",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "BB.3.3.1",
+      "title": "Linear moment gradients",
+      "text": "(1)B The modification factor $C_m$ may be determined from\n  $$C_m = \\frac{1}{B_0 + B_1 \\beta_t + B_2 \\beta_t^2}$$  (BB.13)\n\nin which\n  $$B_0 = \\frac{1 + 10\\eta}{1 + 20\\eta}$$\n  $$B_1 = \\frac{5\\sqrt{\\eta}}{\\pi + 10\\sqrt{\\eta}}$$\n  $$B_2 = \\frac{0.5}{1 + \\pi\\sqrt{\\eta}} - \\frac{0.5}{1 + 20\\eta}$$\n  $$\\eta = \\frac{N_{crE}}{N_{crT}}$$\n  $$N_{crE} = \\frac{\\pi^2 EI_z}{L_t^2}$$\n\n$L_t$ is the distance between the torsional restraints\n\n$$N_{crT} = \\frac{1}{i_s^2} \\left( \\frac{\\pi^2 EI_z a^2}{L_t^2} + \\frac{\\pi^2 EI_w}{L_t^2} + GI_T \\right)$$  (AC2)\n\nis the elastic critical torsional buckling force for an I-section between restraints to both flanges at spacing $L_t$ with intermediate lateral restraints to the tension flange.\n\n$$i_s^2 = i_y^2 + i_z^2 + a^2$$\n\nwhere $a$ is the distance between the centroid of the member and the centroid of the restraining members, such as purlins restraining rafters\n\n$$\\beta_t$$ is the ratio of the algebraically smaller end moment to the larger end moment. Moments that produce compression in the non-restrained flange should be taken as positive. If the ratio is less than $-1.0$ the value of $\\beta_t$ should be taken as $-1.0$, see Figure BB.4.\n\n$$\\beta_t = \\frac{-100}{+200} = -0.5$$\n\n$$\\beta_t = \\frac{-200}{+100} = -2$$\n\nbut $\\beta_t \\leq -1.0$ thus $\\beta_t = -1.0$\n\n**Figure BB.4: Value of $\\beta_t$**",
+      "pointer": "en_1993_1_1_2005#/BB.3.3.1",
+      "keywords": [
+        "BB.3.3.1",
+        "buckling",
+        "compression",
+        "elastic",
+        "flange",
+        "force",
+        "gradients",
+        "lateral",
+        "linear",
+        "moment",
+        "section",
+        "tension",
+        "torsional"
+      ]
+    },
+    {
+      "clause_id": "BB.3.3.2",
+      "title": "Non linear moment gradients",
+      "text": "(1)B The modification factor $C_n$ may be determined from\n\n$$C_n = \\frac{12}{\\left[R_1 + 3R_2 + 4R_3 + 3R_4 + R_5 + 2(R_S - R_E)\\right]}$$\n\nin which $R_1$ to $R_5$ are the values of $R$ according to (2)B at the ends, quarter points and mid-length, see Figure BB.5, and only positive values of $R$ should be included.\n\nIn addition, only positive values of $(R_S - R_E)$ should be included, where\n\n- $R_E$ is the greater of $R_1$ or $R_5$\n- $R_s$ is the maximum value of $R$ anywhere in the length $L_y$\n\n**Figure BB.5: Moment values**\n\n(2)B The value of $R$ should be obtained from:\n\n$$R = \\frac{M_{y,Ed} + a N_{Ed}}{f_y W_{pl,y}}$$\n\n(BB.15)\n\nwhere $a$ is the distance between the centroid of the member and the centroid of the restraining members, such as purlins restraining rafters.",
+      "pointer": "en_1993_1_1_2005#/BB.3.3.2",
+      "keywords": [
+        "BB.3.3.2",
+        "gradients",
+        "linear",
+        "moment"
+      ]
+    },
+    {
+      "clause_id": "BB.3.3.3",
+      "title": "Taper factor",
+      "text": "(1)B For a non uniform member with constant flanges, for which $h \\geq 1,2b$ and $h/t_f \\geq 20$ the taper factor $c$ should be obtained as follows:\n\n- for tapered members or segments, see Figure BB.6(a):\n\n$$c = 1 + \\frac{3}{\\left(\\frac{h}{t_f} - 9\\right)} \\left(\\frac{h_{\\text{max}}}{h_{\\text{min}}} - 1\\right)^{2/3}$$\n\n(BB.16)\n\n- for haunched members or segments, see Figures BB.6(b) and BB.6(c):\n\n$$c = 1 + \\frac{3}{\\left(\\frac{h}{t_f} - 9\\right)} \\left(\\frac{h_h}{h_s}\\right)^{2/3} \\sqrt{\\frac{L_h}{L_y}}$$\n\n(BB.17)\n\nwhere $h_h$ is the additional depth of the haunch or taper, see Figure BB.6;\n\n$h_{\\text{max}}$ is the maximum depth of cross-section within the length $L_y$, see Figure BB.6;\n\n$h_{\\text{min}}$ is the minimum depth of cross-section within the length $L_y$, see Figure BB.6;\n\n$h_s$ is the vertical depth of the un-haunched section, see Figure BB.6;\n\n$L_h$ is the length of haunch within the length $L_y$, see Figure BB.6;\n\n$L_y$ is the length between points at which the compression flange is laterally restrained.\n\n$(h/t_f)$ is to be derived from the shallowest section.\n\n(a) Tapered segment\n\n(b) Haunched segment\n\n(c) Haunched segment\n\n$$x = \\text{restraint}$$\n\nFigure BB.6: Dimensions defining taper factor",
+      "pointer": "en_1993_1_1_2005#/BB.3.3.3",
+      "keywords": [
+        "BB.3.3.3",
+        "compression",
+        "cross-section",
+        "factor",
+        "flange",
+        "lateral",
+        "section",
+        "taper"
       ]
     }
   ]

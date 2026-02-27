@@ -1,21 +1,18 @@
 const STORAGE_KEY = "ec3_chat_threads_v2";
 
 const GRAPH_NODES = [
-  { id: "user",         label: "User",          icon: "person",   col: 0, row: 1 },
-  { id: "orchestrator", label: "Orchestrator",   icon: "brain",    col: 1, row: 1 },
-  { id: "database",     label: "EC3 Database",   icon: "book",     col: 2, row: 0 },
-  { id: "tools",        label: "MCP Tools",      icon: "wrench",   col: 2, row: 2 },
-  { id: "sources",      label: "Sources",        icon: "citation", col: 3, row: 0 },
-  { id: "response",     label: "Response",       icon: "check",    col: 3, row: 2 },
+  { id: "user",         label: "User",          icon: "person", col: 0, row: 1 },
+  { id: "database",     label: "Database",      icon: "book",   col: 1, row: 0 },
+  { id: "orchestrator", label: "Orchestrator",  icon: "brain",  col: 1, row: 1 },
+  { id: "tools",        label: "Tools",         icon: "wrench", col: 1, row: 2 },
+  { id: "response",     label: "Response",      icon: "check",  col: 2, row: 1 },
 ];
 
 const GRAPH_EDGES = [
   { id: "u_o",  from: "user",         to: "orchestrator" },
   { id: "o_d",  from: "orchestrator", to: "database"     },
   { id: "o_t",  from: "orchestrator", to: "tools"        },
-  { id: "d_s",  from: "database",     to: "sources"      },
-  { id: "t_r",  from: "tools",        to: "response"     },
-  { id: "s_r",  from: "sources",      to: "response"     },
+  { id: "o_r",  from: "orchestrator", to: "response"     },
 ];
 
 const NODE_ICONS = {
@@ -129,25 +126,61 @@ function renderThreadList() {
   }
 }
 
-// ---- Flow graph (redesigned) ----
-const GRID = { colW: 168, rowH: 72, padX: 20, padY: 16, nodeW: 148, nodeH: 54 };
+// ---- Flow graph ----
+const GRID = {
+  colW: 186,
+  rowH: 112,
+  padX: 28,
+  padY: 44,
+  nodeW: 156,
+  nodeH: 62,
+  popupGap: 10,
+  popupMaxRows: 2,
+  popupMaxItems: 4,
+  popupRowH: 22,
+  popupRowGap: 6,
+  edgePadY: 12,
+};
 
-function getNodePos(node) {
+function popupLaneReserve() {
+  return GRID.edgePadY
+    + GRID.popupGap
+    + (GRID.popupMaxRows * GRID.popupRowH)
+    + ((GRID.popupMaxRows - 1) * GRID.popupRowGap);
+}
+
+function getGraphLayout() {
+  const minCol = Math.min(...GRAPH_NODES.map(n => n.col));
+  const maxCol = Math.max(...GRAPH_NODES.map(n => n.col));
+  const minRow = Math.min(...GRAPH_NODES.map(n => n.row));
+  const maxRow = Math.max(...GRAPH_NODES.map(n => n.row));
+  const popupReserveY = popupLaneReserve();
+
+  const originX = GRID.padX - minCol * GRID.colW;
+  const originY = GRID.padY + popupReserveY - minRow * GRID.rowH;
+  const spanCols = maxCol - minCol;
+  const spanRows = maxRow - minRow;
+
   return {
-    x: GRID.padX + node.col * GRID.colW,
-    y: GRID.padY + node.row * GRID.rowH,
-    cx: GRID.padX + node.col * GRID.colW + GRID.nodeW / 2,
-    cy: GRID.padY + node.row * GRID.rowH + GRID.nodeH / 2,
+    originX,
+    originY,
+    totalW: originX + spanCols * GRID.colW + GRID.nodeW + GRID.padX,
+    totalH: originY + spanRows * GRID.rowH + GRID.nodeH + GRID.padY + popupReserveY,
   };
 }
 
-function edgePath(fromNode, toNode) {
-  const f = getNodePos(fromNode);
-  const t = getNodePos(toNode);
-  const fx = f.x + GRID.nodeW;
-  const fy = f.cy;
-  const tx = t.x;
-  const ty = t.cy;
+function getNodePos(node, layout = { originX: GRID.padX, originY: GRID.padY }) {
+  return {
+    x: layout.originX + node.col * GRID.colW,
+    y: layout.originY + node.row * GRID.rowH,
+    cx: layout.originX + node.col * GRID.colW + GRID.nodeW / 2,
+    cy: layout.originY + node.row * GRID.rowH + GRID.nodeH / 2,
+  };
+}
+
+function edgePath(fromNode, toNode, layout) {
+  const f = getNodePos(fromNode, layout);
+  const t = getNodePos(toNode, layout);
 
   if (fromNode.col === toNode.col) {
     const midX = f.cx;
@@ -156,8 +189,13 @@ function edgePath(fromNode, toNode) {
     return `M ${midX} ${startY} L ${midX} ${endY}`;
   }
 
-  const dx = tx - fx;
-  return `M ${fx} ${fy} C ${fx + dx * 0.5} ${fy} ${tx - dx * 0.5} ${ty} ${tx} ${ty}`;
+  const rightward = fromNode.col < toNode.col;
+  const startX = rightward ? f.x + GRID.nodeW : f.x;
+  const endX = rightward ? t.x : t.x + GRID.nodeW;
+  const startY = f.cy;
+  const endY = t.cy;
+  const dx = endX - startX;
+  return `M ${startX} ${startY} C ${startX + dx * 0.5} ${startY} ${endX - dx * 0.5} ${endY} ${endX} ${endY}`;
 }
 
 function initFlowGraph(msgNode, prompt) {
@@ -170,8 +208,9 @@ function initFlowGraph(msgNode, prompt) {
   const canvas = document.createElement("div");
   canvas.className = "flow-canvas";
 
-  const totalW = GRID.padX * 2 + (3) * GRID.colW + GRID.nodeW;
-  const totalH = GRID.padY * 2 + (2) * GRID.rowH + GRID.nodeH;
+  const layout = getGraphLayout();
+  const totalW = layout.totalW;
+  const totalH = layout.totalH;
   canvas.style.width = totalW + "px";
   canvas.style.height = totalH + "px";
 
@@ -184,7 +223,7 @@ function initFlowGraph(msgNode, prompt) {
   for (const e of GRAPH_EDGES) {
     const fromN = nodeMap[e.from], toN = nodeMap[e.to];
     const path = document.createElementNS(svgNS, "path");
-    path.setAttribute("d", edgePath(fromN, toN));
+    path.setAttribute("d", edgePath(fromN, toN, layout));
     path.setAttribute("class", "flow-edge idle");
     path.dataset.edge = e.id;
 
@@ -212,7 +251,7 @@ function initFlowGraph(msgNode, prompt) {
 
   const nodeEls = {};
   for (const n of GRAPH_NODES) {
-    const pos = getNodePos(n);
+    const pos = getNodePos(n, layout);
     const el = document.createElement("div");
     el.className = "flow-node idle";
     el.dataset.node = n.id;
@@ -227,29 +266,44 @@ function initFlowGraph(msgNode, prompt) {
     const title = document.createElement("div");
     title.className = "flow-node-title";
     title.textContent = n.label;
-    const detail = document.createElement("div");
-    detail.className = "flow-node-detail";
-
     el.appendChild(icon);
-    const textWrap = document.createElement("div");
-    textWrap.className = "flow-node-text";
-    textWrap.appendChild(title);
-    textWrap.appendChild(detail);
-    el.appendChild(textWrap);
+    el.appendChild(title);
 
     canvas.appendChild(el);
     nodeEls[n.id] = el;
   }
+
+  const docPos = getNodePos(nodeMap.database, layout);
+  const toolPos = getNodePos(nodeMap.tools, layout);
+
+  const docPopups = document.createElement("div");
+  docPopups.className = "flow-popups above";
+  docPopups.style.left = docPos.cx + "px";
+  docPopups.style.top = (docPos.y - GRID.popupGap) + "px";
+  canvas.appendChild(docPopups);
+
+  const toolPopups = document.createElement("div");
+  toolPopups.className = "flow-popups below";
+  toolPopups.style.left = toolPos.cx + "px";
+  toolPopups.style.top = (toolPos.y + GRID.nodeH + GRID.popupGap) + "px";
+  canvas.appendChild(toolPopups);
+
   graph.appendChild(canvas);
 
   const ns = {}, es = {};
   GRAPH_NODES.forEach(n => { ns[n.id] = "idle"; });
   GRAPH_EDGES.forEach(e => { es[e.id] = "idle"; });
 
-  ns["user"] = "active";
+  ns["user"] = "done";
   es["u_o"] = "active";
 
-  msgNode.__flow = { ns, es, nodeEls };
+  msgNode.__flow = {
+    ns,
+    es,
+    nodeEls,
+    popupLanes: { docs: docPopups, tools: toolPopups },
+    popupRefs: { docs: new Map(), tools: new Map() },
+  };
   msgNode.__thinkStart = Date.now();
   msgNode.__stepCount = 0;
   applyFlow(msgNode);
@@ -266,11 +320,65 @@ function setES(f, id, s) {
   f.es[id] = s;
 }
 
-function setNodeDetail(f, nodeId, text) {
-  const el = f.nodeEls[nodeId];
-  if (!el) return;
-  const det = el.querySelector(".flow-node-detail");
-  if (det) det.textContent = clamp(text, 24);
+function triggerPopupPulse(chip) {
+  if (!chip) return;
+  chip.classList.remove("pulse");
+  void chip.offsetWidth;
+  chip.classList.add("pulse");
+}
+
+function addPopupChip(f, lane, key, label) {
+  if (!lane || !key || !label) return;
+  const laneEl = f.popupLanes?.[lane];
+  const refs = f.popupRefs?.[lane];
+  if (!laneEl || !refs) return;
+
+  const existing = refs.get(key);
+  if (existing) {
+    triggerPopupPulse(existing);
+    return;
+  }
+
+  const chip = document.createElement("div");
+  chip.className = "flow-popup-chip";
+  chip.textContent = clamp(label, 48);
+  laneEl.appendChild(chip);
+  refs.set(key, chip);
+  requestAnimationFrame(() => chip.classList.add("show"));
+  triggerPopupPulse(chip);
+
+  while (laneEl.children.length > GRID.popupMaxItems) {
+    const first = laneEl.firstElementChild;
+    if (!first) break;
+    laneEl.removeChild(first);
+    for (const [k, el] of refs.entries()) {
+      if (el === first) refs.delete(k);
+    }
+  }
+}
+
+function formatDocBadge(entry) {
+  if (!entry || typeof entry !== "object") return "";
+  const rawDoc = String(entry.doc_id || "").trim();
+  const file = rawDoc ? `${rawDoc.replace(/\.json$/i, "")}.json` : "document.json";
+  const clause = String(entry.clause_id || "").trim();
+  return clause ? `${file} · Cl. ${clause}` : file;
+}
+
+function pushDocBadges(f, entries) {
+  if (!Array.isArray(entries)) return;
+  for (const entry of entries) {
+    const label = formatDocBadge(entry);
+    if (!label) continue;
+    const key = `${entry.doc_id || "unknown"}:${entry.clause_id || "?"}`;
+    addPopupChip(f, "docs", key, label);
+  }
+}
+
+function pushToolBadge(f, tool) {
+  const raw = normTool(tool);
+  if (!raw) return;
+  addPopupChip(f, "tools", raw.toLowerCase(), raw);
 }
 
 function applyFlow(n) {
@@ -293,60 +401,48 @@ function normTool(n) { return String(n || "").replace(/_ec3/g, "").replace(/_/g,
 function processEvent(f, ev) {
   const s = ev.status || "active", node = ev.node, m = ev.meta || {};
   if (node === "intake") {
-    setNS(f, "user", s === "error" ? "error" : "done");
-    setNS(f, "orchestrator", "active");
-    setES(f, "u_o", s === "done" ? "done" : s);
-    setNodeDetail(f, "orchestrator", "Analyzing...");
-  } else if (node === "plan") {
-    setNS(f, "orchestrator", "active");
-    if (m.mode) setNodeDetail(f, "orchestrator", m.mode);
-  } else if (node === "inputs") {
-    setNS(f, "orchestrator", "active");
-    setNodeDetail(f, "orchestrator", "Resolving inputs");
-  } else if (node === "retrieval") {
-    setNS(f, "orchestrator", "active");
-    setNS(f, "database", s);
-    setES(f, "o_d", s);
-    if (s === "done" || s === "active") {
-      const top = m.top || [];
-      if (top.length) {
-        setNS(f, "sources", "active");
-        setES(f, "d_s", "active");
-        setNodeDetail(f, "sources", top.map(t => t.clause_id || "").filter(Boolean).join(", "));
-      }
-      const tc = m.top_clauses || [];
-      if (tc.length) {
-        setNS(f, "sources", "done");
-        setES(f, "d_s", "done");
-        setNodeDetail(f, "sources", `${tc.length} clauses`);
-      }
-      if (m.retrieved_count != null) {
-        setNodeDetail(f, "database", `${m.retrieved_count} found`);
-      }
+    if (s === "active") {
+      setNS(f, "user", "done");
+      setNS(f, "orchestrator", "active");
+      setES(f, "u_o", "active");
+      return;
     }
+    if (s === "error") {
+      setNS(f, "user", "done");
+      setNS(f, "orchestrator", "error");
+      setES(f, "u_o", "error");
+      return;
+    }
+    setNS(f, "orchestrator", "done");
+    setES(f, "u_o", "done");
+  } else if (node === "plan") {
+    setNS(f, "orchestrator", s === "done" ? "done" : "active");
+  } else if (node === "inputs") {
+    setNS(f, "orchestrator", s === "done" ? "done" : "active");
+  } else if (node === "retrieval") {
+    setNS(f, "orchestrator", "done");
+    setNS(f, "database", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    setES(f, "o_d", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    if (m.top?.length) pushDocBadges(f, m.top);
+    if (m.top_clauses?.length) pushDocBadges(f, m.top_clauses);
   } else if (node === "tools") {
-    setNS(f, "orchestrator", "active");
-    setNS(f, "tools", s);
-    setES(f, "o_t", s);
-    if (m.tool) setNodeDetail(f, "tools", normTool(m.tool));
-    if (s === "done") { setES(f, "t_r", "done"); }
-    if (s === "error") { setES(f, "t_r", "error"); }
+    setNS(f, "orchestrator", "done");
+    setNS(f, "tools", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    setES(f, "o_t", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    if (m.tool) pushToolBadge(f, m.tool);
   } else if (node === "compose") {
-    setNS(f, "orchestrator", s);
-    setES(f, "s_r", s);
+    setNS(f, "orchestrator", s === "done" ? "done" : (s === "error" ? "error" : "active"));
+    if (s === "error") setNS(f, "response", "error");
+    setES(f, "o_r", s === "error" ? "error" : (s === "done" ? "done" : "active"));
     if (m.used_tools?.length) {
       setNS(f, "tools", "done");
-      setES(f, "t_r", "done");
-      setNodeDetail(f, "tools", m.used_tools.map(normTool).join(", "));
+      for (const t of m.used_tools) pushToolBadge(f, t);
     }
-    setNodeDetail(f, "orchestrator", "Composing");
   } else if (node === "output") {
-    setNS(f, "orchestrator", s === "active" ? "active" : "done");
-    setNS(f, "response", s);
-    setES(f, "s_r", s === "done" ? "done" : s);
-    setES(f, "t_r", s === "done" ? "done" : s);
-    setNodeDetail(f, "response", s === "done" ? "Grounded" : "Streaming");
-    setNodeDetail(f, "orchestrator", s === "done" ? "Done" : "Sending");
+    setNS(f, "orchestrator", "done");
+    setNS(f, "response", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    setES(f, "o_r", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    setNS(f, "user", "done");
   }
 }
 
@@ -360,7 +456,7 @@ function appendLog(msgNode, text) {
   ts.textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const msg = document.createElement("span");
   msg.className = "log-msg";
-  msg.textContent = clamp(text, 200);
+  msg.textContent = clamp(text, 260);
   li.appendChild(ts);
   li.appendChild(msg);
   log.prepend(li);
@@ -369,7 +465,103 @@ function appendLog(msgNode, text) {
 
 function updateThinkingLabel(msgNode, text) {
   const label = msgNode.querySelector(".thinking-label");
-  if (label) label.textContent = clamp(text, 80);
+  if (label) label.textContent = clamp(text, 120);
+}
+
+function previewPairs(obj, max = 3) {
+  if (!obj || typeof obj !== "object") return "";
+  const pairs = Object.entries(obj)
+    .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== "")
+    .slice(0, max)
+    .map(([k, v]) => `${k}=${String(v)}`);
+  return pairs.join(", ");
+}
+
+function previewClauses(entries, max = 3) {
+  if (!Array.isArray(entries)) return "";
+  return entries
+    .map((e) => String(e?.clause_id || "").trim())
+    .filter(Boolean)
+    .slice(0, max)
+    .join(", ");
+}
+
+function describeMachineStep(ev) {
+  if (!ev || !ev.node) return "";
+  const s = ev.status || "active";
+  const m = ev.meta || {};
+
+  if (ev.node === "intake") {
+    if (s === "active") return "Read your request and started orchestrator intake.";
+    if (s === "done") return "Parsed the request and moved to planning.";
+    return "Stopped during intake due to an error.";
+  }
+
+  if (ev.node === "plan") {
+    const mode = String(m.mode || "retrieval_only").replace(/_/g, " ");
+    const tools = Array.isArray(m.tools) && m.tools.length ? m.tools.map(normTool).join(" -> ") : "no tools";
+    return `Planned ${mode} path with tool chain: ${tools}.`;
+  }
+
+  if (ev.node === "inputs") {
+    if (s === "active") return "Resolving user-provided values and defaults.";
+    if (s === "done") {
+      const provided = Object.keys(m.user_inputs || {}).length;
+      const defaulted = Object.keys(m.assumed_inputs || {}).length;
+      const sample = previewPairs(m.user_inputs);
+      return sample
+        ? `Resolved inputs (${provided} provided, ${defaulted} defaulted). Key values: ${sample}.`
+        : `Resolved inputs (${provided} provided, ${defaulted} defaulted).`;
+    }
+    return "Input resolution failed.";
+  }
+
+  if (ev.node === "retrieval") {
+    if (s === "active") {
+      const iteration = m.iteration?.iteration || m.iteration?.pass || "";
+      const clauses = previewClauses(m.top || m.top_clauses);
+      if (iteration && clauses) return `Search pass ${iteration}: top EC3 clauses ${clauses}.`;
+      if (iteration) return `Search pass ${iteration}: updating EC3 evidence ranking.`;
+      return "Searching EC3 clauses and ranking relevance.";
+    }
+    if (s === "done") {
+      const count = Number(m.retrieved_count || 0);
+      const clauses = previewClauses(m.top_clauses || m.top);
+      return clauses
+        ? `Selected ${count} relevant clause(s). Top hits: ${clauses}.`
+        : `Selected ${count} relevant clause(s) for evidence.`;
+    }
+    return "Retrieval step failed.";
+  }
+
+  if (ev.node === "tools") {
+    const toolName = normTool(m.tool || "");
+    if (s === "error") {
+      return toolName ? `Tool ${toolName} failed; answer support may be limited.` : "Tool execution failed.";
+    }
+    if (toolName && m.status === "ok") return `Tool ${toolName} completed successfully.`;
+    if (toolName && s === "active") return `Running ${toolName} with resolved inputs.`;
+    if (s === "done") return "Tool execution finished.";
+    return "Executing tool chain.";
+  }
+
+  if (ev.node === "compose") {
+    if (s === "active") return "Composing response from tool outputs and retrieved clauses.";
+    if (s === "done") {
+      const usedTools = Array.isArray(m.used_tools) ? m.used_tools.length : 0;
+      const usedSources = Array.isArray(m.used_sources) ? m.used_sources.length : 0;
+      return `Draft complete with ${usedTools} tool(s) and ${usedSources} source citation(s).`;
+    }
+    return "Could not fully ground the draft in available evidence.";
+  }
+
+  if (ev.node === "output") {
+    if (s === "active") return "Streaming response to chat.";
+    if (s === "done") return "Response delivered.";
+    return "Output stage failed.";
+  }
+
+  return ev.detail || `${ev.node}: ${s}`;
 }
 
 function updateFlow(msgNode, ev) {
@@ -378,8 +570,9 @@ function updateFlow(msgNode, ev) {
   msgNode.__stepCount = (msgNode.__stepCount || 0) + 1;
   processEvent(f, ev);
   applyFlow(msgNode);
-  updateThinkingLabel(msgNode, ev.detail || `${ev.node}: ${ev.status || "active"}`);
-  appendLog(msgNode, ev.detail || `${ev.node}: ${ev.status}`);
+  const detail = describeMachineStep(ev);
+  updateThinkingLabel(msgNode, detail || ev.detail || `${ev.node}: ${ev.status || "active"}`);
+  appendLog(msgNode, detail || ev.detail || `${ev.node}: ${ev.status}`);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
@@ -387,19 +580,15 @@ function finalizeThinking(msgNode, payload) {
   const f = msgNode.__flow;
   if (!f) return;
   setNS(f, "response", payload.supported ? "done" : "error");
-  setES(f, "s_r", payload.supported ? "done" : "error");
-  setES(f, "t_r", payload.supported ? "done" : "error");
-  setNodeDetail(f, "response", payload.supported ? "Grounded" : "Limited");
+  setNS(f, "user", "done");
+  setES(f, "o_r", payload.supported ? "done" : "error");
   applyFlow(msgNode);
 
   const elapsed = ((Date.now() - (msgNode.__thinkStart || Date.now())) / 1000).toFixed(1);
   const steps = msgNode.__stepCount || 0;
   const meta = msgNode.querySelector(".thinking-meta");
   if (meta) meta.textContent = `${steps} steps · ${elapsed}s`;
-  updateThinkingLabel(msgNode, "Reasoning complete");
-
-  const block = msgNode.querySelector(".thinking-block");
-  if (block) block.classList.add("collapsed");
+  updateThinkingLabel(msgNode, "Reasoning complete. Review orchestrator steps below.");
 }
 
 function setTrace(msgNode, payload) {

@@ -1,0 +1,1103 @@
+{
+  "source_file": "EN 1993-1-11-2006.json",
+  "clauses": [
+    {
+      "clause_id": "1.1",
+      "title": "Scope",
+      "text": "(1) prEN1993-1-11 gives design rules for structures with tension components made of steel, which, due to their connections with the structure, are adjustable and replaceable see Table 1.1.\n\nNOTE: Due to the requirement of adjustability and replaceability such tension components are generally prefabricated products delivered to site and installed into the structure. Tension components that are not adjustable or replaceable, e.g. air spun cables of suspension bridges, or for externally post-tensioned bridges, are outside the scope of this part. However, rules of this standard may be applicable.\n\n(2) This standard also gives rules for determining the technical requirements for prefabricated tension components for assessing their safety, serviceability and durability.",
+      "pointer": "en_1993_1_11_2006#/1.1",
+      "keywords": [
+        "1.1",
+        "connection",
+        "scope",
+        "serviceability",
+        "stability",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "Table 1.1",
+      "title": "Groups of tension components",
+      "text": "| Group | Main tension element | Component |\n| :--- | :--- | :--- |\n| A | rod (bar) | tension rod (bar) system, prestressing bar |\n| B | circular wire | spiral strand rope |\n| B | circular and Z-wires | fully locked coil rope |\n| B | circular wire and stranded wire | strand rope |\n| C | circular wire | parallel wire strand (PWS) |\n| C | circular wire | bundle of parallel wires |\n| C | seven wire (prestressing) strand | bundle of parallel strands |\n\nNOTE 1: Group A products in general have a single solid round cross section connected to end terminations by threads. They are mainly used as\n- bracings for roofs, walls, girders\n- stays for roof elements, pylons\n- tensioning systems for steel-wooden truss and steel structures, space frames\n\nNOTE 2: Group B products are composed of wires which are anchored in sockets or other end terminations and are fabricated primarily in the diameter range of 5 mm to 160 mm, see EN 12385-2.\n\nSpiral strand ropes are mainly used as\n- stay cables for aerials, smoke stacks, masts and bridges\n- carrying cables and edge cables for light weight structures\n- hangers or suspenders for suspension bridges\n- stabilizing cables for cable nets and wood and steel trusses\n- hand-rail cables for banisters, balconies, bridge rails and guardrails\n\nFully locked coil ropes are fabricated in the diameter range of 20 mm to 180 mm and are mainly used as\n- stay cables, suspension cables and hangers for bridge construction\n- suspension cables and stabilizing cables in cable trusses\n- edge cables for cable nets\n- stay cables for pylons, masts, aerials\n\nStructural strand ropes are mainly used as\n- stay cables for masts, aerials\n- hangers for suspension bridges\n- damper / spacer tie cables between stay cables\n- edge cables for fabric membranes\n- rail cables for banister, balcony, bridge and guide rails.\n\nNOTE 3: Group C products need individual or collective anchoring and appropriate protection.\nBundles of parallel wires are mainly used as stay cables, main cables for suspension bridges and external tendons.\nBundles of parallel strands are mainly used as stay cables for composite and steel bridges.\n\n(4) The types of termination dealt with in this part for Group B and C products are\n- metal and resin sockets, see EN 13411-4\n- sockets with cement grout\n- ferrules and ferrule securing, see EN 13411-3\n- swaged sockets and swaged fitting\n- U-bolt wire rope grips, see EN 13411-5\n- anchoring for bundles with wedges, cold formed button heads for wires and nuts for bars.\n\nNOTE: For terminology see Annex C.",
+      "pointer": "en_1993_1_11_2006#/Table 1.1",
+      "keywords": [
+        "Table 1.1",
+        "annex",
+        "bolt",
+        "components",
+        "groups",
+        "section",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "1.2",
+      "title": "Normative references",
+      "text": "(1) This European Standard incorporates dated and undated reference to other publications. These normative references are cited at the appropriate places in the text and the publications are listed hereafter. For dated references, subsequent amendments or revisions to any of these publications apply to this European Standard only when incorporated in it by amendment or revision. For undated references the latest edition of the publication referred to applies.\n\nEN 10138 Prestressing steels\nPart 1 General requirements\nPart 2 Wires\nPart 3 Strands\nPart 4 Bars\n\nEN 10244 Steel wire and wire products – Non-ferrous metallic coatings on steel wire\nPart 1 General requirements\nPart 2 Zinc and zinc alloy coatings\nPart 3 Aluminium coatings\n\nEN 10264 Steel wire and wire products – Steel wire for ropes\nPart 1 General requirements\nPart 2 Cold drawn non-alloyed steel wire for ropes for general applications\nPart 3 Cold drawn and cold profiled non alloyed steel wire for high tensile applications\nPart 4 Stainless steel wires\n\nEN 12385 Steel wire ropes – safety\nPart 1 General requirements\nPart 2 Definitions, designation and classification",
+      "pointer": "en_1993_1_11_2006#/1.2",
+      "keywords": [
+        "1.2",
+        "classification",
+        "normative",
+        "references",
+        "stainless"
+      ]
+    },
+    {
+      "clause_id": "1.3",
+      "title": "Terms and definitions",
+      "text": "(1) For the purpose of this European Standard the following terms and definitions apply.\n\n1.3.1\nstrand\nan element of rope normally consisting of an assembly of wires of appropriate shape and dimensions laid helically in the same or opposite direction in one or more layers around a centre\n\n1.3.2\nstrand rope\nan assembly of several strands laid helically in one or more layers around a core (single layer rope) or centre (rotation-resistant or parallel-closed rope)\n\n1.3.3\nspiral rope\nan assembly of a minimum of two layers of wires laid helically over a central wire\n\n1.3.4\nspiral strand rope\nspiral rope comprising only round wires\n\n1.3.5\nfully locked coil rope\nspiral rope having an outer layer of fully locked Z-shaped wires\n\n1.3.6\nfill factor $f$\nthe ratio of the sum of the nominal metallic cross-sectional areas of all the wires in a rope $(A)$ and the circumscribed area $(A_0)$ of the rope based on its nominal diameter $(d)$\n\n1.3.7\nspinning loss factor $k$\nreduction factor for rope construction included in the breaking force factor $K$\n\n1.3.8\nbreaking force factor $(K)$\nan empirical factor used in the determination of minimum breaking force of a rope and obtained as follows:\n$$K = \\frac{\\pi f k}{4}$$\n\nwhere $f$ is the fill factor for the rope\n$k$ is the spinning loss factor\n\nNOTE: $K$-factors for the more common rope classes and constructions are given in the appropriate part of EN 12385.\n\n1.3.9\nminimum breaking force ($F_{\\text{min}}$)\nminimum breaking force which should be obtained as follows:\n\n$$F_{\\text{min}} = \\frac{d^2 R_r K}{1000} \\text{ [kN]}$$\n\nwhere $d$ is the diameter of the rope in mm\n$K$ is the breaking force factor\n$R_r$ is the rope grade in N/mm$^2$\n\n1.3.10\nrope grade ($R_r$)\na level of requirement of breaking force which is designated by a number (e.g. 1770 [N/mm$^2$], 1960 [N/mm$^2$])\n\nNOTE: Rope grades do not necessarily correspond to the tensile strength grades of the wires in the rope.\n\n1.3.11\nunit weight ($w$)\nthe self weight of rope based on the metallic cross-section ($A_m$) and the unit length taking account of the densities of steel and the corrosion protection system\n\n1.3.12\ncable\nmain tension component in a structure (e.g. a stay cable bridge) which may consist of a rope, strand or bundles of parallel wires or strands",
+      "pointer": "en_1993_1_11_2006#/1.3",
+      "keywords": [
+        "1.3",
+        "cross-section",
+        "definitions",
+        "force",
+        "section",
+        "tension",
+        "terms"
+      ]
+    },
+    {
+      "clause_id": "1.4",
+      "title": "Symbols",
+      "text": "(1) For this standard the symbols given in 1.6 of EN 1993-1-1 and 1.6 of EN 1993-1-9 apply.\n\n(2) Additional symbols are defined where they first occur.\n\nNOTE: Symbols may have various meanings.",
+      "pointer": "en_1993_1_11_2006#/1.4",
+      "keywords": [
+        "1.4",
+        "symbols"
+      ]
+    },
+    {
+      "clause_id": "2.1",
+      "title": "General",
+      "text": "(1)P The design of structures with tension components shall be in accordance with the general rules given in EN 1990.\n\n(2) The supplementary provisions for tension components given in this standard should also be applied.\n\n(3) For improved durability the following exposure classes may be applied:",
+      "pointer": "en_1993_1_11_2006#/2.1",
+      "keywords": [
+        "2.1",
+        "general",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "Table 2.1",
+      "title": "Exposure classes",
+      "text": "| Fatigue action | Corrosion action |\n| :--- | :--- |\n| not exposed externally | exposed externally |\n| no significant fatigue action | class 1 class 2 |\n| mainly axial fatigue action | class 3 class 4 |\n| axial and lateral fatigue actions (wind & rain) | – class 5 |\n\n(4) Connections of tension components to the structure should be replaceable and adjustable.",
+      "pointer": "en_1993_1_11_2006#/Table 2.1",
+      "keywords": [
+        "Table 2.1",
+        "axial",
+        "classes",
+        "connection",
+        "exposure",
+        "fatigue",
+        "lateral",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "2.2",
+      "title": "Requirements",
+      "text": "(1)P The following limit states shall be considered in designing tension components:\n\n1. ULS: Applied axial loads shall not exceed the design tension resistance, see section 6.\n\n2. SLS: Stress and strain levels in the component shall not exceed the limiting values, see section 7.\n\nNOTE: For durability reasons, serviceability checks may govern over ULS-verifications.\n\n3. Fatigue: Stress ranges from axial load fluctuations and wind and rain induced oscillations shall not exceed the limiting values, see sections 0 and 0.\n\nNOTE: Due to the difficulties in modelling the excitation characteristics of tension elements, SLS checks should be carried out in addition to fatigue checks.\n\n(2) To prevent the likely de-tension of a tension component (i.e. the stress reaching below zero and causing uncontrolled stability or fatigue or damages to structural or non structural parts) and for certain types of structures, the tension components are preloaded by deformations imposed on the structure (prestressing).\n\nIn such cases permanent actions, which should consist of actions from gravity loads “G” and prestress “P”, should be considered as a single permanent action “G+P” to which the relevant partial factors $\\gamma_{\\text{Gi}}$ should be applied, see section 5.\n\nNOTE: For other materials and methods of construction other rules for the combination of “G” and “P” may apply.\n\n(3) Any attachments to prefabricated tension components, such as saddles or clamps, should be designed for ultimate limit states and serviceability limit states using the breaking strength or proof strength of cables as actions, see section 6. For fatigue see EN 1993-1-9.\n\nNOTE: Fatigue action on the ropes is governed by the radius in the saddle or anchorage area (see Figure 6.1 for minimum radius).",
+      "pointer": "en_1993_1_11_2006#/2.2",
+      "keywords": [
+        "2.2",
+        "axial",
+        "fatigue",
+        "requirements",
+        "resistance",
+        "section",
+        "serviceability",
+        "stability",
+        "tension",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "2.3.1",
+      "title": "Self weight of tension components",
+      "text": "(1) The characteristic value of the self weight of tension components and their attachments should be determined from the cross-sectional area and the density of the materials unless data are given in the relevant parts of EN 12385.\n\n(2) For spiral strand ropes, fully locked coil ropes or circular wire strand ropes the nominal self weight $g_k$ may be calculated as follows:\n\n$$g_k = w A_m$$\n\n(2.1)\n\nwhere $A_m$ is the cross-section in mm$^2$ of the metallic components\n\n$$w \\text{ [N/(mm}^3\\text{)] is the unit weight taking into account the density of steel including the corrosion protection system, see Table 2.2}$$\n\n(3) $A_m$ may be determined from\n\n$$A_m = \\frac{\\pi d^2}{4} f$$\n\n(2.2)\n\nwhere $d$ is the external diameter of rope or strand in mm, including any sheathing for corrosion protection\n\n$f$ is the fill-factor, see Table 2.2",
+      "pointer": "en_1993_1_11_2006#/2.3.1",
+      "keywords": [
+        "2.3.1",
+        "components",
+        "cross-section",
+        "section",
+        "self",
+        "table",
+        "tension",
+        "weight"
+      ]
+    },
+    {
+      "clause_id": "Table 2.2",
+      "title": "Unit weight $w$ and fill-factors $f$",
+      "text": "| | Fill factor $f$ | Number of wire layers around core wire | Unit weight $w \\times 10^{-7}$ |\n| :--- | :--- | :--- | :--- |\n| | Core wires + 1 layer z-wires | Core wires + 2 layer z-wires | Core wires + >2 layer z-wires | 1 | 2 | 3-6 | >6 |\n| 1 | Spiral strand ropes | | 0.77 | 0.76 | 0.75 | 0.73 | 830 |\n| 2 | Fully locked coil ropes | 0.81 | 0.84 | 0.88 | | | | 830 |\n| 3 | Circular wire strand ropes | | | | 0.56 | | 930 |\n\n(4) For parallel wire ropes or parallel strand ropes the metallic cross-section may be determined from\n\n$$A_m = n a_m$$\n\n(2.3)\n\nwhere $n$ is the number of identical wires or strands of which the rope is made\n\n$a_m$ is the cross-section of a wire (derived from its diameter) or a (prestressing) strand (derived from the appropriate standard)\n\n(5) For group C tension components the self weight should be determined from the steel weight of the individual wires or strands and the weight of the protective material (HDPE, wax etc.).",
+      "pointer": "en_1993_1_11_2006#/Table 2.2",
+      "keywords": [
+        "Table 2.2",
+        "cross-section",
+        "section",
+        "tension",
+        "unit",
+        "weight"
+      ]
+    },
+    {
+      "clause_id": "2.3.2",
+      "title": "Wind actions",
+      "text": "(1) The wind effects to be taken into account should include:\n\n- the static effects of wind drag on the cables, see EN 1991-1-4, including deflections and bending effects near the ends of the cable,\n- aerodynamic and other excitation causing possible oscillation of the cables, see section 8.",
+      "pointer": "en_1993_1_11_2006#/2.3.2",
+      "keywords": [
+        "2.3.2",
+        "actions",
+        "bending",
+        "deflection",
+        "section",
+        "wind"
+      ]
+    },
+    {
+      "clause_id": "2.3.3",
+      "title": "Ice loads",
+      "text": "(1) For ice loading see Annex B to EN 1993-3-1.",
+      "pointer": "en_1993_1_11_2006#/2.3.3",
+      "keywords": [
+        "2.3.3",
+        "annex",
+        "loads"
+      ]
+    },
+    {
+      "clause_id": "2.3.4",
+      "title": "Thermal actions",
+      "text": "(1) The thermal actions to be taken into account should include the effects of differential temperatures between the cables and the structure.\n\n(2) For cables exposed externally the actions from differential temperature should be taken into account, see EN 1991-1-5.",
+      "pointer": "en_1993_1_11_2006#/2.3.4",
+      "keywords": [
+        "2.3.4",
+        "actions",
+        "thermal"
+      ]
+    },
+    {
+      "clause_id": "2.3.5",
+      "title": "Prestressing",
+      "text": "(1) The preloads in cables should be such that, when all the permanent actions are applied, the structure adopts the required geometric profile and stress distribution.\n\n(2) Facilities for prestressing and adjusting the cables should be provided and the characteristic value of the preload should be taken as that required to achieve the required profile in (1) at the limit state under consideration.\n\n(3) If adjustment of the cables is not intended to be carried out the effects of the variation of preloads should be considered in the design of the structure.",
+      "pointer": "en_1993_1_11_2006#/2.3.5",
+      "keywords": [
+        "2.3.5",
+        "prestressing"
+      ]
+    },
+    {
+      "clause_id": "2.3.6",
+      "title": "Replacement and loss of tension components",
+      "text": "(1) The replacement of at least one tension component should be taken into account in the design as a transient design situation.\n\nNOTE: The National Annex may define the transient loading conditions and partial factors for replacement.\n\n(2) Where required a sudden loss of any one tension component should be taken into account in the design as an accidental design situation.\n\nNOTE 1: The National Annex may define where such an accidental design situation should apply and also give the protection requirements and loading conditions, e.g. for hangers of bridges.\n\nNOTE 2: In the absence of a rigorous analysis the dynamic effect of a sudden removal may conservatively be allowed for by using the additional action effect $E_d$:\n\n$$E_d = k \\left( E_{d2} - E_{d1} \\right)$$\n\n(2.4)\n\nwhere $k = 1,5$\n\n$E_{d1}$ represents the design effects with all cables intact;\n\n$E_{d2}$ represents the design effects with the relevant cable removed.",
+      "pointer": "en_1993_1_11_2006#/2.3.6",
+      "keywords": [
+        "2.3.6",
+        "annex",
+        "components",
+        "loss",
+        "replacement",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "2.3.7",
+      "title": "Fatigue loads",
+      "text": "(1) For fatigue loads see EN 1991.",
+      "pointer": "en_1993_1_11_2006#/2.3.7",
+      "keywords": [
+        "2.3.7",
+        "fatigue",
+        "loads"
+      ]
+    },
+    {
+      "clause_id": "2.4.1",
+      "title": "Transient design situation during the construction phase",
+      "text": "(1) For the construction phase the partial factor for permanent loads may be amended to suit the particular design situation and limit state model.\n\nNOTE: The National Annex may define the partial factor $\\gamma_{\\text{Gi}}$ for the construction phase. Recommended values $\\gamma_{\\text{Gi}}$ are:\n\n$$\\gamma_{\\text{G}} = 1.10 \\text{ for a short time period (only a few hours) for the installation of first strand in strand by strand installations}$$\n$$\\gamma_{\\text{G}} = 1.20 \\text{ for the installation of other strands}$$\n$$\\gamma_{\\text{G}} = 1.00 \\text{ for favourable effects.}$$",
+      "pointer": "en_1993_1_11_2006#/2.4.1",
+      "keywords": [
+        "2.4.1",
+        "annex",
+        "construction",
+        "design",
+        "during",
+        "phase",
+        "situation",
+        "transient"
+      ]
+    },
+    {
+      "clause_id": "2.4.2",
+      "title": "Persistent design situations during service",
+      "text": "(1) For ULS, SLS and fatigue verifications partial factors $\\gamma_{\\text{M}}$ may be based on\n- the severity of the conditions used for proving tests\n- the measures employed to suppress bending effects.\n\nNOTE: Appropriate values for $\\gamma_{\\text{M}}$ are given in section 6.",
+      "pointer": "en_1993_1_11_2006#/2.4.2",
+      "keywords": [
+        "2.4.2",
+        "bending",
+        "design",
+        "during",
+        "fatigue",
+        "persistent",
+        "section",
+        "service",
+        "situations"
+      ]
+    },
+    {
+      "clause_id": "3.1",
+      "title": "Strength of steels and wires",
+      "text": "(1) The characteristic values $f_y$ and $f_u$ for structural steel and $f_{0.2}$ or $f_{0.1}$ and $f_u$ for wires should be taken from the relevant technical specifications.\n\nNOTE 1: For steel see EN1993-1-1 and EN1993-1-4.\n\nNOTE 2: For wires see EN 10264, Part 1 to Part 4.\n\nNOTE 3: For ropes see EN 12385, Part 4 and Part 10.\n\nNOTE 4: For terminations see EN 13411-3.\n\nNOTE 5: For strands see EN 10138-3.\n\nNOTE 6: The National Annex may give a maximum value for $f_u$ for durability reasons. The following values are recommended:\n\n- steel wires: round wires: nominal tensile strength: $1770 \\text{ N/mm}^2$\n- Z-wires: nominal tensile strength: $1570 \\text{ N/mm}^2$\n- stainless steel wires: round wires: nominal tensile strength: $1450 \\text{ N/mm}^2$",
+      "pointer": "en_1993_1_11_2006#/3.1",
+      "keywords": [
+        "3.1",
+        "annex",
+        "stainless",
+        "steels",
+        "strength",
+        "wires"
+      ]
+    },
+    {
+      "clause_id": "3.2.1",
+      "title": "Group A tension components",
+      "text": "(1) The modulus of elasticity for Group A tension components may be taken as $E = 210000 \\text{ N/mm}^2$; for systems made of stainless steels see EN 1993-1-4.",
+      "pointer": "en_1993_1_11_2006#/3.2.1",
+      "keywords": [
+        "3.2.1",
+        "components",
+        "elastic",
+        "group",
+        "modulus",
+        "stainless",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "3.2.2",
+      "title": "Group B tension components",
+      "text": "(1) The modulus of elasticity for Group B tension components should be derived from tests.\n\nNOTE 1: The modulus of elasticity is dependant on the stress level and whether the cable has been prestretched and cyclically loaded and unloaded.\n\nNOTE 2: The tension stiffness of the cable for tension components of Group B and C may be determined by multiplying the modulus of elasticity by the metallic cross section $A_m$.\n\n(2) The secant modulus should be used as the modulus of elasticity for structural analysis for persistent design situations during service. Characteristic values should be obtained for each cable type and diameter and should be determined after a sufficient number of (at least 5) load cycles between $F_{\\text{inf}}$ and $F_{\\text{sup}}$ to ensure stable values are obtained, where $F_{\\text{inf}}$ and $F_{\\text{sup}}$ are the minimum and maximum cable forces respectively under the characteristic permanent and variable actions.\n\n(3) For short test samples (sample length $\\leq 10$ x lay length) the value of creep obtained will be smaller than for long cables.\n\nNOTE 1: In the absence of more accurate values this effect may be taken into account for cutting to length by applying an additional shortening of 0.15 mm/m.\n\nNOTE 2: When test results are not available, nominal values of moduli of elasticity for use as first estimates are given in Table 3.1. For further information see EN 10138.",
+      "pointer": "en_1993_1_11_2006#/3.2.2",
+      "keywords": [
+        "3.2.2",
+        "components",
+        "elastic",
+        "force",
+        "group",
+        "modulus",
+        "section",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "Table 3.1",
+      "title": "Modulus of elasticity $E_Q$ corresponding to variable loads $Q$",
+      "text": "| | High strength tension component | $E_Q$ [kN/mm$^2$] | |\n| :--- | :--- | :--- | :--- |\n| | | steel wires | stainless steel wires |\n| 1 | Spiral strand ropes | $150 \\pm 10$ | $130 \\pm 10$ |\n| 2 | Fully locked coil ropes | $160 \\pm 10$ | – |\n| 3 | Strand wire ropes with CWR | $100 \\pm 10$ | $90 \\pm 10$ |\n| 4 | Strand wire ropes with CF | $80 \\pm 10$ | – |\n| 5 | Bundle of parallel wires | $205 \\pm 5$ | – |\n| 6 | Bundle of parallel strands | $195 \\pm 5$ | – |\n\nNOTE 3: The nominal values of the modulus of elasticity $E$ for fully locked coil ropes are given in Figure 3.1. These estimated values apply to cyclic loading range between 30 % and 40 % of the calculated breaking strength $F_{\\text{uk}}$.\n\nFigure 3.1: Modulus of elasticity $E$ for non pre-stretched fully locked coil ropes for bridges\n\nNOTE 4: Non pre-stretched Group B cables exhibit both elastic and permanent deformations when subjected to static loading. It is recommended that such cables are pre-stretched before or after installation by cyclic loading up to a maximum of $0.45\\sigma_{uk}$. For cutting to length such cables should be pre-stretched with a precision related to the facilities for in-situ adjustment.\n\nNOTE 5: For Figure 3.1 the following assumptions apply:\n- the lay length is greater than $10 \\times$ the diameter\n- the minimum value of stress is $100 \\text{ N/mm}^2$\nThe minimum value of stress is the lower bound of the elastic range.",
+      "pointer": "en_1993_1_11_2006#/Table 3.1",
+      "keywords": [
+        "Table 3.1",
+        "corresponding",
+        "elastic",
+        "elasticity",
+        "loads",
+        "modulus",
+        "stainless",
+        "tension",
+        "variable"
+      ]
+    },
+    {
+      "clause_id": "3.2.3",
+      "title": "Group C tension components",
+      "text": "(1) The modulus of elasticity for Group C tension components may be taken from EN 10138 or Table 3.1.",
+      "pointer": "en_1993_1_11_2006#/3.2.3",
+      "keywords": [
+        "3.2.3",
+        "components",
+        "elastic",
+        "group",
+        "modulus",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "3.3",
+      "title": "Coefficient of thermal expansion",
+      "text": "(1) The coefficient of thermal expansion should be taken as\n$$\\alpha_T = 12 \\times 10^{-6} \\text{ per }^\\circ\\text{C}$$\nfor steel wires\n$$\\alpha_T = 16 \\times 10^{-6} \\text{ per }^\\circ\\text{C}$$\nfor stainless steel wires",
+      "pointer": "en_1993_1_11_2006#/3.3",
+      "keywords": [
+        "3.3",
+        "coefficient",
+        "expansion",
+        "stainless",
+        "thermal"
+      ]
+    },
+    {
+      "clause_id": "3.4",
+      "title": "Cutting to length of Group B tension components",
+      "text": "(1) Strands may only be marked to length only for cutting at a prescribed cutting load.\n\n(2) For exact cutting to length the following data should be considered:\n\n- measured values of the elongation between $\\sigma_A$ and $\\sigma_{G+P}$ after cyclic loading according to 3.2.2(2)\n- difference between the design temperature (normally 10 $^\\circ\\text{C}$) and the ambient temperature when cutting to length\n- long term cable creep under loads\n- additional elongation of cable after installation of cable clamps\n- deformation after first loading.\n\nNOTE: Cable creep and cone setting will continue after installation, therefore higher loads may be required during erection to account for cable creep and setting of the pouring cone after cooling of molten metal and after the initial load is applied.",
+      "pointer": "en_1993_1_11_2006#/3.4",
+      "keywords": [
+        "3.4",
+        "components",
+        "cutting",
+        "group",
+        "length",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "3.5",
+      "title": "Lengths and fabrication tolerances",
+      "text": "(1) The total length of the cable and all measuring points for the attachment of saddles and clamps should be marked under a defined preload.\n\nNOTE: The provisions of additional control markings allow for later checks of the exact length after parts have been installed.\n\n(2) The fabrication tolerances should be taken into account after pre-stretching and cyclic loading and unloading.\n\n(3) When structures are sensitive to deviations from nominal geometrical values (e.g. by creep), facilities for adjustments should be provided.",
+      "pointer": "en_1993_1_11_2006#/3.5",
+      "keywords": [
+        "3.5",
+        "fabrication",
+        "lengths",
+        "tolerances"
+      ]
+    },
+    {
+      "clause_id": "3.6",
+      "title": "Friction coefficients",
+      "text": "(1) The friction coefficient between fully locked coil cables and steel attachments (clamps, saddles, fittings) should be determined from tests.\n\nNOTE: The friction forces may be reduced by reduction of the diameter if tension is increased.\n\n(2) The friction coefficient for other types of cables should also be determined from tests, see Annex A.",
+      "pointer": "en_1993_1_11_2006#/3.6",
+      "keywords": [
+        "3.6",
+        "annex",
+        "coefficients",
+        "force",
+        "friction",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "4.1",
+      "title": "General",
+      "text": "(1) For Group B and C tension components with exposure classes 2, 4 and 5 according to Table 2.1 the corrosion protection system should be as follows:\n\n1. Individual wires should be protected against corrosion;\n2. The rope interior should be protected to stop the ingress of moisture;\n3. The outer surface should be protected against corrosion.\n\n(2) Group C tension components as defined in Table 1.1 should have two layers of corrosion protection systems with an interface or inner filler between the two systems.\n\n(3) At clamps and anchorages additional corrosion protection should be applied to prevent water penetration.\n\n(4) For transport, storage and handling, see Annex B.",
+      "pointer": "en_1993_1_11_2006#/4.1",
+      "keywords": [
+        "4.1",
+        "annex",
+        "general",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "4.2",
+      "title": "Corrosion protection of individual wires",
+      "text": "(1) Each steel wire within group B and C tension components should be coated with either zinc or zinc alloy compound.\n\n(2) For group B tension components zinc or zinc alloy coating for round wires should be in accordance with EN 10264-2, class A. For shaped wires coating should comply with EN 10264-3, class A.\n\nNOTE 1: Generally Z-shaped wires are galvanized with a thicker coating thickness of up to 300g/m² to allow for a reduction in thickness on sharp corners.\n\nNOTE 2: Wires coated with a Zn95Al5 alloy have a much improved corrosion protection than galvanizing with zinc of the same coating thickness. Round and Z-shaped wires can be coated with a Zn95Al5 basis weight.\n\n(3) For Group C tension components, coating of wires should comply with EN 10138.",
+      "pointer": "en_1993_1_11_2006#/4.2",
+      "keywords": [
+        "4.2",
+        "corrosion",
+        "individual",
+        "protection",
+        "tension",
+        "wires"
+      ]
+    },
+    {
+      "clause_id": "4.3",
+      "title": "Corrosion protection of the interior of Group B tension components",
+      "text": "(1) All interior voids within cables should be filled with an active or passive inner filling that should not be displaced by water, heat or vibration.\n\nNOTE 1: Active fillers are polyurethane-oil based with zinc dust paint.\n\nNOTE 2: Passive inner fillers can be permanent elastic-plastic wax or aluminium flake in hydrocarbon resin.\n\nNOTE 3: The inner filling applied during the manufacture of the tension components can extrude when the component is loaded (bleeding), so that other corrosion protection measures should be timed accordingly.\n\nNOTE 4: The inner filling should be selected to avoid any incompatibility with the other corrosion protection measures being applied to the cable.",
+      "pointer": "en_1993_1_11_2006#/4.3",
+      "keywords": [
+        "4.3",
+        "components",
+        "corrosion",
+        "elastic",
+        "group",
+        "interior",
+        "plastic",
+        "protection",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "4.4",
+      "title": "Corrosion protection of the exterior of Group B tension components",
+      "text": "(1) After construction additional corrosion protection measures should be applied to compensate for any damage incurred and for the loss of zinc.\n\nNOTE: This protection may consist of polyethylene sheathing or zinc rich paint. The minimum thickness of polyethylene should be equal to the outer rope diameter divided by 15 and should not be less than 3 mm.\n\nThe paint system should comprise a minimum of:\n- $2 \\times 50 \\mu m$ polyurethane with zinc dust prime coats;\n- $2 \\times 125 \\mu m$ polyurethane with iron mica finishing coats.\n\n(2) Cables with stainless steel wires and stainless steel terminations without additional corrosion protection should comply with the relevant corrosion resistance class.\n\nNOTE 1: The National Annex may specify the corrosion resistance classes for stainless steel.\n\nNOTE 2: Zn95Al5-coated wires provide up to 3 times better resistance compared with heavy zinc coated wires under identical conditions.",
+      "pointer": "en_1993_1_11_2006#/4.4",
+      "keywords": [
+        "4.4",
+        "annex",
+        "components",
+        "corrosion",
+        "exterior",
+        "group",
+        "protection",
+        "resistance",
+        "stainless",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "4.5",
+      "title": "Corrosion protection of Group C tension components",
+      "text": "(1) Group C tension components should normally be sheathed using steel or polyethylene tube complying to relevant standards with the space between the inside of the sheath and the cable filled with a suitable corrosion protection compound or cement grout.\n\n(2) Alternatively polyethylene sheathing extruded directly or epoxy coating over the individual strands or cables may be used.\n\n(3) The sheaths used for the cables should be made impermeable to water at the connections to the anchorages. The joints should be designed so that they do not break, when the sheath is subjected to tension.\n\n(4) Voids should be filled with continuous hydrophobic materials with no detrimental effects on the tension components. Alternatively, the cable may be protected by circulation of the dry air within the sheath.\n\nNOTE 1: Continuous hydrophobic materials are soft fillers, such as grease, wax or soft resin, or hard fillers, such as cement. The suitability of the fillers should be proved by tests. The choice of the acceptable fillers may be specified in the National Annex.\n\nNOTE 2: Corrosion protection of main cables of suspension bridges requires a special approach. After compacting the main cable into the required cross-sectional area the cable is closely wrapped with tensioned galvanized soft wire laid in a suitable paste sufficient to fill completely the voids between the outer cable wires and the wrapping wire. After removal of the surplus paste from outside of the wrapping wire the zinc-coated surface is cleaned and painted. Special treatment is required for suspension bridge cable anchorages where the wrapping wire is removed. Dehumidification of the air around the wires is a common method of protection.",
+      "pointer": "en_1993_1_11_2006#/4.5",
+      "keywords": [
+        "4.5",
+        "annex",
+        "components",
+        "connection",
+        "corrosion",
+        "cross-section",
+        "group",
+        "protection",
+        "section",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "4.6",
+      "title": "Corrosion protection at connections",
+      "text": "(1) Provision should be made to prevent rainwater running down the cable from entering the clamps, saddles and anchorages.\n\n(2) Cable structure connections should be sealed.",
+      "pointer": "en_1993_1_11_2006#/4.6",
+      "keywords": [
+        "4.6",
+        "connection",
+        "connections",
+        "corrosion",
+        "protection"
+      ]
+    },
+    {
+      "clause_id": "5.1",
+      "title": "General",
+      "text": "(1)P The analysis shall be carried out for the limit states considered for the following design conditions:\n1. the transient construction phase\n2. the persistent service conditions after completion of construction.",
+      "pointer": "en_1993_1_11_2006#/5.1",
+      "keywords": [
+        "5.1",
+        "general"
+      ]
+    },
+    {
+      "clause_id": "5.2",
+      "title": "Transient construction phase",
+      "text": "(1) The construction process including forming cables, pre-stressing and the geometry of the structure should be planned such that the following conditions are attained:\n- the required geometric form\n- a permanent stress distribution that satisfies the serviceability and ultimate limit state conditions for all design situations.\n\n(2) For compliance with control measures throughout the entire construction process (e.g. measurements of shape, gradients, deformations, frequencies or forces) all calculations should be carried out using characteristic values of permanent loads, imposed deformations and any imposed actions.\n\n(3) Where ultimate limit states during pre-stressing are controlled by the differential effects of gravity loads “G” and prestress “P”, the partial factor $x_i$ to be applied to “P” should be defined for that situation.\n\nNOTE: The National Annex may define $\\gamma_P$, the value of $\\gamma_P = 1.00$ is recommended.",
+      "pointer": "en_1993_1_11_2006#/5.2",
+      "keywords": [
+        "5.2",
+        "annex",
+        "construction",
+        "force",
+        "phase",
+        "serviceability",
+        "transient",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "5.3",
+      "title": "Persistent design situation during service",
+      "text": "(1) For any persistent design situation during the service the permanent actions “$G$” from gravity and preloads or prestressing “$P$” should be combined in a single permanent action “$G + P$” corresponding to the permanent shape of the structure.\n\n(2) For the verification of the serviceability limit states the action “$G + P$” should be included in the relevant combination of action. For the verification of the ultimate limit state EQU or STR (see EN 1990) the permanent actions “$G + P$” should be multiplied by the partial factor $\\gamma_G \\sup$, when the effects of permanent action and of variable actions are adverse. If the permanent actions “$G + P$” are favourable they should be multiplied by the partial factor $\\gamma_G \\inf$.\n\nNOTE: The National Annex may give guidance where outside the scope of EN 1993 the partial factor $\\gamma_G$ to “$G + P$” may be used.\n\n(3) When nonlinear action effects from deformations are significant during service these effects should be taken into account, see 5.4.",
+      "pointer": "en_1993_1_11_2006#/5.3",
+      "keywords": [
+        "5.3",
+        "annex",
+        "design",
+        "during",
+        "persistent",
+        "service",
+        "serviceability",
+        "situation",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "5.4.1",
+      "title": "General",
+      "text": "(1) The effects of deformations from catenary effects and the shortening and lengthening of the components including the effects due to creep should be taken into account.",
+      "pointer": "en_1993_1_11_2006#/5.4.1",
+      "keywords": [
+        "5.4.1",
+        "general"
+      ]
+    },
+    {
+      "clause_id": "5.4.2",
+      "title": "Catenary effects",
+      "text": "(1) Catenary effects may be taken into account by using the effective modulus $E_t$ to each cable or its segment:\n\n$$E_t = \\frac{E}{1 + \\frac{w^2 \\ell^2 E}{12 \\sigma^3}}$$\n\n$E$ is the modulus of elasticity of the cable in N/mm$^2$\n\n$w$ is the unit weight according to Table 2.2 in N/mm$^3$\n\n$\\ell$ is the horizontal span of the cable in mm\n\n$\\sigma$ is the stress in the cable in N/mm$^2$. For situations according to 5.3 it is $\\sigma_{G+P}$.",
+      "pointer": "en_1993_1_11_2006#/5.4.2",
+      "keywords": [
+        "5.4.2",
+        "catenary",
+        "effects",
+        "elastic",
+        "modulus",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "5.4.3",
+      "title": "Effects of deformations on the structure",
+      "text": "(1) For the $2^{nd}$ order analysis the action effects due to variable loads should take into account the initial geometrical form of the structure due to the permanent loading “$G + P$” for a given temperature $T_0$.\n\n(2) For the $2^{nd}$ order analysis at serviceability limit state the action effects should be determined using the characteristic load combination. These action effects may also be used for ultimate limit state verifications according to 7.2.\n\n(3) For $2^{nd}$ order analysis for the non-linear behaviour of structures (over-linear structural response) at the ultimate limit state the required permanent geometrical form of the structure at the reference temperature $T_0$ should be combined with the stresses due to “$\\gamma_G (G + P)$”. Design values of the variable actions $\\gamma_Q Q_{k1} + \\gamma_Q \\psi_2 Q_{k2}$ may be applied together with the appropriate assumptions for the imperfection of the structure.\n\nNOTE: For $\\gamma_G$ see 5.3(2).",
+      "pointer": "en_1993_1_11_2006#/5.4.3",
+      "keywords": [
+        "5.4.3",
+        "deformations",
+        "effects",
+        "imperfection",
+        "serviceability",
+        "structure",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "6.1",
+      "title": "Tension rod systems",
+      "text": "(1) Tension rod systems should be designed for the ultimate limit state according to EN 1993-1-1 or EN 1993-1-4 depending on the type of steel used.",
+      "pointer": "en_1993_1_11_2006#/6.1",
+      "keywords": [
+        "6.1",
+        "systems",
+        "tension",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "6.2",
+      "title": "Pre-stressing bars and Group B and C components",
+      "text": "(1)P For the ultimate limit state it shall be verified that\n$$\\frac{F_{Rd}}{F_{Rd}} \\leq 1$$\n\nwhere $F_{Ed}$ is the design value of the axial rope force\n$F_{Rd}$ is the design value of the tension resistance.\n\n(2) The design value of the tension resistance $F_{Rd}$ should be taken as follows:\n$$F_{Rd} = \\min \\left\\{ \\frac{F_{uk}}{1.5\\gamma_R}; \\frac{F_k}{\\gamma_R} \\right\\}$$\n\nwhere $F_{uk}$ is the characteristic value of the breaking strength,\n$F_k$ is the characteristic value of the proof strength of the tension component as given in Table 6.1;\n$\\gamma_R$ is the partial factor.\n\nNOTE 1: $F_{uk}$ corresponds to the characteristic value of the ultimate tensile strength.",
+      "pointer": "en_1993_1_11_2006#/6.2",
+      "keywords": [
+        "6.2",
+        "axial",
+        "bars",
+        "components",
+        "force",
+        "group",
+        "resistance",
+        "table",
+        "tension",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "Table 6.1",
+      "title": "Characteristic value of the proof strength $F_k$ of tension components",
+      "text": "| Group | Relevant standard | AC1 $F_k$ |\n| :--- | :--- | :--- |\n| A | EN 10138-1 | $F_{0.1k}$ |\n| B | EN 10264 | $F_{0.2k}$ |\n| C | EN 10138-1 | $F_{0.1k}$ |\n| $^*$ | For prestressing bars see EN 1993-1-1 and EN 1993-1-4 |\n\nNOTE 2: The check against $F_k$ ensures that the component will remain elastic when the actions attain their design value. For components (e.g. fully locked coil ropes) where $F_k \\geq \\frac{F_{uk}}{1.50}$ this check is not required.\n\nNOTE 3: By tests on delivery it is demonstrated that the experimental values $F_{uke}$ and $F_{ke}$ satisfy the requirement\n$$F_{uke} > F_{uk},$$\n$$F_{ke} > F_k,$$\nsee EN 12385, Part 1.\n\nNOTE 4: The partial factor $\\gamma_R$ may be specified in the National Annex. The value is dependent on whether or not measures are applied at the rope ends to reduce bending moments from cable rotations, see 7.1(2)AC1 The values for $\\gamma_R$ in Table 6.2 are recommended.",
+      "pointer": "en_1993_1_11_2006#/Table 6.1",
+      "keywords": [
+        "Table 6.1",
+        "annex",
+        "bending",
+        "characteristic",
+        "components",
+        "elastic",
+        "moment",
+        "proof",
+        "strength",
+        "table",
+        "tension",
+        "value"
+      ]
+    },
+    {
+      "clause_id": "Table 6.2",
+      "title": "Recommended $\\gamma_R$ - values",
+      "text": "| Measures to minimise bending stresses at the anchorage | $\\gamma_R$ |\n| :--- | :--- |\n| Yes | 0.90 |\n| No | 1.00 |\n\n(3) For prestressing bars and group C tension components the characteristic value of the breaking strength should be determined from:\n\n$$F_{uk} = A_m f_{uk}$$\n\n(6.3)\n\nwhere $A_m$ is the metallic cross-section, see 2.3.1;\n\n$f_{uk}$ is the characteristic value of the tensile strength of bars, wires or (prestressing) strands according to the relevant standard.\n\n(4) For group B tension components $F_{uk}$ should be calculated as:\n\n$$F_{uk} = F_{\\min} k_e$$\n\n(6.4)\n\nwhere $F_{\\min}$ is determined according to EN 12385-2 as:\n\n$$F_{\\min} = \\frac{K d^2 R_r}{1000} [kN]$$\n\n(6.5)\n\nwhere $K$ is the minimum breaking force factor taking account of the spinning loss;\n\n$d$ is the nominal diameter of the rope in mm;\n\n$R_r$ is the rope grade in N/mm²;\n\n$k_e$ is the loss factor given in Table 6.3 for some types of end terminations.\n\nNOTE: $K, d, R_r$ are specified for all ropes in the EN 12385-2.",
+      "pointer": "en_1993_1_11_2006#/Table 6.2",
+      "keywords": [
+        "Table 6.2",
+        "bending",
+        "cross-section",
+        "force",
+        "recommended",
+        "section",
+        "table",
+        "tension",
+        "values"
+      ]
+    },
+    {
+      "clause_id": "Table 6.3",
+      "title": "Loss factors $k_e$",
+      "text": "| Type of termination | Loss factor $k_e$ |\n| :--- | :--- |\n| Metal filled socket | 1.0 |\n| Resin filled socket | 1.0 |\n| Ferrule-secured eye | 0.9 |\n| Swaged socket | 0.9 |\n| U-bolt grip | 0.8* |\n\n*) For U-bolt grip a reduction of preload is possible.",
+      "pointer": "en_1993_1_11_2006#/Table 6.3",
+      "keywords": [
+        "Table 6.3",
+        "bolt",
+        "factors",
+        "loss"
+      ]
+    },
+    {
+      "clause_id": "6.3.1",
+      "title": "Geometrical conditions",
+      "text": "(1) Where the saddle proportions meet the requirements given in Figure 6.1, (2) and (3), stresses due to curvature of wires may be neglected in the design.\n\nFigure 6.1: Bedding of a strand/rope over a saddle\n\nNOTE: Compliance with the requirements in (1) above will result in the breaking resistance of the strand and rope being reduced by not more than 3%.\n\n(2) The radius $r_1$ of the saddle should not be less than the greater of 30d or $r_1 \\geq 400\\varnothing$, where $\\varnothing$ is the diameter of wire;\n$d$ is the diameter of the cable;\n$d'$ is the contact width.\n\n(3) The value of $r_1$ may be reduced to 20d when the bedding of the rope on at least 60% of the diameter is coated with soft metal or zinc spray with a minimum thickness of 1 mm.\n\n(4) Smaller radii may be used for spiral ropes where justified by tests.\n\nNOTE: The locations of $T_1$ and $T_2$ should be determined for the relevant load cases taking into account the movements of bearings and cables.",
+      "pointer": "en_1993_1_11_2006#/6.3.1",
+      "keywords": [
+        "6.3.1",
+        "conditions",
+        "geometrical",
+        "resistance"
+      ]
+    },
+    {
+      "clause_id": "6.3.2",
+      "title": "Slipping of cables over saddles",
+      "text": "(1) To prevent slippages the following condition should be met:\n\n$$\\max \\left\\{ \\frac{F_{Ed1}}{F_{Ed2}} \\right\\} \\leq e^{\\left\\{ \\frac{\\mu\\alpha}{\\gamma_{M,fr}} \\right\\}}$$\n\nwhere $F_{Ed1}$ and $F_{Ed2}$ are the design values of the maximum and minimum force respectively on either side of the $\\langle AC_1 \\rangle$ saddle; $\\langle AC_1 \\rangle$\n\n$\\mu$ is the coefficient of friction between cable and saddle;\n$\\alpha$ is the angle in radians, of the cable passing over the saddle;\n$\\gamma_{M,fr}$ is the partial factor for friction.\n\nNOTE: The partial factor $\\gamma_{Mfr}$ may be given in the National Annex. The value $\\gamma_{Mfr} = 1,65$ is recommended.\n\n(2) If (1) is not satisfied, clamps should be provided to impart an additional radial clamping force $F_r$ such that\n\n$$\\frac{F_{Ed1} - k F_r \\mu}{\\gamma_{M,fr}} \\leq e^{\\left[ \\frac{\\mu \\alpha}{\\gamma_{M,fr}} \\right]}$$\n\n(6.7)\n\nwhere $k$ is normally as 2,0 where there is full friction developed between the saddle grooves and the clamp and $F_r$ does not exceed the resistance of the cable to clamping forces, see 6.3.3, other $k = 1,0$;\n\n$\\gamma_{M,fr}$ is the partial factor for friction resistance.\n\n(3) In determining $F_r$ from preloaded bolts the following effects should be considered:\n\na) long term creep;\nb) reduction of diameter if tension is increased;\nc) compaction/bedding down of cable or ovalisation;\nd) reduction of preload in clamp bolts by external forces;\ne) differential temperature.",
+      "pointer": "en_1993_1_11_2006#/6.3.2",
+      "keywords": [
+        "6.3.2",
+        "annex",
+        "bolt",
+        "cables",
+        "force",
+        "over",
+        "resistance",
+        "saddles",
+        "slipping",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "6.3.3",
+      "title": "Transverse pressure",
+      "text": "(1)P The transverse pressure $q_{Ed}$ due to the radial clamping force $F_r$ shall be limited to\n\n$$\\frac{q_{Ed}}{q_{Rd}} \\leq 1$$\n\n(6.8)\n\nwhere $q_{Ed} = \\frac{F_r}{d' L_2}$ and $0,6d \\leq d' \\leq d$, (for $d'$ see Figure 6.1b));\n\n$$q_{Rd} = \\frac{q_{Rk}}{\\gamma_{M,bed}}$$\n\n$q_{Rk}$ is the limiting value of the transverse pressure which shall be determined from tests;\n\n$\\gamma_{M,bed}$ is the partial factor.\n\nNOTE: For calculating $q_{Rd}$ the pressure from $F_{Ed1}$ need not be considered as it is covered by the rules in 6.3.1.\n\n(2) In the absence of tests the limiting values of the transverse pressure $q_{Rk}$ should be obtained from Table 6.4.\n\nNOTE 1: The use of the limiting values $q_{Rk}$ with $\\gamma_{M,bed} = 1,00$ should lead to a reduction of not more than 3 % of the breaking strength of the cable.",
+      "pointer": "en_1993_1_11_2006#/6.3.3",
+      "keywords": [
+        "6.3.3",
+        "force",
+        "pressure",
+        "table",
+        "transverse"
+      ]
+    },
+    {
+      "clause_id": "Table 6.4",
+      "title": "Limiting values $q_{Rk}$",
+      "text": "| Type of cable | $q_{Rk}$ [N/mm²] |\n| :--- | :--- |\n| Fully locked coil rope | 40 |\n| Spiral strand rope | 25 |\n\nNOTE 2: Cushioned clamps should have a layer of soft metal or sprayed zinc coating with a minimum thickness of 1 mm.",
+      "pointer": "en_1993_1_11_2006#/Table 6.4",
+      "keywords": [
+        "Table 6.4",
+        "limiting",
+        "values"
+      ]
+    },
+    {
+      "clause_id": "6.3.4",
+      "title": "Design of saddles",
+      "text": "(1) Saddles should be designed for a cable force of $k$ times the characteristic breaking strength $F_{\\text{uk}}$ of the cables.\n\nNOTE: The factor $k$ may be specified in the National Annex. The value of $k = 1,10$ is recommended.",
+      "pointer": "en_1993_1_11_2006#/6.3.4",
+      "keywords": [
+        "6.3.4",
+        "annex",
+        "design",
+        "force",
+        "saddles"
+      ]
+    },
+    {
+      "clause_id": "6.4.1",
+      "title": "Slipping of clamps",
+      "text": "(1) P Where clamps transmit longitudinal forces to a cable and the parts (see Figure 6.2) are not mechanically keyed together, slipping shall be prevented by verifying\n\n$$F_{\\text{Ed}_{\\parallel}} \\leq \\frac{\\left(F_{\\text{Ed}_{\\perp}} + F_r\\right) \\mu}{\\gamma_{\\text{M,fr}}}$$\n\n(6.9)\n\nwhere $F_{\\text{Ed}_{\\parallel}}$ is the component of external design load parallel to the cable;\n\n$F_{\\text{Ed}_{\\perp}}$ is the component of the external design load perpendicular to the cable;\n\n$F_r$ is the radial clamping force considered that may be reduced by items in 0(3);\n\n$\\mu$ is the coefficient of friction;\n\n$\\gamma_{\\text{M,fr}}$ is the partial factor for friction.\n\nNOTE 1: The partial factor $\\gamma_{\\text{M,fr}}$ may be specified in the National Annex. $\\gamma_{\\text{M,fr}} = 1,65$ is recommended.\n\nNOTE 2: $F_r$ may be increased or reduced by external forces according to the manner in which they are applied to the cable clamp.",
+      "pointer": "en_1993_1_11_2006#/6.4.1",
+      "keywords": [
+        "6.4.1",
+        "annex",
+        "clamps",
+        "force",
+        "slipping"
+      ]
+    },
+    {
+      "clause_id": "6.4.2",
+      "title": "Transverse pressure",
+      "text": "(1) The transverse pressure due to the application of the greater of $F_{\\text{Ed}_{\\perp}}$ or $F_{\\text{Ed}_{\\perp}} + F_r$ should meet the requirements of 6.3.3.",
+      "pointer": "en_1993_1_11_2006#/6.4.2",
+      "keywords": [
+        "6.4.2",
+        "pressure",
+        "transverse"
+      ]
+    },
+    {
+      "clause_id": "6.4.3",
+      "title": "Design of clamps",
+      "text": "(1) Clamps and their fittings connecting components such as hangers to a main cable should be designed for a notional force equal to 1,15 times the characteristic value of the proof strength $\\leftarrow F_k$ of the secondary components clamped, see Figure 6.2.",
+      "pointer": "en_1993_1_11_2006#/6.4.3",
+      "keywords": [
+        "6.4.3",
+        "clamps",
+        "design",
+        "force"
+      ]
+    },
+    {
+      "clause_id": "7.1",
+      "title": "Serviceability criteria",
+      "text": "(1) The following serviceability criteria should be considered.\n\n1. Deformations or vibrations;\n2. Elastic service conditions.\n\nNOTE 1: Limits for deformations or vibrations may result in a stiffness requirement governed by the structural system, the dimensions and the preloading of high strength tension components, and by the slipping resistance of attachments.\n\nNOTE 2: Limits to retain elastic behaviour and durability are related to maximum and minimum values of stresses for serviceability load combinations.\n\n(2) Bending stresses in the anchorage zone may be reduced by suitable measures (e.g. neoprene pads for transverse loading).",
+      "pointer": "en_1993_1_11_2006#/7.1",
+      "keywords": [
+        "7.1",
+        "bending",
+        "criteria",
+        "elastic",
+        "resistance",
+        "serviceability",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "7.2",
+      "title": "Stress limits",
+      "text": "(1) Limiting stress may be specified for the characteristic load combination for the following purposes:\n\n- to keep stresses in the elastic range for the relevant design situations during construction and in the service phase;\n- to limit strains such that corrosion control measures are not affected, i.e. cracking of sheaths, hard fillers, opening of joints etc., and also to cater for uncertainty in the fatigue design;\n- ULS verifications for linear and sub-linear structural response to actions.\n\n(2) Stress limits should be related to the breaking strength as follows:\n\n$$\\sigma_{uk} = \\frac{F_{uk}}{A_m}$$\n\n(7.1)\n\nsee equation (6.3).\n\nNOTE 1: The National Annex may give values for stress limits $f_{\\text{const}}$ and $f_{\\text{SLS}}$. Recommended values for stress limits $f_{\\text{const}}$ are given in Table 7.1 for the construction phase and for stress limits $f_{\\text{SLS}}$ in Table 7.2 for service conditions.",
+      "pointer": "en_1993_1_11_2006#/7.2",
+      "keywords": [
+        "7.2",
+        "annex",
+        "elastic",
+        "fatigue",
+        "limits",
+        "stress",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "Table 7.1",
+      "title": "Stress limits $f_{\\text{const}}$ for the construction phase",
+      "text": "| Stage of installation | $f_{\\text{const}}$ |\n| :--- | :--- |\n| First tension components for only a few hours | $0,60 \\sigma_{\\text{uk}}$ |\n| After instalment of other tension components | $0,55 \\sigma_{\\text{uk}}$ |\n\nNOTE 2: The stress limits follow from\n\n$$f_{\\text{const}} = \\frac{\\sigma_{\\text{uk}}}{1,50 \\gamma_R \\gamma_F} = \\frac{0,66 \\sigma_{\\text{uk}}}{\\gamma_R \\gamma_F}$$\n\nwith $\\gamma_R \\times \\gamma_F = 1,0 \\times 1,10 = 1,10$ for short term situations\n\n$$\\gamma_R \\times \\gamma_F = 1,0 \\times 1,20 = 1,20$$ for long term situations",
+      "pointer": "en_1993_1_11_2006#/Table 7.1",
+      "keywords": [
+        "Table 7.1",
+        "construction",
+        "limits",
+        "phase",
+        "stress",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "Table 7.2",
+      "title": "Stress limits $f_{\\text{SLS}}$ for service conditions",
+      "text": "| Loading conditions | $f_{\\text{SLS}}$ |\n| :--- | :--- |\n| Fatigue design including bending stresses *) | $0,50 \\sigma_{\\text{uk}}$ |\n| Fatigue design without bending stresses | $0,45 \\sigma_{\\text{uk}}$ |\n\n*) Bending stresses may be reduced by detailing measures, see [AC1](AC1).\n\nNOTE 3: The stress limits follow from\n\n$$f_{\\text{SLS}} = \\frac{\\sigma_{\\text{uk}}}{1,50 \\gamma_R \\gamma_F} = \\frac{0,66 \\sigma_{\\text{uk}}}{\\gamma_R \\gamma_F}$$\n\nwith $\\gamma_R \\times \\gamma_F = 0,9 \\times 1,48 = 1,33$ with bending stresses\n\n$$\\gamma_R \\times \\gamma_F = 1,0 \\times 1,48 = 1,48$$ without bending stresses\n\nwhere $\\gamma_F \\approx \\gamma_Q = 1,50 \\approx 1,48$\n\nNOTE 4: The stress limit $f_{\\text{SLS}} = 0,45 \\sigma_{\\text{uk}}$ is used for testing, see Annex A.",
+      "pointer": "en_1993_1_11_2006#/Table 7.2",
+      "keywords": [
+        "Table 7.2",
+        "annex",
+        "bending",
+        "conditions",
+        "fatigue",
+        "limits",
+        "service",
+        "stress"
+      ]
+    },
+    {
+      "clause_id": "8.1",
+      "title": "General",
+      "text": "(1) For cables exposed externally (e.g. stay cables) any wind-induced vibrations during and after erection and their impact on safety should be checked.\n\n(2) Aerodynamic forces on the cable may be caused by:\n\na) buffeting (from turbulence in the air flow)\n\nb) vortex shedding (from von Karman vortexes in the wake behind the cable)\n\nc) galloping (self induction)\n\nd) wake galloping (fluid-elastic interaction of neighbouring cables)\n\ne) interaction of wind, rain and cable\n\nNOTE: Galloping is not possible on a cable with a circular cross-section for symmetry reasons. This phenomenon may arise with cables where apparent shapes have altered, due to formation of layers of ice or dust. Forces due to c), d) and e) are a function of the motion of the cable (feedback) and are due to the ensuing aeroelastic instability leading to vibrations of large amplitudes starting at a critical wind speed. As the mechanism of dynamic excitation cannot yet be modelled with sufficient accuracy to make reliable predictions, measures should be provided to limit unforeseen vibrations.\n\n(3) Cable vibrations may also be caused by dynamic forces acting on other parts of the structure (girder, pylon).\n\nNOTE: This phenomenon is often referred to as “parametric excitation” and is responsible for large amplitude vibrations where the eigen-frequency of the cable stays and the structure overlap.",
+      "pointer": "en_1993_1_11_2006#/8.1",
+      "keywords": [
+        "8.1",
+        "cross-section",
+        "elastic",
+        "force",
+        "general",
+        "section",
+        "stability"
+      ]
+    },
+    {
+      "clause_id": "8.2",
+      "title": "Measures to limit vibrations of cables",
+      "text": "(1) Structures supported by cables should be monitored for excessive wind and rain induced vibrations either by visual inspection or other methods that allow a more accurate determination of their amplitudes, modes and frequencies.\n\n(2) In the design of a cable structure provisions should be made for installing vibration controlling measures during or after erection.\n\n(3) Such measures may include:\na) modification of cable surface (aerodynamic shape);\nb) damping devices;\nc) stabilizing cables (e.g. tie-down cables with appropriate connections).",
+      "pointer": "en_1993_1_11_2006#/8.2",
+      "keywords": [
+        "8.2",
+        "cables",
+        "connection",
+        "limit",
+        "measures",
+        "vibrations"
+      ]
+    },
+    {
+      "clause_id": "8.3",
+      "title": "Estimation of risks",
+      "text": "(1) Vibration of cables due to rain and wind should be prevented by design; this can involve utilising cable stays with texturing.\n\n(2) The risk of vibration increases with cable stay length. Short cable stays (less than 70 m $AC_1$ to 80 m) generally impose no risk, except that in the case of a particularly unstable structure (poorly shaped and flexible deck) parametric resonance occurs. Dampers are therefore not needed for short cable stays.\n\n(3) For long cable stays with length greater than 80 m provisions should be made for the installation of dampers to ensure that the critical damping ratio exceeds 0.5%. Dampers may be dispensed with on the back span cable stays where it is unlikely to have any major displacement of the anchorage as the span is short.\n\n(4) The risk of parametric resonance should be assessed at the design stage by means of a detailed study of the $AC_1$ eigen modes $AC_1$ of the structure and cable stays considering the ratio of angular frequencies and anchorage displacement for each mode.\n\n(5) Measures should be taken to avoid overlapping of frequencies, i.e. situations where the cable stay’s frequency of excitation $\\Omega$ is within 20 % of the structure’s frequency $\\omega_h$ or $2\\omega_h$. If necessary, stability cables can be used to offset the modal angular frequencies of the cable stays.\n\n(6) For users comfort and safety, the amplitude of cable stay vibration should be limited using a response criterion such that with a moderate wind velocity of 15 m/s the amplitude of cable stay vibration should not exceed $L/500$, where $L$ is the length of the cable.",
+      "pointer": "en_1993_1_11_2006#/8.3",
+      "keywords": [
+        "8.3",
+        "estimation",
+        "risks",
+        "stability",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "9.1",
+      "title": "General",
+      "text": "(1) The fatigue endurance of tension components in exposure classes 3, 4 or 5 to Table 2.1 should be determined using the fatigue actions from EN 1991 and the appropriate category of structural detail.\n\n(2) Fatigue failure of cable systems usually occurs at anchorages, saddles or clamps. The effective category of detail at these locations should preferably be determined from tests representing the actual\n\nconfiguration used and reproducing any flexural effect or transverse stresses likely to occur in practice. The test evaluation should be carried out according to EN 1990 – Annex D.",
+      "pointer": "en_1993_1_11_2006#/9.1",
+      "keywords": [
+        "9.1",
+        "annex",
+        "fatigue",
+        "general",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "9.2",
+      "title": "Fluctuating axial loads",
+      "text": "(1) In the absence of the tests described in 9.1(2) above, fatigue strength curves and detail categories may be obtained from Figure 9.1 and Table 9.1, respectively.\n\nFigure 9.1: Fatigue strength curves for tension components",
+      "pointer": "en_1993_1_11_2006#/9.2",
+      "keywords": [
+        "9.2",
+        "axial",
+        "fatigue",
+        "fluctuating",
+        "loads",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "Table 9.1",
+      "title": "Detail categories for fatigue strength according to EN 1993-1-9",
+      "text": "| Group | Tension components | Detail category $\\Delta \\sigma_c$ [N/mm$^2$] |\n| :--- | :--- | :--- |\n| A | Prestressing bars | 105 |\n| B | Fully locked coil rope with metal or resin socketing | 150 |\n| B | Spiral strands with metal or resin socketing | 150 |\n| C | Parallel wire strands with epoxy socketing | 160 |\n| C | Bundle of parallel strands | 160 |\n| C | Bundle of parallel wires | 160 |\n\nNOTE: The detail categories in Table 9.1 refer to exposure classes 3 and 4 according to Table 2.1. For axial and lateral fatigue actions (exposure class 5 according to Table 2.1) additional protective measures are required in order to minimise bending stresses.\n\n(2) The categories given in (1) are only valid when the following conditions apply:\na) cables with sockets comply with the basic requirements in Annex A;\nb) the design of cables, saddles and clamps complies with 6;\nc) large aerodynamic oscillations of cables are prevented, see 8;\nd) adequate protection against corrosion is provided, see 4.\n\n(3) For fatigue assessments see EN 1993-1-9.",
+      "pointer": "en_1993_1_11_2006#/Table 9.1",
+      "keywords": [
+        "Table 9.1",
+        "according",
+        "annex",
+        "axial",
+        "bending",
+        "categories",
+        "detail",
+        "fatigue",
+        "lateral",
+        "strength",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "A.1",
+      "title": "Scope",
+      "text": "(1) This annex gives the product requirements for tension components and their terminations to be used for buildings and civil engineering works.\n\n(2) The requirements are based on the specific use of the prefabricated tension component including environmental and loading conditions.\n\n(3) The following types of prefabricated tension components are covered:\n- Group A: tension rod systems, bars;\n- Group C: bundle of parallel wires, bundle of bars, bundle of parallel strands.",
+      "pointer": "en_1993_1_11_2006#/A.1",
+      "keywords": [
+        "A.1",
+        "annex",
+        "scope",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "A.2",
+      "title": "Basic requirements",
+      "text": "(1) Tension components should comply with the following criteria:\n1. strength and ductility of the cable system and its terminations;\n2. fatigue resistance due to axial load fluctuation, bending stresses, angular deviations caused by catenary effects, wind forces and erection imperfections;\n3. stable condition of axial and flexural stiffness of the cable system (e.g. by guaranteed pre-stretching);\n4. protection of cable and anchorages against corrosion;\n5. resistance to fretting at any contact between steel parts.\n\n(2) Terminations and anchorages of the tension components should be designed such that:\n1. the ultimate resistance of the tension component would be reached before any yielding or other permanent deformation of the anchoring or any bearing elements would occur;\n2. their fatigue resistance exceeds that of the components;\n3. facilities for adjustment of the component length are provided to meet the requirements for preload, geometrical tolerances etc.;\n4. sufficient articulation is provided in the anchorage to cater for manufacturing and erection imperfections;\n5. the tension components can be replaced.\n\n(3) The above requirements should be met by:\n- appropriate choice of materials for wires, strands, steels and protective coatings;\n- choice of the form of construction in respect of strength, stiffness, ductility, durability and robustness for manufacturing, transport, handling and installation;\n- quality control of accurate fitting of the end termination to ensure the correct alignment of tension component in service.\n\n(4) The compliance of the above requirements should be verified by testing as part of an appropriate quality management system.",
+      "pointer": "en_1993_1_11_2006#/A.2",
+      "keywords": [
+        "A.2",
+        "axial",
+        "basic",
+        "bending",
+        "ductility",
+        "fatigue",
+        "force",
+        "imperfection",
+        "requirements",
+        "resistance",
+        "table",
+        "tension",
+        "ultimate",
+        "yield"
+      ]
+    },
+    {
+      "clause_id": "A.3",
+      "title": "Materials",
+      "text": "(1) All materials used should comply with the relevant European technical specifications.\n\n(2) The suitability of the corrosion protection system including the durability of fillers and protection materials should be proved by appropriate testing.\n\nNOTE: The testing may prove the following:\n- protection against aggressive agents (chemicals, stress corrosion cracking, UV);\n- water tightness (flexibility and durability when cable bends);\n- durability of colour (if required).",
+      "pointer": "en_1993_1_11_2006#/A.3",
+      "keywords": [
+        "A.3",
+        "materials"
+      ]
+    },
+    {
+      "clause_id": "A.4.1",
+      "title": "General",
+      "text": "(1) The following tests on wire, strands, bars and complete tension components should ensure that they perform as required.\n\n(2) $F_{\\text{ke}}$ and $F_{\\text{uke}}$ (see 6.2) should be determined in a static tension test. If required (e.g. for cutting to length (see 3.4) and structural analysis (see 5)) the test should follow the predicted stress profile of the cable in the structure for measuring all relevant data.\n\n(3) To determine the fatigue strength curve, where required, a representative number of axial tests should be carried out at $\\sigma_{\\text{sup}} = 0.45\\sigma_{\\text{uk}}$ (see 7.2(2)) with different values of $\\Delta F$, see Table A.4.1.\n\nNOTE: The fatigue testing should be carried out under load control and not under extension control.",
+      "pointer": "en_1993_1_11_2006#/A.4.1",
+      "keywords": [
+        "A.4.1",
+        "axial",
+        "fatigue",
+        "general",
+        "table",
+        "tension"
+      ]
+    },
+    {
+      "clause_id": "Table A.4.1",
+      "title": "Testing requirements for fatigue",
+      "text": "| Type of test | Fatigue loading before fracture test |\n| :--- | :--- |\n| 1 axial test (class 3 and 4) | $\\sigma_{\\text{sup}} = 0.45\\sigma_{\\text{uk}}$ $\\Delta \\sigma$ according to $\\Delta \\sigma_{\\text{c}}$ given in Table 9.1 $\\Delta \\alpha = 0$ $n = 2 \\times 10^{6}$ cycles |\n| 2 axial and flexural test (class 5) | $\\sigma_{\\text{sup}} = 0.45\\sigma_{\\text{uk}}$ $\\Delta \\sigma$ according to $\\Delta \\sigma_{\\text{c}}$ given in Table 9.1 $\\Delta \\alpha = 0 - 10$ milli radians $(0 - 0.7$ degrees) $n = 2 \\times 10^{6}$ cycles |\n\n(4) If the tension component is to be subjected to fatigue loading and the fatigue resistance is verified according to 9.2(2) at least one test for each diameter of the component should be undertaken. It should be checked that in an axial test with $\\sigma_{\\text{sup}} = 0.45\\sigma_{\\text{uk}}$ and $\\Delta \\sigma = 1.25\\Delta \\sigma_{\\text{c}}$ (see Table 9.1) the number of broken wires after 2.10$^{6}$ cycles is less than 2% of the total. No failure should occur in the anchorage material or in any component of the anchorage during the fatigue tests. No failure is acceptable for bars.\n\n(5) If the round-out radius at the entrance of the cable in the socket is less than 30$d$ (see Figure 6.1) the tests as described in (2) and (3) should be undertaken with $\\Delta \\alpha$ being governed by the round-out radius.\n\n(6) After fatigue loading, the test specimen should be loaded to fracture and should develop a minimum tensile force equal to 92% of the actual tensile strength of the cable or 95% of the minimum ultimate tensile strength of the cable, whichever is greater. The strain under this load should not be less than 1.5%.\n\n(7) Fatigue tests in accordance with EN 10138 should be carried out on single strands, wires or bars taken from samples of each manufactured length of tension components.",
+      "pointer": "en_1993_1_11_2006#/Table A.4.1",
+      "keywords": [
+        "Table A.4.1",
+        "axial",
+        "fatigue",
+        "force",
+        "fracture",
+        "requirements",
+        "resistance",
+        "table",
+        "tension",
+        "testing",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "A.4.2.1",
+      "title": "Wires",
+      "text": "(1) Wires coated in zinc or zinc alloy should be tested in an approved testing machine.",
+      "pointer": "en_1993_1_11_2006#/A.4.2.1",
+      "keywords": [
+        "A.4.2.1",
+        "wires"
+      ]
+    },
+    {
+      "clause_id": "A.4.2.2",
+      "title": "Strands",
+      "text": "(1) Tests should be carried out for tensile strength, 0,1% proof strength and elongation according to EN 10138.",
+      "pointer": "en_1993_1_11_2006#/A.4.2.2",
+      "keywords": [
+        "A.4.2.2",
+        "strands"
+      ]
+    },
+    {
+      "clause_id": "A.4.2.3",
+      "title": "Bars",
+      "text": "(1) Tests should be carried out for tensile strength, 0,1% proof strength and elongation according to EN 10138.",
+      "pointer": "en_1993_1_11_2006#/A.4.2.3",
+      "keywords": [
+        "A.4.2.3",
+        "bars"
+      ]
+    },
+    {
+      "clause_id": "A.4.3",
+      "title": "Strands and complete cables",
+      "text": "(1) If different sizes of one type of strand or ropes are used at least 3 representative tests should be carried out. Cables should be tested with all load-bearing components attached to them and the test load should be applied in the same way as in the structure.",
+      "pointer": "en_1993_1_11_2006#/A.4.3",
+      "keywords": [
+        "A.4.3",
+        "cables",
+        "complete",
+        "strands"
+      ]
+    },
+    {
+      "clause_id": "A.4.4",
+      "title": "Coefficient of friction",
+      "text": "(1) If the coefficient of friction between the strands and saddles, clamps etc. is determined by testing the following should be taken into account:\n- the effects of axial loads on the diameter of the strands;\n- the creep due to transverse preloading (on filler material and zinc coating).\n\n(2) In the evaluation of the test results account should be taken of the fact, that friction can be either beneficial or adverse depending on the effect being considered.",
+      "pointer": "en_1993_1_11_2006#/A.4.4",
+      "keywords": [
+        "A.4.4",
+        "axial",
+        "coefficient",
+        "friction"
+      ]
+    },
+    {
+      "clause_id": "A.4.5.1",
+      "title": "Waterproofing",
+      "text": "(1) The durability of the cable system should be verified using “accelerated ageing” in which the cycles of axial loads and bending and temperatures can be simulated. The test should be carried out for a representative section of the complete lower end of the cable including anchoring devices, stay pipe etc.\n\nNOTE: Details for tests may be given in the National Annex.",
+      "pointer": "en_1993_1_11_2006#/A.4.5.1",
+      "keywords": [
+        "A.4.5.1",
+        "annex",
+        "axial",
+        "bending",
+        "section",
+        "waterproofing"
+      ]
+    },
+    {
+      "clause_id": "A.4.5.2",
+      "title": "Corrosion protection barriers",
+      "text": "NOTE: Details for tests, e.g. salt fog tests, may be given in the National Annex.",
+      "pointer": "en_1993_1_11_2006#/A.4.5.2",
+      "keywords": [
+        "A.4.5.2",
+        "annex",
+        "barriers",
+        "corrosion",
+        "protection"
+      ]
+    },
+    {
+      "clause_id": "Annex B",
+      "title": "Transport, storage, handling",
+      "text": "(1) Spiral strands and fully locked coil cables are supplied in either coils or on reels.\n\n(2) To keep the out cover wires in lay the minimum diameter of the reel should not be less than 30 times the rope diameter of fully locked coil ropes, 24 times the rope diameter of spiral strand ropes and 16 times the diameter of strand ropes.\n\nNOTE: The minimum diameter depends on the protection system, storage time and temperature. Caution should be taken when unreeling at temperatures below 5 °C.\n\n(3) If cables are stored in coils each coil should be properly ventilated (no direct ground contact) to prevent any formation of white blister which may be caused by condensation or moisture.\n\n(4) Cables should be handled with utmost care during installation. Coils require a turntable for horizontal unreeling.\n\n(5) Cables should not:\n\n- have their serving removed before they have been installed;\n- be bent through a radius smaller than 30 × cable diameter;\n- be pulled across sharp edges;\n- be neither twisted or untwisted (observe cable marking line).\n\n(6) Tension components should be monitored and inspected during working life for deviations to design conditions, corrosion and damage.\n\nNOTE: The National Annex may give further guidance on monitoring and inspections.",
+      "pointer": "en_1993_1_11_2006#/Annex B",
+      "keywords": [
+        "Annex B",
+        "annex",
+        "handling",
+        "storage",
+        "table",
+        "tension",
+        "transport"
+      ]
+    },
+    {
+      "clause_id": "Annex C",
+      "title": "Glossary",
+      "text": "NOTE: See EN 12385, Part 2.",
+      "pointer": "en_1993_1_11_2006#/Annex C",
+      "keywords": [
+        "Annex C",
+        "glossary"
+      ]
+    },
+    {
+      "clause_id": "C.2",
+      "title": "Products Group B",
+      "text": "Spiral strand rope\n\nConstruction $1 \\times 19$\nDiameter $d_s$ [mm] $3 \\to 14$\nStrand $1$\nWire per strand $19$\nOuter wire per strand $12$\nNominal metallic area factor $C$ $0.6$\nBreaking force factor $K$ $0.525$\n\nSpiral strand rope\n\nConstruction $6 \\times 19 - CF$\nDiameter $d_s$ [mm] $6 \\to 40$\nStrand $6$\nWire per strand $18$\nOuter wire per strand $12$\nNominal metallic area factor $C$ $0.357$\nBreaking force factor $K$ $0.307$\n\nSpiral strand rope\n\nConstruction $6 \\times 19 - CWS$\nDiameter $d_s$ [mm] $6 \\to 40$\nStrand $6$\nWire per strand $18$\nOuter wire per strand $12$\nNominal metallic area factor $C$ $0.414$\nBreaking force factor $K$ $0.332$\n\nConstruction $6 \\times 36WS - CF$\nDiameter $d_s$ [mm] $6 \\to 40$\nStrand $6$\nWire per strand $18$\nOuter wire per strand $12$\nNominal metallic area factor $C$ $0.393$\nBreaking force factor $K$ $0.329$\n\nConstruction $6 \\times 36WS - CWR$\nDiameter $d_s$ [mm] $6 \\to 40$\nStrand $6$\nWire per strand $18$\nOuter wire per strand $12$\nNominal metallic area factor $C$ $0.455$\nBreaking force factor $K$ $0.355$\n\n<table><thead><tr><th colspan=\"4\">Fully locked coil rope</th></tr><tr><th></th><th>1 layer Z-wires</th><th>2 layer Z-wires</th><th>≥ 3 layer Z-wires</th></tr></thead><tbody><tr><td>Construction</td><td></td><td></td><td></td></tr><tr><td>Diameter $d_s$ [mm]</td><td>20 to 40</td><td>25 to 50</td><td>40 to 180</td></tr><tr><td>Tolerance for $d_s$</td><td>+5%</td><td>+5%</td><td>+5%</td></tr><tr><td>Nominal metallic area factor $C$</td><td>0,636</td><td>0,660</td><td>0,700</td></tr><tr><td>Breaking force factor $K$</td><td>0,585</td><td>0,607</td><td>0,643</td></tr><tr><td colspan=\"4\">NOTE: Nominal metallic area factor and breaking force factor acc. EN 12385-2.</td></tr></tbody></table>\n\n```markdown\nWire rope end connectors swaged\n\nOpen swaged socket\nClosed swaged socket\nSwaged fitting with thread\nThimble with swaged aluminium ferrule acc. EN 13411-3\nU-bolt grip acc. EN 13411-5",
+      "pointer": "en_1993_1_11_2006#/C.2",
+      "keywords": [
+        "C.2",
+        "bolt",
+        "force",
+        "group",
+        "products",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "C.4",
+      "title": "Product Group C",
+      "text": "Bare strands, PE- or epoxy-coated strands\n\nLive end anchorage Live end anchorage\n\nAnchorage with wedges and postgrouted bond socket – bare strands, PE- or epoxy-coated strands\n\nAnchorage with wedges and sealing plates – PE-coated strands\n\nAnchorage with wedges and pregrouted pipe – PE-coated strands\n\nAnchorage with wedges and wax filled transition pipe – PE-coated strands\n```\n\n<table class=\"table table-bordered\"><thead><tr><th colspan=\"2\">Wires</th></tr><tr><th>Live end anchorage</th><th>Live end anchorage</th></tr></thead><tbody><tr><td colspan=\"2\">Anchorage with wires and compound filled socket</td></tr><tr><td colspan=\"2\">Anchorage with wires and button heads filled with epoxy resin</td></tr></tbody></table>\n\nblank",
+      "pointer": "en_1993_1_11_2006#/C.4",
+      "keywords": [
+        "C.4",
+        "group",
+        "product",
+        "table"
+      ]
+    }
+  ]
+}

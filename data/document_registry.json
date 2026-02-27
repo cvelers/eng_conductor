@@ -1,11 +1,123 @@
 [
   {
     "id": "ec3.en1993-1-1.2005",
-    "title": "Eurocode 3: Design of steel structures — Part 1-1: General rules and rules for buildings",
+    "title": "Eurocode 3: Design of steel structures - Part 1-1: General rules and rules for buildings",
     "standard": "EN 1993-1-1",
     "year_version": "2005",
     "file_path": "data/ec3/en_1993_1_1_2005_structured.json",
-    "coverage_notes": "83 structured clauses extracted from OCR covering Sections 1–7, Annexes A/B/AB/BB. Includes section classification (5.5), ULS resistance checks (6.2), buckling (6.3), SLS (7), and material tables.",
+    "coverage_notes": "126 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-2.2005",
+    "title": "Eurocode 3: Design of steel structures - Part 1-2: Structural fire design",
+    "standard": "EN 1993-1-2",
+    "year_version": "2005",
+    "file_path": "data/ec3/en_1993_1_2_2005_structured.json",
+    "coverage_notes": "93 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-3.2006",
+    "title": "Eurocode 3: Design of steel structures - Part 1-3: General rules - Supplementary rules for cold-formed members and sheeting",
+    "standard": "EN 1993-1-3",
+    "year_version": "2006",
+    "file_path": "data/ec3/en_1993_1_3_2006_structured.json",
+    "coverage_notes": "140 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-4.2006",
+    "title": "Eurocode 3: Design of steel structures - Part 1-4: General rules - Supplementary rules for stainless steels",
+    "standard": "EN 1993-1-4",
+    "year_version": "2006",
+    "file_path": "data/ec3/en_1993_1_4_2006_structured.json",
+    "coverage_notes": "65 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-5.2006",
+    "title": "Eurocode 3: Design of steel structures - Part 1-5: Plated structural elements",
+    "standard": "EN 1993-1-5",
+    "year_version": "2006",
+    "file_path": "data/ec3/en_1993_1_5_2006_structured.json",
+    "coverage_notes": "79 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-6.2007",
+    "title": "Eurocode 3: Design of steel structures - Part 1-6: Strength and stability of shell structures",
+    "standard": "EN 1993-1-6",
+    "year_version": "2007",
+    "file_path": "data/ec3/en_1993_1_6_2007_structured.json",
+    "coverage_notes": "239 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-10.2005",
+    "title": "Eurocode 3: Design of steel structures - Part 1-10: Material toughness and through-thickness properties",
+    "standard": "EN 1993-1-10",
+    "year_version": "2005",
+    "file_path": "data/ec3/en_1993_1_10_2005_structured.json",
+    "coverage_notes": "14 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-11.2006",
+    "title": "Eurocode 3: Design of steel structures - Part 1-11: Design of structures with tension components",
+    "standard": "EN 1993-1-11",
+    "year_version": "2006",
+    "file_path": "data/ec3/en_1993_1_11_2006_structured.json",
+    "coverage_notes": "78 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-12.2007",
+    "title": "Eurocode 3: Design of steel structures - Part 1-12: High strength steels",
+    "standard": "EN 1993-1-12",
+    "year_version": "2007",
+    "file_path": "data/ec3/en_1993_1_12_2007_structured.json",
+    "coverage_notes": "31 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
     "clause_locator": {
       "id_field": "clause_id",
       "title_field": "title",

@@ -1,0 +1,90 @@
+[
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "The European Union\n\nEDICT OF GOVERNMENT\n\nIn order to promote public education and public safety, equal justice for all, a better informed citizenry, the rule of law, world trade and world peace, this legal document is hereby made available on a noncommercial basis, as it is the right of all humans to know and speak the laws that govern them.\n\nEN 1993-1-12 (2007) (English): Eurocode 3: Design of steel structures - Part 1-12: General - High strength steels\n[Authority: The European Union Per Regulation 305/2011, Directive 98/34/EC, Directive 2004/18/EC]",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "BLANK PAGE\n\nBRUTUM FULMEN\n\nIGNORANTIA\nJURIS\nNON EXCUSAT\n\nPROTECTED BY COPYRIGHT",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "EUROPEAN STANDARD\nEN 1993-1-12\nNORME EUROPÉENNE\nEUROPÄISCHE NORM\nFebruary 2007\n\nICS 91.010.30; 91.080.10\nIncorporating corrigendum April 2009\n\nEnglish Version\n\nEurocode 3 - Design of steel structures - Part 1-12: Additional rules for the extension of EN 1993 up to steel grades S 700\n\nEurocode 3 - Calcul des structures en acier - Partie 1-12:\nRègles additionnelles pour l'utilisation de l'EN 1993 jusqu'à la nuance d'acier S 700\n\nEurocode 3: Bemessung und Konstruktion von Stahlbauten\n- Teil 1-12: Zusätzliche Regeln zur Erweiterung von EN 1993 auf Stahlsorten bis S 700\n\nThis European Standard was approved by CEN on 6 July 2006.\n\nCEN members are bound to comply with the CEN/CENELEC Internal Regulations which stipulate the conditions for giving this European Standard the status of a national standard without any alteration. Up-to-date lists and bibliographical references concerning such national standards may be obtained on application to the CEN Management Centre or to any CEN member.\n\nThis European Standard exists in three official versions (English, French, German). A version in any other language made by translation under the responsibility of a CEN member into its own language and notified to the CEN Management Centre has the same status as the official versions.\n\nCEN members are the national standards bodies of Austria, Belgium, Bulgaria, Cyprus, Czech Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia, Lithuania, Luxembourg, Malta, Netherlands, Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Switzerland and United Kingdom.\n\nEUROPEAN COMMITTEE FOR STANDARDIZATION\nCOMITÉ EUROPÉEN DE NORMALISATION\nEUROPÄISCHE KOMITEE FÜR NORMUNG\n\nManagement Centre: rue de Stassart, 36 B-1050 Brussels\n\n© 2007 CEN All rights of exploitation in any form and by any means reserved worldwide for CEN national Members.\n\nRef. No. EN 1993-1-12:2007: E",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "## Contents\n\n### Foreword... 3\n\n1. **General**... 3\n   1.1 Scope... 3\n   1.2 Normative references... 4\n   1.3 Symbols... 4\n\n2. **Additional rules to EN 1993-1-1 to EN 1993-1-11**... 5\n   2.1 Additional rules to EN 1993-1-1... 5\n   2.2 Additional rules to EN 1993-1-2... 6\n   2.3 Additional rules to EN 1993-1-3... 6\n   2.4 Additional rules to EN 1993-1-4... 6\n   2.5 Additional rules to EN 1993-1-5... 7\n   2.6 Additional rules to EN 1993-1-6... 7\n   2.7 Additional rules to EN 1993-1-7... 7\n   2.8 Additional rules to EN 1993-1-8... 7\n   2.9 Additional rules to EN 1993-1-9... 8\n   2.10 Additional rules to EN 1993-1-10... 8\n   2.11 Additional rules to EN 1993-1-11... 9\n\n3. **Additional rules to application parts EN 1993-2 to EN 1993-6**... 9",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "Foreword\n\nThis European Standard EN 1993-1-12, \"Eurocode 3: Design of steel structures: Part 1-12: Additional rules for the extension of EN 1993 up to steel grades S 700\", has been prepared by Technical Committee CEN/TC250 « Structural Eurocodes », the Secretariat of which is held by BSI. CEN/TC250 is responsible for all Structural Eurocodes.\n\nThis European Standard shall be given the status of a National Standard, either by publication of an identical text or by endorsement, at the latest by August 2007, and conflicting National Standards shall be withdrawn at latest by March 2010.\n\nAccording to the CEN-CENELEC Internal Regulations, the National Standard Organizations of the following countries are bound to implement this European Standard: Austria, Belgium, Bulgaria, Cyprus, Czech Republic, Denmark, Estonia, Finland, France, Germany, Greece, Hungary, Iceland, Ireland, Italy, Latvia, Lithuania, Luxembourg, Malta, Netherlands, Norway, Poland, Portugal, Romania, Slovakia, Slovenia, Spain, Sweden, Switzerland and United Kingdom.\n\nNational annex for EN 1993-1-12\n\nThis standard gives alternative procedures, values and recommendations with notes indicating where national choices may have to be made. Therefore the National Standard implementing EN 1993-1-12 should have a National annex containing all Nationally Determined Parameters to be used for the design of steel structures to be constructed in the relevant country.\n\nNational choice is allowed in EN 1993-1-12 through:\n\n- 2.1 (3.1(2))\n- 2.1 (3.2.2(1))\n- 2.1 (5.4.3(1))\n- 2.1 (6.2.3(2))\n- 2.8 (4.2(2))\n- 3 (1)\n\n1 General\n\n1.1 Scope\n\n(1) This EN 1993-1-12 gives rules that can be used in conjunction with parts\n\n- EN1993-1-1\n- EN 1993-1-2\n- EN 1993-1-3\n- EN 1993-1-4\n- EN 1993-1-5\n- EN 1993-1-6\n- EN 1993-1-7\n- EN 1993-1-8",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "to enable steel structures to be designed with steel of grades greater than S460 up to S700.\n\n(2) Where it is necessary to alter a rule in other parts to enable up to S700 to be used, it is stated what needs to be done, either by noting that a rule is not to be used with steel grades greater than S460, then giving the one that is required, or by giving an additional rule or rules.\n\n1.2 Normative references\n\n(1) This European Standard incorporates, by dated or undated reference, provisions from other publications. These normative references are cited at the appropriate places in the text and the publications are listed hereafter. For dated references, subsequent amendments to or revisions of any of these publications apply to this European Standard only when incorporated in it by amendment or revision. For undated references the latest edition of the publication referred to applies.\n\nEN 499 Welding consumables – Covered electrodes for manual metal arc welding of non alloy and fine grain steels – Classification\n\nEN 10025-6 Hot rolled products of structural steels - Part 6: Technical delivery conditions for flat products of high yield strength structural steels in the quenched and tempered condition\n\nEN 10149-1 Hot-rolled flat products made of high yield strength steels for cold forming – Part 1: General delivery conditions\n\nEN 10149-2 Hot-rolled flat products made of high yield strength steels for cold forming – Part 2: Delivery conditions for thermomechanically rolled steels\n\nEN 12534 Welding consumables – Wire electrodes, wires, rods and deposits for gas shielded metal arc welding of high strength steels – Classification\n\nEN 12535 Welding consumables – Tubular cored electrodes for gas shielded metal arc welding of high strength steels – Classification\n\n1.3 Symbols\n\n(1) Symbols used in this standard are defined in the standards referred to.",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "2 Additional rules to EN 1993-1-1 to EN 1993-1-11\n\n2.1 Additional rules to EN 1993-1-1\n\n3.1(2) Additional note:\n\nNOTE The National Annex may specify steel grades greater than S460 up to S700 for general use or for use in specific applications. The grades in Tables 1 and 2 and the nominal values that may be used for their yield strengths and ultimate tensile strength are recommended for use, provided that the rules in this Part 1.12 are followed.\n\nTable 1 — Nominal values of yield strength $f_y$ and ultimate tensile strength $f_u$ for hot rolled structural steel\n\n| EN10025-6 Steel grade and qualities | Nominal thickness of the element $t$ mm |\n| :--- | :--- |\n| $f_y$ [N/mm$^2$] | $f_u$ [N/mm$^2$] |\n| $t \\leq 50$ mm | $50$ mm $< t \\leq 100$ mm |\n| $50$ mm $< t \\leq 150$ mm | $100$ mm $< t \\leq 150$ mm |\n| $S$ 500Q/QL/QL1 | 500 590 480 590 440 540 |\n| $S$ 550Q/QL/QL1 | 550 640 530 640 490 590 |\n| $S$ 620Q/QL/QL1 | 620 700 580 700 560 650 |\n| $S$ 690Q/QL/QL1 | 690 770 650 760 630 710 |\n\nTable 2 — Nominal values of yield strength $f_y$ and ultimate tensile strength $f_u$ for hot rolled flat products.\n\n| EN 10149-2a) | 1.5 mm $< t \\leq 8$ mm | 8 mm $< t \\leq 16$ mm |\n| :--- | :--- | :--- |\n| $f_y$ [N/mm$^2$] | $f_u$ [N/mm$^2$] | $f_y$ [N/mm$^2$] | $f_u$ [N/mm$^2$] |\n| S 500MC | 500 550 500 550 |\n| S 550MC | 550 600 550 600 |\n| S 600MC | 600 650 600 650 |\n| S 650MC | 650 700 630 700 |\n| S 700MC | 700 750 680 750 |\n\na) Verification of the impact energy in accordance with EN 10149-1 Clause 11, Option 5 should be specified.\n\n3.2.2(1) Additional note:\n\nNOTE The limiting values of the ratio $f_u/f_y$, the elongation at failure and the ultimate strain $\\varepsilon_u$ for steels greater than S460 up to S700 may be defined in the National Annex. The following values are recommended:\n\n- $f_u/f_y \\geq 1.05$;\n- elongation at failure not less than 10%;\n- $\\varepsilon_u \\geq 15f_y/E$.\n\n3.2.2(2) Additional notes:\n\nNOTE 1 Steels with grades greater than S460 up to S700 conforming to one of the steel grades listed in Tables 1 and 2 should be accepted as satisfying these requirements.\n\nNOTE 2 The ability of a steel structure to absorb deformation is related to both the elongation and the toughness properties of its constituent steel products. The global performance required depends on the anticipated deformations. The local performance required depends on the details used. Due to higher stress levels, structures of steels according to Tables 1 and 2 require special care in both the control of deformations.",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "and in detailing to avoid notches and other stress concentrations. The global analysis should consider imposed deformations where relevant.\n\n5.4.1 (3) Additional rule:\n\nNot applicable to steels with grades greater than S460 up to S700.\n\n5.4.1 (4)B Additional rule:\n\nNot applicable to steels with grades greater than S460 up to S700.\n\n5.4.3(1) Additional rule:\n\nFor steels of grades greater than S460 up to S700, the global analysis using non-linear plastic analysis considering partial plastification of members in plastic zones only, applies.\n\nNOTE: The National Annex may specify additional rules for steels according to Tables 1 and 2. Rules for design with FEM are given in Informative Annex C of EN 1993-1-5.\n\n6.2.3(2) Additional rule:\n\nFor steels with grades greater than S460 up to S700 the design resistance of a net section should be taken as\n\n$$N_{t,Rd} = \\frac{0.9A_{net}f_u}{\\gamma_{M12}}$$\n\n(6.7a)\n\nwhere $\\gamma_{M12}$ is the partial factor for net section resistance for steels with grades greater than S460 up to S700.\n\nNOTE: The National Annex may specify the value of $\\gamma_{M12}$. The value $\\gamma_{M12} = \\gamma_{M2} = 1.25$ is recommended.\n\n6.2.3(3) Additional rules:\n\nSteels with grades greater than S460 up to S700 should not be used for applications where capacity design is required.\n\nTable 6.2 Additional rule:\n\nThe rules for S 460 also apply for steels with grades greater than S460 up to S700.\n\n2.2 Additional rules to EN 1993-1-2\n\nThe standard is applicable to steels with grades greater than S460 up to S700 without further additional rules.\n\n2.3 Additional rules to EN 1993-1-3\n\nThe standard is applicable to steels with grades greater than S460 up to S700 without further additional rules.\n\n2.4 Additional rules to EN 1993-1-4\n\nEN 1993-1-4 is not applicable.",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "2.5 Additional rules to EN 1993-1-5\n\nThe standard is applicable to steels with grades greater than S460 up to S700 without further additional rules.\n\n2.6 Additional rules to EN 1993-1-6\n\nAnnex B is not applicable to steels with grades greater than S460 up to S700.\n\n2.7 Additional rules to EN 1993-1-7\n\nThe standard is applicable to steels with grades greater than S460 up to S700 without further additional rules.\n\n2.8 Additional rules to EN 1993-1-8\n\n1.1(1) Additional rules:\n\nEN 1993-1-8 may be applied also to steels with grades greater than S460 up to S700 if the following additional rules are applied.\n\n3.6.1(1) For steels with grades greater than S460 up to S700 and bolts loaded in shear in oversize and slotted holes should only be used for category C connections.\n\n3.10.3(2) Not applicable to steels with grades greater than S460 up to S700.\n\n3.10.4 Not applicable to steels with grades greater than S460 up to S700.\n\n3.12(2) This clause also applies to connections in steels with grades greater than S460 up to S700.\n\n4.2(2) Additional rule:\n\nFor steels with grades greater than S460 up to S700 the filler metal may have lower strength than the base material.\n\nNOTE The National Annex may give restrictions for the use of such undermatched electrodes.\n\n4.5.3.2(6) Additional rule:\n\nFor under matched electrodes that are used for steels with grades greater than S460 up to S700 $f_u$ should be substituted with the ultimate strength of the filler metal $f_{eu}$ according to Table 3 for electrodes according to EN 499, EN 12534 and EN 12535. $\\beta_w$ should be taken as 1.0.\n\nTable 3 — Ultimate strength $f_{eu}$ of electrodes\n\n| Strength class | 35 | 42 | 55 | 62 | 69 |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| Ultimate strength $f_{eu}$ N/mm² | 440 | 500 | 640 | 700 | 770 |\n\n4.7.1(1) Additional rule:\n\nThe resistance of welded connections with undermatched electrodes with steel grades greater than S460 up to S700 should be based on the strength of the filler metal.",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "4.11 Additional rule:\n\nFor steel grades greater than S460 up to S700 longitudinal fillet welds in lap joints with steel grades greater than S460 up to S700 should not be longer than 50a unless the non-uniform stress distribution is taken into account in the design.\n\n5.1.3 Not applicable to steels with grades greater than S460 up to S700.\n\n5.1.4 Not applicable to steels with grades greater than S460 up to S700.\n\n5.2.2.4 Not applicable to steels with grades greater than S460 up to S700.\n\n6 Additional rules:\n\nThe rules for semi-rigid joints are not applicable for steels with grades greater than S460 up to S700. If non-linear plastic global analysis considering the partial plastification of members in plastic zones is used, connections between members should only be on the basis of full-strength joints. If elastic global analysis is used, connection with partial-strength joints may be used, provided that the resistance of joints exceeds the design values of the internal forces and moments in the connected elements. In both cases the resistance of joints should be determined based on elastic distribution of forces over the components of a joint.\n\n6.2.6.9 to 6.2.6.12 Additional rules:\n\nThe rules for column bases may only be used for steel grades greater than S460 up to S700, provided that the bolt failure mode is decisive for verification of base plates in bending on the tension side of connections and an elastic distribution of forces in anchor bolts is used.\n\n7.1.1(4) Additional rule:\n\nFor steels with grades greater than S460 up to S700 the reduction factor is 0.8.\n\n2.9 Additional rules to EN 1993-1-9\n\n8(1) Additional rule:\n\nFor hybrid girders made of steel with flange grades greater than S460 up to S700 the limitation $\\Delta \\sigma \\leq 1.5 f_{yf}$ should be applied, where $f_{yf}$ is the yield strength of the flange.\n\n2.10 Additional rules to EN 1993-1-10\n\n2.3.2(1) Additional rule:\n\nTable 4 may also be used to determine the maximum permissible element thickness for steel grades greater than S460 up to S700.\n\nNOTE 1 Linear interpolation can be used in applying Table 4. Most applications require $\\sigma_{Ed}$ values between $\\sigma_{Ed} = 0.75 f_{y}(t)$ and $\\sigma_{Ed} = 0.50 f_{y}(t)$. $\\sigma_{Ed} = 0.25 f_{y}(t)$ is given for interpolation purposes. Extrapolations beyond the extreme values are not valid.\n\nNOTE 2 For ordering products made of steels according to Table 4 the $T_J$ values should be specified.\n\nNOTE 3 Table 4 has been derived for the guaranteed Charpy energy values CVN in the direction of the rolling of the product.",
+      "bbox_2d": null
+    }
+  ],
+  [
+    {
+      "index": 0,
+      "label": "text",
+      "content": "Table 4 — Maximum permissible values of element thickness t in mm\n\n| Steel grade | Subgrade | Charpy energy CVN | Reference temperature $T_{Ed} [^\\circ C]$ | 10 | 0 | -10 | -20 | -30 | -40 | -50 | 10 | 0 | -10 | -20 | -30 | -40 | -50 | 10 | 0 | -10 | -20 | -30 | -40 | -50 |\n| :--- | :---",
+      "bbox_2d": null
+    }
+  ]
+]

@@ -1,148 +1,169 @@
 from __future__ import annotations
 
+import json
+import logging
 import re
+from dataclasses import dataclass, field
 from typing import Any
 
 from backend.config import Settings
+from backend.llm.base import LLMProvider
+from backend.utils.json_utils import parse_json_loose, strip_code_fences
 
-SECTION_PATTERN = re.compile(r"\b(IPE\s*\d+|HEA\s*\d+|HEB\s*\d+)\b", re.IGNORECASE)
-STEEL_PATTERN = re.compile(r"\bS(235|275|355|420|460)\b", re.IGNORECASE)
-LENGTH_PATTERN = re.compile(r"(?:\bL\b|length|span)\s*=?\s*(\d+(?:\.\d+)?)\s*(mm|m|cm)?", re.IGNORECASE)
-MED_PATTERN = re.compile(r"(?:M(?:_?ed)?|moment)\s*=?\s*(\d+(?:\.\d+)?)\s*(kNm|knm|Nm|nm)?", re.IGNORECASE)
-NED_PATTERN = re.compile(r"(?:N(?:_?ed)?|axial)\s*=?\s*(\d+(?:\.\d+)?)\s*(kN|kn|N|n)?", re.IGNORECASE)
-VEd_PATTERN = re.compile(r"(?:V(?:_?ed)?|shear)\s*=?\s*(\d+(?:\.\d+)?)\s*(kN|kn|N|n)?", re.IGNORECASE)
-SECTION_CLASS_PATTERN = re.compile(r"\bclass\s*([1-4])\b", re.IGNORECASE)
+logger = logging.getLogger(__name__)
 
-UDL_PATTERN = re.compile(r"(\d+(?:\.\d+)?)\s*(?:kN/m|kn/m)\b", re.IGNORECASE)
-POINT_LOAD_PATTERN = re.compile(r"(?:point\s*load|P|load)\s*=?\s*(\d+(?:\.\d+)?)\s*(?:kN|kn)\b", re.IGNORECASE)
-BOLT_CLASS_PATTERN = re.compile(r"\b(4\.6|4\.8|5\.6|5\.8|6\.8|8\.8|10\.9)\b")
-BOLT_DIAMETER_PATTERN = re.compile(r"\bM\s*(\d+)\b", re.IGNORECASE)
-N_BOLTS_PATTERN = re.compile(r"(\d+)\s*(?:×|x|bolts?\b)", re.IGNORECASE)
-THROAT_PATTERN = re.compile(r"(?:throat|a)\s*=?\s*(\d+(?:\.\d+)?)\s*mm", re.IGNORECASE)
-WELD_LENGTH_PATTERN = re.compile(r"(?:weld\s*)?length\s*=?\s*(\d+(?:\.\d+)?)\s*mm", re.IGNORECASE)
-DEFLECTION_PATTERN = re.compile(r"(?:deflection|delta)\s*=?\s*(\d+(?:\.\d+)?)\s*mm", re.IGNORECASE)
-LIMIT_RATIO_PATTERN = re.compile(r"\bL/(\d+)\b")
+_SECTION_RE = re.compile(r"\b((?:IPE|HEA|HEB|HEM)\s*\d{2,4})\b", re.IGNORECASE)
+_STEEL_RE = re.compile(r"\b(S(?:235|275|355|420|460))\b", re.IGNORECASE)
 
 
-def normalize_section_name(raw: str) -> str:
-    return raw.upper().replace(" ", "")
+@dataclass
+class ExtractionResult:
+    user_inputs: dict[str, Any]
+    assumed_inputs: dict[str, Any]
+    assumptions: list[str]
+    tool_inputs: dict[str, dict[str, Any]]
 
 
-def parse_user_inputs(query: str) -> dict[str, Any]:
-    found: dict[str, Any] = {}
+_EXTRACTION_SYSTEM = """\
+You are an engineering input extractor for Eurocode 3 calculations.
+Given a user query and a set of tool schemas, extract all explicitly stated values \
+and identify what defaults should be assumed for missing required inputs.
 
-    if section_match := SECTION_PATTERN.search(query):
-        found["section_name"] = normalize_section_name(section_match.group(1))
+Return JSON only with this exact shape:
+{
+  "user_inputs": { ... values the user explicitly stated ... },
+  "assumed_inputs": { ... reasonable defaults for values the user did NOT state ... },
+  "assumptions": [ "human-readable note for each assumed value" ],
+  "tool_inputs": {
+    "tool_name_1": { ... complete input dict ready for this tool ... },
+    "tool_name_2": { ... complete input dict ready for this tool ... }
+  }
+}
 
-    if steel_match := STEEL_PATTERN.search(query):
-        found["steel_grade"] = f"S{steel_match.group(1)}"
-
-    if length_match := LENGTH_PATTERN.search(query):
-        val = float(length_match.group(1))
-        unit = (length_match.group(2) or "m").lower()
-        if unit == "mm":
-            val /= 1000.0
-        elif unit == "cm":
-            val /= 100.0
-        found["length_m"] = val
-
-    if med_match := MED_PATTERN.search(query):
-        val = float(med_match.group(1))
-        unit = (med_match.group(2) or "kNm").lower()
-        if unit == "nm":
-            val /= 1000.0
-        found["MEd_kNm"] = val
-
-    if ned_match := NED_PATTERN.search(query):
-        val = float(ned_match.group(1))
-        unit = (ned_match.group(2) or "kN").lower()
-        if unit == "n":
-            val /= 1000.0
-        found["NEd_kN"] = val
-
-    if ved_match := VEd_PATTERN.search(query):
-        val = float(ved_match.group(1))
-        unit = (ved_match.group(2) or "kN").lower()
-        if unit == "n":
-            val /= 1000.0
-        found["VEd_kN"] = val
-
-    if class_match := SECTION_CLASS_PATTERN.search(query):
-        found["section_class"] = int(class_match.group(1))
-
-    if udl_match := UDL_PATTERN.search(query):
-        found["load_kn_per_m"] = float(udl_match.group(1))
-
-    if point_match := POINT_LOAD_PATTERN.search(query):
-        found["load_kn"] = float(point_match.group(1))
-
-    if bolt_class_match := BOLT_CLASS_PATTERN.search(query):
-        found["bolt_class"] = bolt_class_match.group(1)
-
-    if bolt_diam_match := BOLT_DIAMETER_PATTERN.search(query):
-        found["bolt_diameter_mm"] = int(bolt_diam_match.group(1))
-
-    if n_bolts_match := N_BOLTS_PATTERN.search(query):
-        found["n_bolts"] = int(n_bolts_match.group(1))
-
-    if throat_match := THROAT_PATTERN.search(query):
-        found["throat_thickness_mm"] = float(throat_match.group(1))
-
-    if defl_match := DEFLECTION_PATTERN.search(query):
-        found["actual_deflection_mm"] = float(defl_match.group(1))
-
-    if limit_match := LIMIT_RATIO_PATTERN.search(query):
-        found["limit_ratio"] = f"L/{limit_match.group(1)}"
-
-    return found
+Rules:
+- Normalize units: lengths to meters, forces to kN, moments to kNm, stresses to MPa.
+- Section names: uppercase, no spaces (e.g. "IPE300", "HEA200").
+- Steel grades: "S235", "S275", "S355", "S420", "S460".
+- Only include tools listed in planned_tools.
+- For tool_inputs, merge user values with reasonable defaults to create complete ready-to-run inputs.
+- If a tool depends on outputs from a previous tool in the chain, use null for those fields.
+- Be conservative with assumptions — note each one clearly.
+- Infer load_type from context (e.g. "UDL" → "udl", "point load at midspan" → "point_mid")."""
 
 
-def apply_defaults(
+def extract_inputs(
+    *,
     query: str,
-    user_inputs: dict[str, Any],
+    planned_tools: list[str],
+    tool_registry: dict[str, Any],
+    llm: LLMProvider,
     settings: Settings,
-    requires_tools: bool,
-) -> tuple[dict[str, Any], list[str]]:
-    assumed: dict[str, Any] = {}
-    assumptions: list[str] = []
-
-    if not requires_tools:
-        return assumed, assumptions
-
-    lowered = query.lower()
-
-    if "steel_grade" not in user_inputs:
-        assumed["steel_grade"] = settings.default_steel_grade
-        assumptions.append(
-            f"Steel grade assumed as {settings.default_steel_grade} (typical structural grade)."
+) -> ExtractionResult:
+    if not planned_tools:
+        return ExtractionResult(
+            user_inputs={}, assumed_inputs={}, assumptions=[], tool_inputs={}
         )
 
-    if "section_name" not in user_inputs:
-        assumed["section_name"] = settings.default_section_name
-        assumptions.append(
-            f"Section assumed as {settings.default_section_name} (common rolled I-section)."
-        )
+    if not llm.available:
+        return _fallback_extraction(planned_tools, settings, query=query)
 
-    if "gamma_M0" not in user_inputs:
-        assumed["gamma_M0"] = settings.default_gamma_m0
-        assumptions.append(f"γ_M0 = {settings.default_gamma_m0:.2f} (standard EC3 value).")
+    tool_schemas: dict[str, Any] = {}
+    for name in planned_tools:
+        entry = tool_registry.get(name)
+        if entry:
+            tool_schemas[name] = {
+                "description": entry.description,
+                "input_schema": entry.input_schema,
+                "constraints": entry.constraints,
+                "examples": entry.examples[:2],
+            }
 
-    if (
-        "section_class" not in user_inputs
-        and any(token in lowered for token in ["class", "classification", "m_rd", "moment resistance", "bending resistance"])
-    ):
-        assumed["section_class"] = 2
-        assumptions.append("Section class assumed as Class 2 (compact — plastic resistance basis).")
-
-    interaction_like = "interaction" in lowered or (
-        "combined" in lowered and ("bending" in lowered or "axial" in lowered)
+    prompt = (
+        "###TASK:EXTRACT_INPUTS###\n"
+        f"User query: {query}\n\n"
+        f"Planned tools (in execution order): {json.dumps(planned_tools)}\n\n"
+        f"Tool schemas:\n{json.dumps(tool_schemas, indent=2)}\n\n"
+        f"Default values when user does not specify:\n"
+        f"- steel_grade: {settings.default_steel_grade}\n"
+        f"- section_name: {settings.default_section_name}\n"
+        f"- gamma_M0: {settings.default_gamma_m0}\n"
+        f"- MEd_kNm: {settings.default_med_knm}\n"
+        f"- NEd_kN: {settings.default_ned_kn}\n\n"
+        "Extract all inputs from the query and fill defaults. Return JSON only."
     )
-    if interaction_like and "MEd_kNm" not in user_inputs:
-        assumed["MEd_kNm"] = settings.default_med_knm
-        assumptions.append(f"M_Ed = {settings.default_med_knm:.1f} kNm assumed (typical service value).")
 
-    if interaction_like and "NEd_kN" not in user_inputs:
-        assumed["NEd_kN"] = settings.default_ned_kn
-        assumptions.append(f"N_Ed = {settings.default_ned_kn:.1f} kN assumed (typical service value).")
+    try:
+        raw = llm.generate(
+            system_prompt=_EXTRACTION_SYSTEM,
+            user_prompt=prompt,
+            temperature=0,
+            max_tokens=1400,
+        )
+        parsed = parse_json_loose(raw)
+        return ExtractionResult(
+            user_inputs=parsed.get("user_inputs", {}),
+            assumed_inputs=parsed.get("assumed_inputs", {}),
+            assumptions=parsed.get("assumptions", []),
+            tool_inputs=parsed.get("tool_inputs", {}),
+        )
+    except Exception as exc:
+        logger.warning("llm_input_extraction_failed", extra={"error": str(exc)})
+        return _fallback_extraction(planned_tools, settings, query=query)
 
-    return assumed, assumptions
+
+def _strip_code_fences(text: str) -> str:
+    # Backward-compat shim for existing call sites/tests.
+    return strip_code_fences(text)
+
+
+def _fallback_extraction(
+    planned_tools: list[str], settings: Settings, *, query: str = "",
+) -> ExtractionResult:
+    """Minimal fallback when LLM is unavailable."""
+    normalized_query = query or ""
+    section_match = _SECTION_RE.search(normalized_query)
+    steel_match = _STEEL_RE.search(normalized_query)
+
+    parsed_section = (
+        section_match.group(1).replace(" ", "").upper()
+        if section_match
+        else settings.default_section_name
+    )
+    parsed_steel = steel_match.group(1).upper() if steel_match else settings.default_steel_grade
+
+    user_inputs: dict[str, Any] = {}
+    assumptions: list[str] = []
+    if section_match:
+        user_inputs["section_name"] = parsed_section
+    else:
+        assumptions.append(
+            f"Section assumed as {settings.default_section_name} (LLM extraction unavailable)."
+        )
+    if steel_match:
+        user_inputs["steel_grade"] = parsed_steel
+    else:
+        assumptions.append(
+            f"Steel grade assumed as {settings.default_steel_grade} (LLM extraction unavailable)."
+        )
+
+    assumed: dict[str, Any] = {
+        "steel_grade": parsed_steel,
+        "section_name": parsed_section,
+        "gamma_M0": settings.default_gamma_m0,
+    }
+    assumptions.append(f"γ_M0 = {settings.default_gamma_m0:.2f} (LLM extraction unavailable).")
+
+    tool_inputs: dict[str, dict[str, Any]] = {}
+    for name in planned_tools:
+        tool_inputs[name] = {
+            "section_name": parsed_section,
+            "steel_grade": parsed_steel,
+            "gamma_M0": settings.default_gamma_m0,
+        }
+
+    return ExtractionResult(
+        user_inputs=user_inputs,
+        assumed_inputs=assumed,
+        assumptions=assumptions,
+        tool_inputs=tool_inputs,
+    )

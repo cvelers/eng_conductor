@@ -8,13 +8,14 @@ from typing import Any, Iterator
 
 from backend.config import Settings
 from backend.llm.base import LLMProvider
-from backend.registries.document_registry import ClauseRecord
+from backend.registries.document_registry import ClauseRecord, DocumentRegistryEntry
 from backend.registries.tool_registry import ToolRegistryEntry
 from backend.retrieval.agentic_search import AgenticRetriever, RetrievedClause
 from backend.schemas import ChatResponse, Citation, RetrievalTraceStep, ToolTraceStep
 from backend.tools.runner import MCPToolRunner
 from backend.utils.citations import build_citation_address
-from backend.utils.parsing import apply_defaults, parse_user_inputs
+from backend.utils.json_utils import parse_json_loose
+from backend.utils.parsing import ExtractionResult, extract_inputs
 
 logger = logging.getLogger(__name__)
 
@@ -82,40 +83,44 @@ class PlanResult:
     rationale: str
 
 
-TOOL_KEYWORD_MAP = {
-    "simple_beam_calculator": [
-        "simply supported", "simple beam", "udl", "uniform load", "point load", "bending moment",
-        "beam moment", "beam shear", "beam deflection",
-    ],
-    "cantilever_beam_calculator": ["cantilever"],
-    "steel_grade_properties": [
-        "steel grade", "yield strength", "fy value", "fu value", "material properties",
-        "steel properties", "table 3.1",
-    ],
-    "effective_length_ec3": ["effective length", "buckling length", "k factor", "l_cr"],
-    "column_buckling_ec3": [
-        "column buckling", "buckling resistance", "nb,rd", "compression member",
-        "flexural buckling", "buckling check",
-    ],
-    "bolt_shear_ec3": [
-        "bolt", "bolt shear", "bolt resistance", "m20", "m16", "m24",
-        "bolt capacity", "bolt class", "8.8", "10.9",
-    ],
-    "weld_resistance_ec3": [
-        "weld", "fillet weld", "weld resistance", "weld capacity", "throat",
-    ],
-    "deflection_check": [
-        "deflection check", "deflection limit", "serviceability", "l/250", "l/300",
-    ],
-    "unit_converter": ["convert", "conversion", "unit convert", "convert unit"],
-    "section_classification_ec3": ["classification", "section class", "class 1", "class 2"],
-    "member_resistance_ec3": [
-        "resistance", "capacity", "m_rd", "n_rd", "v_rd", "axial resistance",
-        "shear resistance", "bending resistance",
-    ],
-    "interaction_check_ec3": ["interaction", "combined", "axial and bending", "utilization"],
-    "ipe_moment_resistance_ec3": ["ipe", "moment resistance", "m_rd"],
+_CHAIN_MAPPINGS: dict[str, dict[str, tuple[str, str, Any]]] = {
+    "member_resistance_ec3": {
+        "section_class": ("section_classification_ec3", "outputs.governing_class", 2),
+    },
+    "interaction_check_ec3": {
+        "M_Rd_kNm": ("member_resistance_ec3", "outputs.M_Rd_kNm", None),
+        "N_Rd_kN": ("member_resistance_ec3", "outputs.N_Rd_kN", None),
+    },
 }
+
+def _resolve_nested(data: dict[str, Any] | None, path: str) -> Any:
+    """Walk a dot-separated path into a nested dict."""
+    if data is None:
+        return None
+    current: Any = data
+    for part in path.split("."):
+        if isinstance(current, dict):
+            current = current.get(part)
+        else:
+            return None
+    return current
+
+
+_FOLLOWUP_VALUE_RE = re.compile(
+    r"\b(?:IPE\s*\d+|HEA\s*\d+|HEB\s*\d+|S(?:235|275|355|420|460)|M\d+|\d+(?:\.\d+)?)\b",
+    re.IGNORECASE,
+)
+
+_DANGLING_TAIL_RE = re.compile(
+    r"(?:\b(?:and|or|with|because|for|to|of|in|on|at|from|that|which|where|when|if|while|as)\b[\s,;:]*)+$",
+    re.IGNORECASE,
+)
+
+_BROKEN_HYPHEN_TAIL_RE = re.compile(r"(?:\b[0-9A-Za-z_]+-)$")
+_INCOMPLETE_CAUSE_TAIL_RE = re.compile(
+    r"(?:\b(?:because|due to|as)\b[^.?!]{0,160}?\b(?:cross|cross[- ]?section|section|properties?|inputs?|data|parameters?)\b)$",
+    re.IGNORECASE,
+)
 
 
 class CentralIntelligenceOrchestrator:
@@ -127,12 +132,14 @@ class CentralIntelligenceOrchestrator:
         retriever: AgenticRetriever,
         tool_runner: MCPToolRunner,
         tool_registry: list[ToolRegistryEntry],
+        document_registry: list[DocumentRegistryEntry] | None = None,
     ) -> None:
         self.settings = settings
         self.orchestrator_llm = orchestrator_llm
         self.retriever = retriever
         self.tool_runner = tool_runner
         self.tool_registry = {entry.tool_name: entry for entry in tool_registry}
+        self.document_registry = document_registry or []
 
     def run(self, query: str, *, history: list | None = None) -> ChatResponse:
         final_response: ChatResponse | None = None
@@ -160,8 +167,16 @@ class CentralIntelligenceOrchestrator:
 
         # --- INPUT RESOLUTION ---
         yield ("machine", {"node": "inputs", "status": "active", "title": "Input Resolution", "detail": "Extracting values from your query..."})
-        user_inputs = parse_user_inputs(query)
-        assumed_inputs, assumptions = apply_defaults(query, user_inputs, self.settings, requires_tools)
+        extraction = extract_inputs(
+            query=query,
+            planned_tools=plan.tools,
+            tool_registry=self.tool_registry,
+            llm=self.orchestrator_llm,
+            settings=self.settings,
+        )
+        user_inputs = extraction.user_inputs
+        assumed_inputs = extraction.assumed_inputs
+        assumptions = extraction.assumptions
         yield ("machine", {
             "node": "inputs", "status": "done", "title": "Input Resolution",
             "detail": f"Found {len(user_inputs)} values, filled {len(assumed_inputs)} defaults.",
@@ -210,7 +225,7 @@ class CentralIntelligenceOrchestrator:
         else:
             yield ("machine", {"node": "tools", "status": "active", "title": "MCP Tools", "detail": f"Running {len(plan.tools)} tool(s)..."})
             for idx, tool_name in enumerate(plan.tools, 1):
-                inputs = self._build_tool_inputs(tool_name, user_inputs, assumed_inputs, tool_outputs)
+                inputs = self._build_tool_inputs(tool_name, extraction, tool_outputs)
                 yield ("machine", {
                     "node": "tools", "status": "active", "title": "MCP Tools",
                     "detail": f"[{idx}/{len(plan.tools)}] {tool_name}",
@@ -270,101 +285,141 @@ class CentralIntelligenceOrchestrator:
     # ---- PLANNING ----
     def _build_plan(self, query: str) -> PlanResult:
         valid_tools = list(self.tool_registry.keys())
+
+        if not self.orchestrator_llm.available:
+            return PlanResult(
+                mode="retrieval_only", tools=[],
+                rationale="LLM unavailable — retrieval-only fallback.",
+            )
+
+        tool_descriptions = "\n".join(
+            f"- {name}: {self.tool_registry[name].description} "
+            f"| inputs: {list(self.tool_registry[name].input_schema.get('properties', {}).keys())}"
+            for name in valid_tools
+        )
+
+        doc_descriptions = "\n".join(
+            f"- {entry.standard} ({entry.year_version}): {entry.title}"
+            for entry in self.document_registry
+        )
+        if not doc_descriptions:
+            doc_descriptions = "(no documents loaded)"
+
+        try:
+            raw = self.orchestrator_llm.generate(
+                system_prompt=(
+                    "You are the Central Intelligence Orchestrator for a Eurocodes engineering chatbot.\n"
+                    "Plan the best execution path for answering a user query.\n"
+                    "You have access to:\n"
+                    "1. A database of Eurocode clauses (for explanations, rules, formulas)\n"
+                    "2. Calculator tools (for numerical computations)\n\n"
+                    "Return JSON only: {\"mode\":\"retrieval_only|calculator|hybrid\","
+                    "\"tools\":[...],\"rationale\":\"...\"}"
+                ),
+                user_prompt=(
+                    "###TASK:PLAN###\n"
+                    f"User query: {query}\n\n"
+                    f"Available calculator tools:\n{tool_descriptions}\n\n"
+                    f"Available Eurocode documents in the database:\n{doc_descriptions}\n\n"
+                    "Decision rules:\n"
+                    "- 'retrieval_only': conceptual/explanatory questions, clause lookups, "
+                    "'what is'/'explain'/'describe' type queries\n"
+                    "- 'calculator': pure computation — user gives values and wants numerical results\n"
+                    "- 'hybrid': needs both clause evidence AND computation "
+                    "(most common for engineering design checks)\n"
+                    "- Order tools in execution dependency order "
+                    "(e.g. section_classification before member_resistance)\n"
+                    "- Only select tools that are directly relevant to the query\n"
+                    "- If unsure whether tools are needed, prefer 'hybrid' over 'calculator'"
+                ),
+                temperature=0,
+                max_tokens=900,
+            )
+            parsed = parse_json_loose(raw)
+            if not isinstance(parsed, dict):
+                raise ValueError("plan payload is not a JSON object")
+            mode = parsed.get("mode", "retrieval_only")
+            tools = [t for t in parsed.get("tools", []) if t in valid_tools]
+            rationale = str(parsed.get("rationale", "LLM-generated plan."))
+            if mode in {"retrieval_only", "calculator", "hybrid"}:
+                if mode == "retrieval_only" and not tools:
+                    heuristic = self._heuristic_plan_fallback(
+                        query=query, valid_tools=valid_tools
+                    )
+                    if heuristic.tools:
+                        return heuristic
+                return PlanResult(mode=mode, tools=tools, rationale=rationale)
+        except Exception as exc:
+            logger.warning("plan_generation_failed", extra={"error": str(exc)})
+
+        return self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+
+    def _heuristic_plan_fallback(self, *, query: str, valid_tools: list[str]) -> PlanResult:
         lowered = query.lower()
+        has_section_profile = bool(
+            re.search(r"\b(?:ipe|hea|heb|hem)\s*\d{2,4}\b", lowered)
+        )
+        has_calc_intent = any(
+            token in lowered
+            for token in (
+                "resistance",
+                "resistan",
+                "capacity",
+                "m_rd",
+                "n_rd",
+                "v_rd",
+                "calculate",
+                "calculation",
+                "check",
+                "design value",
+            )
+        )
+        has_action_type = any(token in lowered for token in ("shear", "bending", "axial"))
 
-        heuristic_plan = self._heuristic_plan(lowered, valid_tools)
-        if heuristic_plan:
-            return heuristic_plan
+        def pick(candidates: list[str]) -> list[str]:
+            return [name for name in candidates if name in valid_tools]
 
-        if self.orchestrator_llm.available:
-            try:
-                tool_descriptions = "\n".join(
-                    f"- {name}: {self.tool_registry[name].description}"
-                    for name in valid_tools
+        if any(token in lowered for token in ("interaction", "combined")):
+            tools = pick(["section_classification_ec3", "member_resistance_ec3", "interaction_check_ec3"])
+            if tools:
+                return PlanResult(
+                    mode="hybrid",
+                    tools=tools,
+                    rationale="Heuristic tool selection for interaction check query.",
                 )
-                raw = self.orchestrator_llm.generate(
-                    system_prompt="You are the Central Intelligence Orchestrator for Eurocodes. Plan a grounded tool/retrieval pathway. Return JSON only.",
-                    user_prompt=(
-                        "###TASK:PLAN###\n"
-                        f"User query: {query}\n\n"
-                        f"Available tools:\n{tool_descriptions}\n\n"
-                        "Return JSON: {\"mode\":\"retrieval_only|calculator|hybrid\",\"tools\":[...],\"rationale\":\"...\"}\n"
-                        "Rules:\n"
-                        "- Use 'retrieval_only' for explanation/conceptual questions\n"
-                        "- Use 'calculator' for pure computation queries\n"
-                        "- Use 'hybrid' when both explanation and computation are needed\n"
-                        "- Order tools in execution dependency order\n"
-                        "- Only include tools that are directly relevant"
-                    ),
-                    temperature=0,
-                    max_tokens=300,
+
+        if has_calc_intent and (has_section_profile or has_action_type):
+            tools = pick(["section_classification_ec3", "member_resistance_ec3"])
+            if tools:
+                return PlanResult(
+                    mode="hybrid",
+                    tools=tools,
+                    rationale="Heuristic tool selection for member resistance query.",
                 )
-                parsed = json.loads(raw)
-                mode = parsed.get("mode", "retrieval_only")
-                tools = [t for t in parsed.get("tools", []) if t in valid_tools]
-                rationale = str(parsed.get("rationale", "LLM-generated plan."))
-                if mode in {"retrieval_only", "calculator", "hybrid"}:
-                    return PlanResult(mode=mode, tools=tools, rationale=rationale)
-            except Exception as exc:
-                logger.warning("plan_generation_failed", extra={"error": str(exc)})
 
-        return self._fallback_plan(lowered, valid_tools)
+        if any(token in lowered for token in ("bolt", "m12", "m16", "m20", "m24")) and "shear" in lowered:
+            tools = pick(["bolt_shear_ec3"])
+            if tools:
+                return PlanResult(
+                    mode="hybrid",
+                    tools=tools,
+                    rationale="Heuristic tool selection for bolt shear query.",
+                )
 
-    def _heuristic_plan(self, lowered: str, valid: list[str]) -> PlanResult | None:
-        explanation_like = any(t in lowered for t in ["explain", "what is", "what are", "how does", "clause", "rules", "describe", "overview"])
+        if "column buckling" in lowered or "flexural buckling" in lowered:
+            tools = pick(["column_buckling_ec3"])
+            if tools:
+                return PlanResult(
+                    mode="hybrid",
+                    tools=tools,
+                    rationale="Heuristic tool selection for column buckling query.",
+                )
 
-        if "cantilever" in lowered and any(t in lowered for t in ["beam", "moment", "shear", "load", "deflection"]):
-            tools = ["cantilever_beam_calculator"]
-            if "deflection" in lowered and "check" in lowered:
-                tools.append("deflection_check")
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=[t for t in tools if t in valid], rationale="Heuristic: cantilever beam query")
-
-        if ("simply supported" in lowered or "simple beam" in lowered or "udl" in lowered) and any(t in lowered for t in ["moment", "shear", "load", "deflection", "span", "beam"]):
-            tools = ["simple_beam_calculator"]
-            if "deflection" in lowered and "check" in lowered:
-                tools.append("deflection_check")
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=[t for t in tools if t in valid], rationale="Heuristic: simply supported beam query")
-
-        if any(t in lowered for t in ["bolt", "m20", "m16", "m24", "m12"]) and any(t in lowered for t in ["shear", "resistance", "capacity"]):
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=["bolt_shear_ec3"] if "bolt_shear_ec3" in valid else [], rationale="Heuristic: bolt shear query")
-
-        if any(t in lowered for t in ["weld", "fillet"]) and any(t in lowered for t in ["resistance", "capacity", "strength"]):
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=["weld_resistance_ec3"] if "weld_resistance_ec3" in valid else [], rationale="Heuristic: weld resistance query")
-
-        if any(t in lowered for t in ["column buckling", "buckling resistance", "compression member", "flexural buckling"]):
-            tools = ["column_buckling_ec3"]
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=[t for t in tools if t in valid], rationale="Heuristic: column buckling query")
-
-        if any(t in lowered for t in ["effective length", "buckling length"]):
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=["effective_length_ec3"] if "effective_length_ec3" in valid else [], rationale="Heuristic: effective length query")
-
-        if any(t in lowered for t in ["steel grade", "yield strength", "material prop"]) and not any(t in lowered for t in ["resistance", "capacity"]):
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=["steel_grade_properties"] if "steel_grade_properties" in valid else [], rationale="Heuristic: steel properties query")
-
-        if any(t in lowered for t in ["convert", "conversion"]) and any(t in lowered for t in ["unit", "mm", "kn", "mpa", "psi", "inch", "foot"]):
-            return PlanResult(mode="calculator", tools=["unit_converter"] if "unit_converter" in valid else [], rationale="Heuristic: unit conversion query")
-
-        if "deflection" in lowered and any(t in lowered for t in ["check", "limit", "l/250", "serviceability"]):
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=["deflection_check"] if "deflection_check" in valid else [], rationale="Heuristic: deflection check query")
-
-        ipe_moment = "ipe" in lowered and any(t in lowered for t in ["moment resistance", "bending resistance", "m_rd"]) and "interaction" not in lowered
-        if ipe_moment and "ipe_moment_resistance_ec3" in valid:
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=["ipe_moment_resistance_ec3"], rationale="Heuristic: IPE moment resistance")
-
-        return None
-
-    def _fallback_plan(self, lowered: str, valid: list[str]) -> PlanResult:
-        explanation_like = any(t in lowered for t in ["explain", "what", "clause", "rules", "classification", "describe"])
-        calculation_like = any(t in lowered for t in ["given", "resistance", "capacity", "check", "m_ed", "n_ed", "bending", "calculate", "compute"])
-        interaction_like = "interaction" in lowered or ("combined" in lowered and ("bending" in lowered or "axial" in lowered))
-
-        if calculation_like:
-            tools = ["section_classification_ec3", "member_resistance_ec3"]
-            if interaction_like:
-                tools.append("interaction_check_ec3")
-            return PlanResult(mode="hybrid" if explanation_like else "calculator", tools=[t for t in tools if t in valid], rationale="Fallback heuristic plan.")
-
-        return PlanResult(mode="retrieval_only", tools=[], rationale="Retrieval-only fallback.")
+        return PlanResult(
+            mode="retrieval_only",
+            tools=[],
+            rationale="LLM plan parsing failed and no heuristic tool match.",
+        )
 
     # ---- FOLLOW-UP RESOLUTION ----
     def _resolve_followup(self, query: str, history: list) -> str:
@@ -396,7 +451,9 @@ class CentralIntelligenceOrchestrator:
         if not anchor_msg:
             return query
 
-        current_inputs = parse_user_inputs(query)
+        followup_values = {
+            m.lower().replace(" ", "") for m in _FOLLOWUP_VALUE_RE.findall(query)
+        }
 
         if self.orchestrator_llm.available:
             try:
@@ -417,12 +474,10 @@ class CentralIntelligenceOrchestrator:
                 )
                 resolved = raw.strip()
                 if resolved and len(resolved) > len(query):
-                    resolved_lower = resolved.lower()
-                    all_preserved = all(
-                        str(val).lower() in resolved_lower
-                        for val in current_inputs.values()
-                    )
-                    if all_preserved:
+                    if not followup_values or all(
+                        v in resolved.lower().replace(" ", "")
+                        for v in followup_values
+                    ):
                         logger.info("followup_resolved", extra={"original": query, "resolved": resolved})
                         return resolved
                     logger.info("followup_llm_drift", extra={"resolved": resolved})
@@ -434,105 +489,22 @@ class CentralIntelligenceOrchestrator:
 
     # ---- TOOL INPUT BUILDERS ----
     def _build_tool_inputs(
-        self, tool_name: str, user_inputs: dict[str, Any], assumed_inputs: dict[str, Any], tool_outputs: dict[str, dict[str, Any]],
+        self,
+        tool_name: str,
+        extraction: ExtractionResult,
+        tool_outputs: dict[str, dict[str, Any]],
     ) -> dict[str, Any]:
-        merged = {**assumed_inputs, **user_inputs}
+        base = dict(extraction.tool_inputs.get(tool_name, {}))
 
-        if tool_name == "section_classification_ec3":
-            return {"section_name": merged.get("section_name"), "steel_grade": merged.get("steel_grade", self.settings.default_steel_grade)}
+        if not base:
+            base = {**extraction.assumed_inputs, **extraction.user_inputs}
 
-        if tool_name == "member_resistance_ec3":
-            gov_class = tool_outputs.get("section_classification_ec3", {}).get("outputs", {}).get("governing_class", 2)
-            return {"section_name": merged.get("section_name"), "steel_grade": merged.get("steel_grade", self.settings.default_steel_grade), "section_class": gov_class, "gamma_M0": merged.get("gamma_M0", self.settings.default_gamma_m0)}
+        for input_key, (src_tool, output_path, default) in _CHAIN_MAPPINGS.get(tool_name, {}).items():
+            if base.get(input_key) is None:
+                val = _resolve_nested(tool_outputs.get(src_tool, {}), output_path)
+                base[input_key] = val if val is not None else default
 
-        if tool_name == "interaction_check_ec3":
-            res = tool_outputs.get("member_resistance_ec3", {}).get("outputs", {})
-            return {"MEd_kNm": merged.get("MEd_kNm", self.settings.default_med_knm), "NEd_kN": merged.get("NEd_kN", self.settings.default_ned_kn), "M_Rd_kNm": res.get("M_Rd_kNm"), "N_Rd_kN": res.get("N_Rd_kN")}
-
-        if tool_name == "ipe_moment_resistance_ec3":
-            return {"section_name": merged.get("section_name", self.settings.default_section_name), "steel_grade": merged.get("steel_grade", self.settings.default_steel_grade), "section_class": int(merged.get("section_class", 2)), "gamma_M0": merged.get("gamma_M0", self.settings.default_gamma_m0)}
-
-        if tool_name == "simple_beam_calculator":
-            inp: dict[str, Any] = {"span_m": merged.get("length_m", 6.0)}
-            load_kn = merged.get("load_kn") or merged.get("P_kN")
-            load_kn_per_m = merged.get("load_kn_per_m") or merged.get("w_kN_per_m")
-            if load_kn:
-                inp["load_type"] = "point_mid"
-                inp["load_kn"] = float(load_kn)
-            elif load_kn_per_m:
-                inp["load_type"] = "udl"
-                inp["load_kn_per_m"] = float(load_kn_per_m)
-            else:
-                inp["load_type"] = "udl"
-                inp["load_kn_per_m"] = 10.0
-            return inp
-
-        if tool_name == "cantilever_beam_calculator":
-            inp = {"span_m": merged.get("length_m", 3.0)}
-            load_kn = merged.get("load_kn") or merged.get("P_kN")
-            load_kn_per_m = merged.get("load_kn_per_m") or merged.get("w_kN_per_m")
-            if load_kn_per_m:
-                inp["load_type"] = "udl"
-                inp["load_kn_per_m"] = float(load_kn_per_m)
-            else:
-                inp["load_type"] = "point_tip"
-                inp["load_kn"] = float(load_kn or 10.0)
-            return inp
-
-        if tool_name == "steel_grade_properties":
-            return {"steel_grade": merged.get("steel_grade", self.settings.default_steel_grade), "thickness_mm": merged.get("thickness_mm")}
-
-        if tool_name == "effective_length_ec3":
-            return {"support_conditions": merged.get("support_conditions", "pinned-pinned"), "system_length_m": merged.get("length_m", 5.0)}
-
-        if tool_name == "column_buckling_ec3":
-            return {
-                "section_name": merged.get("section_name", self.settings.default_section_name),
-                "steel_grade": merged.get("steel_grade", self.settings.default_steel_grade),
-                "system_length_m": merged.get("length_m", 5.0),
-                "k_factor": merged.get("k_factor", 1.0),
-                "buckling_curve": merged.get("buckling_curve", "b"),
-                "gamma_M1": merged.get("gamma_M1", 1.0),
-            }
-
-        if tool_name == "bolt_shear_ec3":
-            inp = {}
-            bolt_class = merged.get("bolt_class")
-            if bolt_class:
-                inp["bolt_class"] = str(bolt_class)
-            bolt_diam = merged.get("bolt_diameter_mm")
-            if bolt_diam:
-                inp["bolt_diameter_mm"] = int(bolt_diam)
-            n_bolts = merged.get("n_bolts")
-            if n_bolts:
-                inp["n_bolts"] = int(n_bolts)
-            n_planes = merged.get("n_shear_planes")
-            if n_planes:
-                inp["n_shear_planes"] = int(n_planes)
-            return inp
-
-        if tool_name == "weld_resistance_ec3":
-            return {
-                "throat_thickness_mm": merged.get("throat_thickness_mm", 5.0),
-                "weld_length_mm": merged.get("weld_length_mm", 200.0),
-                "steel_grade": merged.get("steel_grade", self.settings.default_steel_grade),
-            }
-
-        if tool_name == "deflection_check":
-            return {
-                "span_m": merged.get("length_m", 6.0),
-                "actual_deflection_mm": merged.get("actual_deflection_mm", 20.0),
-                "limit_ratio": merged.get("limit_ratio", "L/250"),
-            }
-
-        if tool_name == "unit_converter":
-            return {
-                "value": merged.get("convert_value", 1.0),
-                "from_unit": merged.get("from_unit", "mm"),
-                "to_unit": merged.get("to_unit", "m"),
-            }
-
-        return merged
+        return {k: v for k, v in base.items() if v is not None}
 
     # ---- SOURCE COLLECTION ----
     def _collect_sources(self, retrieved: list[RetrievedClause], tool_outputs: dict[str, dict[str, Any]]) -> list[Citation]:
@@ -562,7 +534,7 @@ class CentralIntelligenceOrchestrator:
             return "I don't have enough information in the currently indexed clauses or tools to give you a reliable answer on this. You'd need to add the relevant Eurocode section or a dedicated calculator tool."
 
         if not self.orchestrator_llm.available:
-            return self._build_fallback_narrative(plan, retrieved, tool_outputs)
+            return self._build_fallback_narrative(query, plan, retrieved, tool_outputs)
 
         clause_evidence = []
         for c in retrieved[:5]:
@@ -582,12 +554,13 @@ class CentralIntelligenceOrchestrator:
                 system_prompt=(
                     "You are a senior structural engineer giving a concise answer to a colleague. "
                     "Rules:\n"
-                    "1. First sentence: state the key result with its value. Example: 'The design bending resistance is **M_Rd = 223.08 kNm**'.\n"
+                    "1. First sentence: state the key result with its value and units. Example: 'The design bending resistance is **M_Rd = 223.08 kNm**'.\n"
                     "2. Then 1-2 sentences on the method/formula used. Mention the governing clause once, e.g. (EC3-1-1, Cl. 6.2.5).\n"
                     "3. Bold **key numerical results** with their engineering symbols.\n"
                     "4. Use ONLY the provided evidence. Never invent values.\n"
                     "5. Keep it to 2-4 sentences total. No sections, no bullet lists, no 'Sources' or 'Assumptions'.\n"
-                    "6. Write naturally, as if explaining at a desk review. Always finish your sentences."
+                    "6. Write naturally, as if explaining at a desk review. Always finish your sentences.\n"
+                    "7. Ensure markdown emphasis is balanced (never leave dangling '**')."
                 ),
                 user_prompt=(
                     f"Question: {query}\n\n"
@@ -598,24 +571,332 @@ class CentralIntelligenceOrchestrator:
                 temperature=0.15,
                 max_tokens=700,
             )
-            return raw.strip()
+            return self._polish_narrative(
+                raw.strip(),
+                query=query,
+                plan=plan,
+                retrieved=retrieved,
+                tool_outputs=tool_outputs,
+            )
         except Exception as exc:
             logger.warning("answer_generation_failed", extra={"error": str(exc)})
-            return self._build_fallback_narrative(plan, retrieved, tool_outputs)
+            return self._build_fallback_narrative(query, plan, retrieved, tool_outputs)
 
-    def _build_fallback_narrative(self, plan: PlanResult, retrieved: list[RetrievedClause], tool_outputs: dict[str, dict[str, Any]]) -> str:
+    def _build_fallback_narrative(
+        self,
+        query: str,
+        plan: PlanResult,
+        retrieved: list[RetrievedClause],
+        tool_outputs: dict[str, dict[str, Any]],
+    ) -> str:
         parts: list[str] = []
+        headline = self._compose_result_headline(
+            plan=plan, tool_outputs=tool_outputs, query=query
+        )
+        if headline:
+            parts.append(headline)
+
         if tool_outputs:
-            for tname, tout in tool_outputs.items():
-                outputs = tout.get("outputs", {})
-                pretty = tname.replace("_ec3", "").replace("_", " ").title()
-                headline = ", ".join(f"**{self._format_value(k, v)}**" for k, v in outputs.items() if isinstance(v, (int, float)))
-                if headline:
-                    parts.append(f"{pretty}: {headline}.")
-        if retrieved:
-            top = retrieved[0]
-            parts.append(f"Based on EC3-1-1, Cl. {top.clause.clause_id} ({top.clause.clause_title}).")
-        return " ".join(parts) if parts else "Results computed from the available tools and EC3 database."
+            first_payload = next(iter(tool_outputs.values()))
+            outputs = first_payload.get("outputs", {})
+            formula = outputs.get("formula")
+            if isinstance(formula, str) and formula.strip():
+                parts.append(f"I used the calculator output formula `{formula.strip()}` with the extracted section/material inputs.")
+
+        basis = self._compose_clause_basis_sentence(retrieved=retrieved, tool_outputs=tool_outputs)
+        if basis:
+            parts.append(basis)
+
+        text = " ".join(parts).strip()
+        if not text:
+            text = "Results computed from the available tools and EC3 database."
+        return self._polish_narrative(
+            text,
+            query=query,
+            plan=plan,
+            retrieved=retrieved,
+            tool_outputs=tool_outputs,
+        )
+
+    def _polish_narrative(
+        self,
+        narrative: str,
+        *,
+        query: str,
+        plan: PlanResult,
+        retrieved: list[RetrievedClause],
+        tool_outputs: dict[str, dict[str, Any]],
+    ) -> str:
+        text = re.sub(r"\s+", " ", (narrative or "")).strip()
+        if not text:
+            text = "Results computed from the available tools and EC3 database."
+
+        text = self._ensure_sentence_complete(text)
+        text = self._sanitize_bold_markers(text)
+
+        headline = self._compose_result_headline(
+            plan=plan,
+            tool_outputs=tool_outputs,
+            query=query,
+        )
+        if headline and not self._has_unitized_headline(text):
+            replaced = self._replace_leading_result_sentence(text, headline)
+            text = replaced if replaced else f"{headline} {text}".strip()
+
+        basis = self._compose_clause_basis_sentence(retrieved=retrieved, tool_outputs=tool_outputs)
+        if basis and "Cl." not in text:
+            text = f"{text} {basis}".strip()
+
+        return self._ensure_sentence_complete(text)
+
+    @staticmethod
+    def _sanitize_bold_markers(text: str) -> str:
+        return text.replace("**", "") if text.count("**") % 2 else text
+
+    @staticmethod
+    def _ensure_sentence_complete(text: str) -> str:
+        cleaned = (text or "").strip()
+        if not cleaned:
+            return cleaned
+
+        terminal = cleaned[-1] if cleaned[-1] in ".!?" else ""
+        body = cleaned[:-1].rstrip() if terminal else cleaned
+
+        if _BROKEN_HYPHEN_TAIL_RE.search(body):
+            body = _BROKEN_HYPHEN_TAIL_RE.sub("", body).rstrip(" ,;:-")
+            cause_match = re.search(r"\b(?:because|due to|as)\b", body, re.IGNORECASE)
+            if cause_match:
+                prefix = body[: cause_match.start()].rstrip(" ,;:-")
+                if prefix:
+                    body = f"{prefix} because required section properties are missing"
+                else:
+                    body = "Required section properties are missing"
+            elif body:
+                body = f"{body} required section properties are missing"
+            else:
+                body = "Required section properties are missing"
+            terminal = ""
+
+        if _INCOMPLETE_CAUSE_TAIL_RE.search(body):
+            cause_match = re.search(r"\b(?:because|due to|as)\b", body, re.IGNORECASE)
+            if cause_match:
+                prefix = body[: cause_match.start()].rstrip(" ,;:-")
+                if prefix:
+                    body = f"{prefix} because required section properties are missing"
+                else:
+                    body = "Required section properties are missing"
+            else:
+                body = f"{body} required section properties are missing"
+            terminal = ""
+
+        if _DANGLING_TAIL_RE.search(body):
+            body = f"{body} additional required inputs are missing"
+            terminal = ""
+
+        cleaned = f"{body}{terminal}".strip()
+        if cleaned[-1] not in ".!?":
+            cleaned = f"{cleaned}."
+        return cleaned
+
+    @staticmethod
+    def _has_unitized_headline(text: str) -> bool:
+        first_sentence = text.split(".", 1)[0]
+        has_equation = "=" in first_sentence
+        has_unit = bool(re.search(r"\b(kNm|kN|MPa|GPa|mm|cm²|cm³|cm⁴|m)\b", first_sentence))
+        return has_equation and has_unit
+
+    def _replace_leading_result_sentence(self, text: str, headline: str) -> str:
+        match = re.match(r"^(?P<first>.*?[.!?])(?:\s+(?P<rest>.*))?$", text.strip())
+        if not match:
+            return ""
+        first = (match.group("first") or "").strip()
+        rest = (match.group("rest") or "").strip()
+        if not self._looks_like_result_sentence(first):
+            return ""
+        return f"{headline} {rest}".strip() if rest else headline
+
+    @staticmethod
+    def _looks_like_result_sentence(sentence: str) -> bool:
+        cleaned = re.sub(r"<[^>]+>", "", sentence or "")
+        cleaned = cleaned.replace("**", "").lower()
+        if "=" not in cleaned:
+            return False
+        symbol_hit = any(token in cleaned for token in ("mrd", "m_rd", "nrd", "n_rd", "vrd", "v_rd"))
+        result_word_hit = any(token in cleaned for token in ("resistance", "capacity", "utilization", "result"))
+        return symbol_hit or result_word_hit
+
+    def _compose_result_headline(
+        self,
+        *,
+        plan: PlanResult,
+        tool_outputs: dict[str, dict[str, Any]],
+        query: str,
+    ) -> str:
+        _, payload = self._pick_tool_payload(plan=plan, tool_outputs=tool_outputs)
+        if not payload:
+            return ""
+
+        outputs = payload.get("outputs", {})
+        key, value = self._pick_primary_numeric_output(outputs, query=query)
+        if not key:
+            return ""
+
+        base_key = self._strip_unit_suffix(key)
+        symbol = self._pretty_key(base_key)
+        value_text = self._format_value(key, value)
+        quantity = self._describe_output_quantity(base_key)
+
+        inputs = payload.get("inputs_used", {})
+        section = str(inputs.get("section_name", "")).strip()
+        steel = str(inputs.get("steel_grade", "")).strip()
+
+        if section and steel:
+            context = f"For **{section}** in **{steel}** steel, "
+        elif section:
+            context = f"For **{section}**, "
+        elif steel:
+            context = f"For **{steel}** steel, "
+        else:
+            context = ""
+
+        return f"{context}the {quantity} is **{symbol} = {value_text}**."
+
+    def _compose_clause_basis_sentence(
+        self,
+        *,
+        retrieved: list[RetrievedClause],
+        tool_outputs: dict[str, dict[str, Any]],
+    ) -> str:
+        seen: set[str] = set()
+        clause_refs: list[tuple[str, str]] = []
+
+        for payload in tool_outputs.values():
+            for ref in payload.get("clause_references", []):
+                cid = str(ref.get("clause_id", "")).strip()
+                title = str(ref.get("title", "")).strip()
+                norm = self._normalize_clause_id(cid)
+                if not norm or norm in seen:
+                    continue
+                seen.add(norm)
+                clause_refs.append((cid, title))
+                if len(clause_refs) >= 2:
+                    break
+            if len(clause_refs) >= 2:
+                break
+
+        if len(clause_refs) < 2:
+            for item in retrieved:
+                cid = str(item.clause.clause_id).strip()
+                title = str(item.clause.clause_title).strip()
+                norm = self._normalize_clause_id(cid)
+                if not norm or norm in seen:
+                    continue
+                seen.add(norm)
+                clause_refs.append((cid, title))
+                if len(clause_refs) >= 2:
+                    break
+
+        if not clause_refs:
+            return ""
+        if len(clause_refs) == 1:
+            cid, title = clause_refs[0]
+            return f"This is checked against EN 1993-1-1, Cl. {cid} ({title})."
+
+        first_cid, first_title = clause_refs[0]
+        second_cid, second_title = clause_refs[1]
+        return (
+            f"This follows EN 1993-1-1, Cl. {first_cid} ({first_title}) "
+            f"with supporting classification guidance from Cl. {second_cid} ({second_title})."
+        )
+
+    def _pick_tool_payload(
+        self,
+        *,
+        plan: PlanResult,
+        tool_outputs: dict[str, dict[str, Any]],
+    ) -> tuple[str, dict[str, Any]] | tuple[str, None]:
+        for tool_name in plan.tools:
+            payload = tool_outputs.get(tool_name)
+            outputs = payload.get("outputs", {}) if payload else {}
+            if payload and outputs and self._has_preferred_numeric_output(outputs):
+                return tool_name, payload
+        for tool_name, payload in tool_outputs.items():
+            outputs = payload.get("outputs", {}) if payload else {}
+            if payload and outputs and self._has_preferred_numeric_output(outputs):
+                return tool_name, payload
+
+        for tool_name in plan.tools:
+            payload = tool_outputs.get(tool_name)
+            if payload and payload.get("outputs"):
+                return tool_name, payload
+        for tool_name, payload in tool_outputs.items():
+            if payload and payload.get("outputs"):
+                return tool_name, payload
+        return "", None
+
+    @staticmethod
+    def _has_preferred_numeric_output(outputs: dict[str, Any]) -> bool:
+        preferred = {"M_Rd_kNm", "N_Rd_kN", "V_Rd_kN", "MEd_kNm", "NEd_kN", "utilization"}
+        for key in preferred:
+            value = outputs.get(key)
+            if isinstance(value, (int, float)):
+                return True
+        return False
+
+    @staticmethod
+    def _pick_primary_numeric_output(
+        outputs: dict[str, Any],
+        *,
+        query: str,
+    ) -> tuple[str, float | int] | tuple[str, None]:
+        if not outputs:
+            return "", None
+
+        lowered_query = query.lower()
+        if any(token in lowered_query for token in ("shear", "v_rd", "shear resistance")):
+            preferred_order = ["V_Rd_kN", "M_Rd_kNm", "N_Rd_kN", "utilization", "MEd_kNm", "NEd_kN"]
+        elif any(token in lowered_query for token in ("axial", "compression", "tension", "n_rd", "normal force")):
+            preferred_order = ["N_Rd_kN", "M_Rd_kNm", "V_Rd_kN", "utilization", "MEd_kNm", "NEd_kN"]
+        elif any(token in lowered_query for token in ("bending", "moment", "m_rd")):
+            preferred_order = ["M_Rd_kNm", "V_Rd_kN", "N_Rd_kN", "utilization", "MEd_kNm", "NEd_kN"]
+        else:
+            preferred_order = ["M_Rd_kNm", "N_Rd_kN", "V_Rd_kN", "MEd_kNm", "NEd_kN", "utilization"]
+
+        for key in preferred_order:
+            value = outputs.get(key)
+            if isinstance(value, (int, float)):
+                return key, value
+
+        for key, value in outputs.items():
+            if isinstance(value, (int, float)):
+                return key, value
+        return "", None
+
+    @staticmethod
+    def _strip_unit_suffix(key: str) -> str:
+        for suffix, _ in _UNIT_SUFFIXES:
+            if key.endswith(suffix):
+                return key[: -len(suffix)]
+        return key
+
+    @staticmethod
+    def _describe_output_quantity(base_key: str) -> str:
+        lowered = base_key.lower()
+        if "m_rd" in lowered:
+            return "design bending resistance"
+        if "n_rd" in lowered:
+            return "design axial resistance"
+        if "v_rd" in lowered:
+            return "design shear resistance"
+        if "utilization" in lowered:
+            return "utilization ratio"
+        return "design result"
+
+    @staticmethod
+    def _pretty_tool_name(tool_name: str) -> str:
+        pretty = tool_name.replace("_ec3", "").replace("_", " ").title()
+        pretty = pretty.replace("Ipe", "IPE").replace("Ec3", "EC3")
+        return pretty
 
     # ---- MARKDOWN BUILDER ----
     def _build_markdown_answer(self, *, query: str, plan: PlanResult, narrative: str, supported: bool,
@@ -642,18 +923,24 @@ class CentralIntelligenceOrchestrator:
                 if not outputs:
                     continue
 
-                pretty = tool_name.replace("_ec3", "").replace("_", " ").title()
-                lines.append(f"<details><summary><strong>{pretty}</strong> — detailed results</summary>\n")
+                pretty = self._pretty_tool_name(tool_name)
+                lines.append(f"<details class=\"tool-result\">")
+                lines.append(f"<summary><strong>{pretty}</strong> detailed results</summary>")
+                lines.append("")
 
                 if inputs_used:
+                    lines.append("**Inputs**")
+                    lines.append("")
                     lines.append("| Input | Value |")
-                    lines.append("|:------|------:|")
+                    lines.append("| --- | --- |")
                     for k, v in inputs_used.items():
                         lines.append(f"| {self._pretty_key(k)} | {self._format_value(k, v)} |")
                     lines.append("")
 
+                lines.append("**Outputs**")
+                lines.append("")
                 lines.append("| Output | Value |")
-                lines.append("|:-------|------:|")
+                lines.append("| --- | --- |")
                 for k, v in outputs.items():
                     if isinstance(v, (int, float, str, bool)):
                         lines.append(f"| {self._pretty_key(k)} | **{self._format_value(k, v)}** |")
@@ -661,17 +948,24 @@ class CentralIntelligenceOrchestrator:
 
                 notes = payload.get("notes", [])
                 if notes:
+                    lines.append("**Notes**")
+                    lines.append("")
                     for n in notes:
-                        lines.append(f"> {n}")
+                        lines.append(f"- {n}")
                     lines.append("")
 
-                lines.append("</details>\n")
+                lines.append("</details>")
+                lines.append("")
 
         if assumptions:
-            lines.append("<details><summary>Assumptions made</summary>\n")
+            lines.append("<details class=\"assumptions\">")
+            lines.append("<summary>Assumptions used</summary>")
+            lines.append("")
             for a in assumptions:
                 lines.append(f"- {a}")
-            lines.append("\n</details>\n")
+            lines.append("")
+            lines.append("</details>")
+            lines.append("")
 
         if any(s.status == "error" for s in tool_trace):
             lines.append("\n**Tool Errors:**\n")

@@ -54,6 +54,7 @@ class Settings:
 
     document_registry_path: Path | None = None
     tool_registry_path: Path | None = None
+    orchestrator_thread_log_path: Path | None = None
 
     supabase_url: str = ""
     supabase_anon_key: str = ""
@@ -74,6 +75,12 @@ class Settings:
         if self.tool_registry_path:
             return self.tool_registry_path
         return self.project_root / "tools" / "tool_registry.json"
+
+    @property
+    def resolved_orchestrator_thread_log_path(self) -> Path:
+        if self.orchestrator_thread_log_path:
+            return self.orchestrator_thread_log_path
+        return self.project_root / "logs" / "orchestrator_threads.json"
 
     @classmethod
     def load(cls) -> "Settings":
@@ -116,6 +123,11 @@ class Settings:
             tool_registry_path=(
                 Path(os.environ["TOOL_REGISTRY_PATH"])
                 if os.getenv("TOOL_REGISTRY_PATH")
+                else None
+            ),
+            orchestrator_thread_log_path=(
+                Path(os.environ["ORCHESTRATOR_THREAD_LOG_PATH"])
+                if os.getenv("ORCHESTRATOR_THREAD_LOG_PATH")
                 else None
             ),
             supabase_url=os.getenv("SUPABASE_URL", ""),

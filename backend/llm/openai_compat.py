@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import logging
+
 import httpx
 
 from backend.llm.base import LLMProvider
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAICompatProvider(LLMProvider):
@@ -61,7 +65,22 @@ class OpenAICompatProvider(LLMProvider):
         if not choices:
             raise RuntimeError(f"{self.provider_name} returned no choices.")
 
-        content = choices[0].get("message", {}).get("content", "")
+        choice = choices[0]
+        finish_reason = str(choice.get("finish_reason", "")).strip().lower()
+        if finish_reason == "length":
+            logger.warning(
+                "llm_output_hit_token_limit",
+                extra={
+                    "provider": self.provider_name,
+                    "model": self.model,
+                    "max_tokens": max_tokens,
+                },
+            )
+            raise RuntimeError(
+                f"{self.provider_name} output hit token limit (max_tokens={max_tokens})."
+            )
+
+        content = choice.get("message", {}).get("content", "")
         if not isinstance(content, str):
             raise RuntimeError(f"{self.provider_name} response content is invalid.")
         return content

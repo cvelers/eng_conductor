@@ -3,7 +3,9 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+from datetime import datetime, timezone
 from pathlib import Path
+from uuid import uuid4
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
@@ -30,6 +32,54 @@ def _chunk_text(value: str, size: int = 36) -> list[str]:
     if not value:
         return []
     return [value[idx : idx + size] for idx in range(0, len(value), size)]
+
+
+def _append_thread_log(settings: Settings, payload: dict) -> None:
+    log_path = settings.resolved_orchestrator_thread_log_path
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        entries: list[dict] = []
+
+        if log_path.exists():
+            raw = log_path.read_text(encoding="utf-8").strip()
+            if raw:
+                try:
+                    parsed = json.loads(raw)
+                    if isinstance(parsed, list):
+                        entries = [item for item in parsed if isinstance(item, dict)]
+                    elif isinstance(parsed, dict):
+                        entries = [parsed]
+                except Exception:
+                    # Backward compatibility: migrate old JSONL content into JSON array.
+                    migrated: list[dict] = []
+                    for line in raw.splitlines():
+                        line = line.strip()
+                        if not line:
+                            continue
+                        try:
+                            item = json.loads(line)
+                        except Exception:
+                            continue
+                        if isinstance(item, dict):
+                            migrated.append(item)
+                    entries = migrated
+
+        entries.append(payload)
+        log_path.write_text(json.dumps(entries, default=str, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        logger.exception("thread_log_write_failed", extra={"path": str(log_path)})
+
+
+def _history_payload(history: list) -> list[dict]:
+    rows: list[dict] = []
+    for item in history or []:
+        if hasattr(item, "model_dump"):
+            rows.append(item.model_dump())
+        elif isinstance(item, dict):
+            rows.append(dict(item))
+        else:
+            rows.append({"role": str(getattr(item, "role", "")), "content": str(getattr(item, "content", ""))})
+    return rows
 
 
 class ToolGenerateRequest(BaseModel):
@@ -63,6 +113,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         retriever=retriever,
         tool_runner=tool_runner,
         tool_registry=tool_registry,
+        document_registry=doc_registry,
     )
 
     tool_writer_provider = get_tool_writer_provider(active_settings)
@@ -91,37 +142,84 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/api/chat", response_model=ChatResponse)
     async def chat(request: ChatRequest) -> ChatResponse:
+        request_id = uuid4().hex
+        machine_events: list[dict] = []
+        final_response: ChatResponse | None = None
+        error_detail: str | None = None
         try:
-            response = orchestrator.run(request.message, history=request.history)
-            return response
+            for event_type, payload in orchestrator.run_stream(request.message, history=request.history):
+                if event_type == "machine":
+                    machine_events.append(payload)
+                elif event_type == "response":
+                    final_response = payload
+            if final_response is None:
+                raise RuntimeError("No response generated.")
+            return final_response
         except Exception as exc:
+            error_detail = str(exc)
             logger.exception("chat_failed")
             raise HTTPException(status_code=500, detail=str(exc)) from exc
+        finally:
+            _append_thread_log(
+                active_settings,
+                {
+                    "ts": datetime.now(timezone.utc).isoformat(),
+                    "request_id": request_id,
+                    "endpoint": "/api/chat",
+                    "request": {
+                        "message": request.message,
+                        "history": _history_payload(request.history),
+                    },
+                    "machine_events": machine_events,
+                    "response": final_response.model_dump() if final_response else None,
+                    "error": error_detail,
+                },
+            )
 
     @app.post("/api/chat/stream")
     async def chat_stream(request: ChatRequest) -> StreamingResponse:
         async def event_generator():
+            request_id = uuid4().hex
+            machine_events: list[dict] = []
             final_response: ChatResponse | None = None
+            error_detail: str | None = None
             try:
                 for event_type, payload in orchestrator.run_stream(request.message, history=request.history):
                     if event_type == "machine":
+                        machine_events.append(payload)
                         yield json.dumps({"type": "machine", **payload}) + "\n"
                         await asyncio.sleep(0.005)
                     elif event_type == "response":
                         final_response = payload
             except Exception as exc:
+                error_detail = str(exc)
                 logger.exception("chat_stream_failed")
                 yield json.dumps({"type": "error", "detail": str(exc)}) + "\n"
-                return
-
-            if final_response is None:
-                yield json.dumps({"type": "error", "detail": "No response generated."}) + "\n"
-                return
-
-            for piece in _chunk_text(final_response.answer, size=32):
-                yield json.dumps({"type": "delta", "delta": piece}) + "\n"
-                await asyncio.sleep(0.006)
-            yield json.dumps({"type": "final", "response": final_response.model_dump()}) + "\n"
+            else:
+                if final_response is None:
+                    error_detail = "No response generated."
+                    yield json.dumps({"type": "error", "detail": "No response generated."}) + "\n"
+                else:
+                    for piece in _chunk_text(final_response.answer, size=32):
+                        yield json.dumps({"type": "delta", "delta": piece}) + "\n"
+                        await asyncio.sleep(0.006)
+                    yield json.dumps({"type": "final", "response": final_response.model_dump()}) + "\n"
+            finally:
+                _append_thread_log(
+                    active_settings,
+                    {
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                        "request_id": request_id,
+                        "endpoint": "/api/chat/stream",
+                        "request": {
+                            "message": request.message,
+                            "history": _history_payload(request.history),
+                        },
+                        "machine_events": machine_events,
+                        "response": final_response.model_dump() if final_response else None,
+                        "error": error_detail,
+                    },
+                )
 
         return StreamingResponse(event_generator(), media_type="application/x-ndjson")
 
