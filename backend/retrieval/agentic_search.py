@@ -335,7 +335,7 @@ class AgenticRetriever:
                     "Return JSON array of search strings only."
                 ),
                 temperature=0,
-                max_tokens=500,
+                max_tokens=self.settings.search_decompose_max_tokens,
             )
             data = parse_json_loose(raw)
             if isinstance(data, list) and data:

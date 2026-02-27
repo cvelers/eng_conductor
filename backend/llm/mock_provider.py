@@ -28,6 +28,9 @@ class MockProvider(LLMProvider):
         if "###task:plan###" in prompt:
             return self._mock_plan(prompt)
 
+        if "###task:plan_tools###" in prompt:
+            return self._mock_plan_tools(prompt)
+
         if "###task:extract_inputs###" in prompt:
             return self._mock_extract(prompt)
 
@@ -91,6 +94,29 @@ class MockProvider(LLMProvider):
             "mode": mode, "tools": tools,
             "rationale": "Mock deterministic plan.",
         })
+
+    def _mock_plan_tools(self, prompt: str) -> str:
+        q = self._extract_user_query(prompt)
+        tools: list[str] = []
+
+        if "interaction" in q or ("combined" in q and any(t in q for t in ["bending", "axial"])):
+            tools = ["section_classification_ec3", "member_resistance_ec3", "interaction_check_ec3"]
+        elif any(t in q for t in ["resistance", "given", "check", "m_ed", "n_ed", "moment"]):
+            if "ipe" in q:
+                tools = ["ipe_moment_resistance_ec3"]
+            else:
+                tools = ["section_classification_ec3", "member_resistance_ec3"]
+        elif any(t in q for t in ["bolt", "m20", "m16"]) and "shear" in q:
+            tools = ["bolt_shear_ec3"]
+        elif any(t in q for t in ["column buckling", "flexural buckling"]):
+            tools = ["column_buckling_ec3"]
+
+        return json.dumps(
+            {
+                "tools": tools,
+                "rationale": "Mock post-retrieval tool planning.",
+            }
+        )
 
     def _mock_extract(self, prompt: str) -> str:
         q = self._extract_user_query(prompt)

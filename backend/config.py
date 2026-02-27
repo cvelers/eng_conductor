@@ -34,6 +34,7 @@ class Settings:
     search_model: str = "moonshotai/kimi-k2.5"
     search_api_key: str = ""
     search_base_url: str = "https://openrouter.ai/api/v1"
+    search_decompose_max_tokens: int = 1200
 
     tool_writer_provider: str = ""
     tool_writer_model: str = ""
@@ -99,6 +100,9 @@ class Settings:
             search_model=os.getenv("SEARCH_MODEL", "moonshotai/kimi-k2.5"),
             search_api_key=os.getenv("SEARCH_API_KEY", ""),
             search_base_url=os.getenv("SEARCH_BASE_URL", "https://openrouter.ai/api/v1"),
+            search_decompose_max_tokens=_to_int(
+                os.getenv("SEARCH_DECOMPOSE_MAX_TOKENS"), 1200
+            ),
             tool_writer_provider=os.getenv("TOOL_WRITER_PROVIDER", ""),
             tool_writer_model=os.getenv("TOOL_WRITER_MODEL", ""),
             tool_writer_api_key=os.getenv("TOOL_WRITER_API_KEY", ""),

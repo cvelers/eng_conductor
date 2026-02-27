@@ -80,6 +80,7 @@ ORCHESTRATOR_API_KEY=your-key-here
 SEARCH_PROVIDER=openrouter
 SEARCH_MODEL=moonshotai/kimi-k2.5
 SEARCH_API_KEY=your-key-here
+SEARCH_DECOMPOSE_MAX_TOKENS=1200
 
 # Feature flags
 AGENTIC_SEARCH_ENABLED=true

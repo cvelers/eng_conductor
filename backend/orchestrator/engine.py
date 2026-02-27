@@ -12,68 +12,13 @@ from backend.registries.document_registry import ClauseRecord, DocumentRegistryE
 from backend.registries.tool_registry import ToolRegistryEntry
 from backend.retrieval.agentic_search import AgenticRetriever, RetrievedClause
 from backend.schemas import ChatResponse, Citation, RetrievalTraceStep, ToolTraceStep
+from backend.tools.response_formatter import ResponseFormatterTool
 from backend.tools.runner import MCPToolRunner
 from backend.utils.citations import build_citation_address
 from backend.utils.json_utils import parse_json_loose
 from backend.utils.parsing import ExtractionResult, extract_inputs
 
 logger = logging.getLogger(__name__)
-
-_UNIT_SUFFIXES = [
-    ("_kNm", " (kNm)"),
-    ("_kN", " (kN)"),
-    ("_MPa", " (MPa)"),
-    ("_GPa", " (GPa)"),
-    ("_mm", " (mm)"),
-    ("_cm2", " (cm²)"),
-    ("_cm3", " (cm³)"),
-    ("_cm4", " (cm⁴)"),
-    ("_m", " (m)"),
-]
-
-_KEY_SUBSCRIPTS: dict[str, str] = {
-    "M_Rd": "M<sub>Rd</sub>",
-    "N_Rd": "N<sub>Rd</sub>",
-    "V_Rd": "V<sub>Rd</sub>",
-    "M_Ed": "M<sub>Ed</sub>",
-    "N_Ed": "N<sub>Ed</sub>",
-    "V_Ed": "V<sub>Ed</sub>",
-    "N_b_Rd": "N<sub>b,Rd</sub>",
-    "Fv_Rd": "F<sub>v,Rd</sub>",
-    "Fv": "F<sub>v</sub>",
-    "fy": "f<sub>y</sub>",
-    "fu": "f<sub>u</sub>",
-    "fub": "f<sub>ub</sub>",
-    "Wpl": "W<sub>pl</sub>",
-    "Wel": "W<sub>el</sub>",
-    "L_cr": "L<sub>cr</sub>",
-    "gamma_M0": "γ<sub>M0</sub>",
-    "gamma_M1": "γ<sub>M1</sub>",
-    "gamma_M2": "γ<sub>M2</sub>",
-    "alpha_v": "α<sub>v</sub>",
-}
-
-_NARRATIVE_SUB_RE: list[tuple[re.Pattern[str], str]] = [
-    (re.compile(r"gamma_M([012])"), r"γ<sub>M\1</sub>"),
-    (re.compile(r"γ_M([012])"), r"γ<sub>M\1</sub>"),
-    (re.compile(r"γM([012])"), r"γ<sub>M\1</sub>"),
-    (re.compile(r"N_b,Rd"), "N<sub>b,Rd</sub>"),
-    (re.compile(r"Fv[_,]Rd"), "F<sub>v,Rd</sub>"),
-    (re.compile(r"M_Rd"), "M<sub>Rd</sub>"),
-    (re.compile(r"N_Rd"), "N<sub>Rd</sub>"),
-    (re.compile(r"V_Rd"), "V<sub>Rd</sub>"),
-    (re.compile(r"M_Ed"), "M<sub>Ed</sub>"),
-    (re.compile(r"N_Ed"), "N<sub>Ed</sub>"),
-    (re.compile(r"V_Ed"), "V<sub>Ed</sub>"),
-    (re.compile(r"F_v\b"), "F<sub>v</sub>"),
-    (re.compile(r"f_ub"), "f<sub>ub</sub>"),
-    (re.compile(r"f_y"), "f<sub>y</sub>"),
-    (re.compile(r"f_u\b"), "f<sub>u</sub>"),
-    (re.compile(r"W_pl"), "W<sub>pl</sub>"),
-    (re.compile(r"W_el"), "W<sub>el</sub>"),
-    (re.compile(r"L_cr"), "L<sub>cr</sub>"),
-    (re.compile(r"α_?v\b"), "α<sub>v</sub>"),
-]
 
 
 @dataclass
@@ -111,17 +56,6 @@ _FOLLOWUP_VALUE_RE = re.compile(
     re.IGNORECASE,
 )
 
-_DANGLING_TAIL_RE = re.compile(
-    r"(?:\b(?:and|or|with|because|for|to|of|in|on|at|from|that|which|where|when|if|while|as)\b[\s,;:]*)+$",
-    re.IGNORECASE,
-)
-
-_BROKEN_HYPHEN_TAIL_RE = re.compile(r"(?:\b[0-9A-Za-z_]+-)$")
-_INCOMPLETE_CAUSE_TAIL_RE = re.compile(
-    r"(?:\b(?:because|due to|as)\b[^.?!]{0,160}?\b(?:cross|cross[- ]?section|section|properties?|inputs?|data|parameters?)\b)$",
-    re.IGNORECASE,
-)
-
 
 class CentralIntelligenceOrchestrator:
     def __init__(
@@ -133,6 +67,7 @@ class CentralIntelligenceOrchestrator:
         tool_runner: MCPToolRunner,
         tool_registry: list[ToolRegistryEntry],
         document_registry: list[DocumentRegistryEntry] | None = None,
+        response_formatter: ResponseFormatterTool | None = None,
     ) -> None:
         self.settings = settings
         self.orchestrator_llm = orchestrator_llm
@@ -140,6 +75,7 @@ class CentralIntelligenceOrchestrator:
         self.tool_runner = tool_runner
         self.tool_registry = {entry.tool_name: entry for entry in tool_registry}
         self.document_registry = document_registry or []
+        self.response_formatter = response_formatter or ResponseFormatterTool()
 
     def run(self, query: str, *, history: list | None = None) -> ChatResponse:
         final_response: ChatResponse | None = None
@@ -163,65 +99,138 @@ class CentralIntelligenceOrchestrator:
             "meta": {"mode": plan.mode, "tools": plan.tools, "rationale": plan.rationale},
         })
 
-        requires_tools = plan.mode in {"calculator", "hybrid"} and bool(plan.tools)
+        run_retrieval = plan.mode in {"retrieval_only", "hybrid"}
+        run_tools = plan.mode in {"calculator", "hybrid"}
+
+        retrieved: list[RetrievedClause] = []
+        retrieval_trace: list[dict[str, object]] = []
+
+        # --- RETRIEVAL ---
+        if run_retrieval:
+            yield ("machine", {"node": "retrieval", "status": "active", "title": "Database Search", "detail": "Searching EC3 clauses..."})
+            for retrieval_event in self.retriever.iter_retrieve(query, top_k=self.settings.top_k_clauses):
+                etype = retrieval_event.get("type")
+                if etype == "iteration":
+                    step = retrieval_event.get("step", {})
+                    top = retrieval_event.get("top", [])
+                    yield ("machine", {
+                        "node": "retrieval", "status": "active", "title": "Database Search",
+                        "detail": f"Pass {step.get('iteration', '?')}: found {len(step.get('top_clause_ids', []))} matches",
+                        "meta": {"iteration": step, "top": top},
+                    })
+                elif etype == "recursive":
+                    yield ("machine", {"node": "retrieval", "status": "active", "title": "Database Search", "detail": str(retrieval_event.get("detail", "Expanding search..."))})
+                elif etype == "final":
+                    retrieved = retrieval_event.get("results", [])
+                    retrieval_trace = retrieval_event.get("trace", [])
+
+            yield ("machine", {
+                "node": "retrieval", "status": "done", "title": "Database Search",
+                "detail": f"Retrieved {len(retrieved)} relevant clauses.",
+                "meta": {
+                    "retrieved_count": len(retrieved),
+                    "top_clauses": [
+                        {"doc_id": i.clause.doc_id, "clause_id": i.clause.clause_id, "title": i.clause.clause_title, "pointer": i.clause.pointer}
+                        for i in retrieved[:5]
+                    ],
+                },
+            })
+        else:
+            yield ("machine", {
+                "node": "retrieval", "status": "done", "title": "Database Search",
+                "detail": "Skipped for calculator-only path.",
+                "meta": {"retrieved_count": 0, "top_clauses": []},
+            })
+
+        if run_tools and plan.mode == "hybrid":
+            yield ("machine", {
+                "node": "plan",
+                "status": "active",
+                "title": "Pathway Planning",
+                "detail": "Refining tool plan from retrieved clauses...",
+            })
+            planned_tools, tool_plan_note = self._plan_tools_after_retrieval(
+                query=query,
+                retrieved=retrieved,
+                initial_tools=plan.tools,
+            )
+            planned_tools = self._normalize_tool_chain(planned_tools)
+            if planned_tools:
+                rationale = plan.rationale
+                if tool_plan_note:
+                    rationale = f"{plan.rationale} | {tool_plan_note}"
+                plan = PlanResult(mode="hybrid", tools=planned_tools, rationale=rationale)
+            else:
+                rationale = f"{plan.rationale} | {tool_plan_note}" if tool_plan_note else plan.rationale
+                plan = PlanResult(
+                    mode="retrieval_only",
+                    tools=[],
+                    rationale=f"{rationale} | Post-retrieval tool planning found no required calculator.",
+                )
+                run_tools = False
+
+            yield ("machine", {
+                "node": "plan",
+                "status": "done",
+                "title": "Pathway Planning",
+                "detail": f"Final strategy: {plan.mode} | Tools: {plan.tools or ['none']}",
+                "meta": {"mode": plan.mode, "tools": plan.tools, "rationale": plan.rationale},
+            })
+        elif run_tools:
+            normalized_tools = self._normalize_tool_chain(plan.tools)
+            if normalized_tools != plan.tools:
+                plan = PlanResult(
+                    mode=plan.mode,
+                    tools=normalized_tools,
+                    rationale=f"{plan.rationale} | Tool chain normalized for execution dependencies.",
+                )
 
         # --- INPUT RESOLUTION ---
-        yield ("machine", {"node": "inputs", "status": "active", "title": "Input Resolution", "detail": "Extracting values from your query..."})
-        extraction = extract_inputs(
-            query=query,
-            planned_tools=plan.tools,
-            tool_registry=self.tool_registry,
-            llm=self.orchestrator_llm,
-            settings=self.settings,
+        extraction = ExtractionResult(
+            user_inputs={},
+            assumed_inputs={},
+            assumptions=[],
+            tool_inputs={},
         )
+        if run_tools:
+            yield ("machine", {"node": "inputs", "status": "active", "title": "Input Resolution", "detail": "Extracting values from your query..."})
+            extraction = extract_inputs(
+                query=query,
+                planned_tools=plan.tools,
+                tool_registry=self.tool_registry,
+                llm=self.orchestrator_llm,
+                settings=self.settings,
+            )
+            yield ("machine", {
+                "node": "inputs", "status": "done", "title": "Input Resolution",
+                "detail": f"Found {len(extraction.user_inputs)} values, filled {len(extraction.assumed_inputs)} defaults.",
+                "meta": {
+                    "user_inputs": extraction.user_inputs,
+                    "assumed_inputs": extraction.assumed_inputs,
+                    "assumptions": extraction.assumptions,
+                },
+            })
+        else:
+            yield ("machine", {
+                "node": "inputs", "status": "done", "title": "Input Resolution",
+                "detail": "No calculator inputs required for this path.",
+                "meta": {"user_inputs": {}, "assumed_inputs": {}, "assumptions": []},
+            })
+
         user_inputs = extraction.user_inputs
         assumed_inputs = extraction.assumed_inputs
         assumptions = extraction.assumptions
-        yield ("machine", {
-            "node": "inputs", "status": "done", "title": "Input Resolution",
-            "detail": f"Found {len(user_inputs)} values, filled {len(assumed_inputs)} defaults.",
-            "meta": {"user_inputs": user_inputs, "assumed_inputs": assumed_inputs, "assumptions": assumptions},
-        })
 
-        # --- RETRIEVAL ---
-        yield ("machine", {"node": "retrieval", "status": "active", "title": "Database Search", "detail": "Searching EC3 clauses..."})
-        retrieved: list[RetrievedClause] = []
-        retrieval_trace: list[dict[str, object]] = []
-        for retrieval_event in self.retriever.iter_retrieve(query, top_k=self.settings.top_k_clauses):
-            etype = retrieval_event.get("type")
-            if etype == "iteration":
-                step = retrieval_event.get("step", {})
-                top = retrieval_event.get("top", [])
-                top_labels = ", ".join(str(i.get("clause_id", "?")) for i in top) or "none"
-                yield ("machine", {
-                    "node": "retrieval", "status": "active", "title": "Database Search",
-                    "detail": f"Pass {step.get('iteration', '?')}: found {len(step.get('top_clause_ids', []))} matches",
-                    "meta": {"iteration": step, "top": top},
-                })
-            elif etype == "recursive":
-                yield ("machine", {"node": "retrieval", "status": "active", "title": "Database Search", "detail": str(retrieval_event.get("detail", "Expanding search..."))})
-            elif etype == "final":
-                retrieved = retrieval_event.get("results", [])
-                retrieval_trace = retrieval_event.get("trace", [])
-
-        yield ("machine", {
-            "node": "retrieval", "status": "done", "title": "Database Search",
-            "detail": f"Retrieved {len(retrieved)} relevant clauses.",
-            "meta": {
-                "retrieved_count": len(retrieved),
-                "top_clauses": [
-                    {"doc_id": i.clause.doc_id, "clause_id": i.clause.clause_id, "title": i.clause.clause_title, "pointer": i.clause.pointer}
-                    for i in retrieved[:5]
-                ],
-            },
-        })
+        requires_tools = run_tools
 
         # --- TOOLS ---
         tool_trace: list[ToolTraceStep] = []
         tool_outputs: dict[str, dict[str, Any]] = {}
 
-        if not plan.tools:
-            yield ("machine", {"node": "tools", "status": "done", "title": "MCP Tools", "detail": "No tools needed — retrieval-only path."})
+        if not run_tools:
+            yield ("machine", {"node": "tools", "status": "done", "title": "MCP Tools", "detail": "No tools needed for this strategy."})
+        elif not plan.tools:
+            yield ("machine", {"node": "tools", "status": "error", "title": "MCP Tools", "detail": "Mode requires calculators, but no suitable tool chain was planned."})
         else:
             yield ("machine", {"node": "tools", "status": "active", "title": "MCP Tools", "detail": f"Running {len(plan.tools)} tool(s)..."})
             for idx, tool_name in enumerate(plan.tools, 1):
@@ -248,7 +257,7 @@ class CentralIntelligenceOrchestrator:
 
         sources = self._collect_sources(retrieved, tool_outputs)
         supported = bool(sources)
-        if requires_tools and any(s.status == "error" for s in tool_trace):
+        if requires_tools and (not plan.tools or any(s.status == "error" for s in tool_trace)):
             supported = False
 
         narrative = self._draft_grounded_narrative(query=query, plan=plan, retrieved=retrieved, tool_outputs=tool_outputs, supported=supported)
@@ -322,15 +331,15 @@ class CentralIntelligenceOrchestrator:
                     f"Available calculator tools:\n{tool_descriptions}\n\n"
                     f"Available Eurocode documents in the database:\n{doc_descriptions}\n\n"
                     "Decision rules:\n"
-                    "- 'retrieval_only': conceptual/explanatory questions, clause lookups, "
-                    "'what is'/'explain'/'describe' type queries\n"
-                    "- 'calculator': pure computation — user gives values and wants numerical results\n"
-                    "- 'hybrid': needs both clause evidence AND computation "
-                    "(most common for engineering design checks)\n"
+                    "- 'retrieval_only': explanations, procedure/method checks, clause lookups, "
+                    "or any query that does not require a numerical result\n"
+                    "- 'calculator': direct/trivial numeric computation where clause retrieval is not needed\n"
+                    "- 'hybrid': needs both clause evidence and computation, especially when procedure "
+                    "must be verified before calculation\n"
                     "- Order tools in execution dependency order "
                     "(e.g. section_classification before member_resistance)\n"
                     "- Only select tools that are directly relevant to the query\n"
-                    "- If unsure whether tools are needed, prefer 'hybrid' over 'calculator'"
+                    "- Modes are equal choices: pick the single best mode for this query"
                 ),
                 temperature=0,
                 max_tokens=900,
@@ -338,20 +347,24 @@ class CentralIntelligenceOrchestrator:
             parsed = parse_json_loose(raw)
             if not isinstance(parsed, dict):
                 raise ValueError("plan payload is not a JSON object")
-            mode = parsed.get("mode", "retrieval_only")
-            tools = [t for t in parsed.get("tools", []) if t in valid_tools]
+            mode = str(parsed.get("mode", "retrieval_only")).strip()
+            tools = self._normalize_tool_chain(
+                [t for t in parsed.get("tools", []) if t in valid_tools]
+            )
             rationale = str(parsed.get("rationale", "LLM-generated plan."))
             if mode in {"retrieval_only", "calculator", "hybrid"}:
-                if mode == "retrieval_only" and not tools:
-                    heuristic = self._heuristic_plan_fallback(
-                        query=query, valid_tools=valid_tools
-                    )
-                    if heuristic.tools:
-                        return heuristic
+                if mode == "retrieval_only":
+                    return PlanResult(mode="retrieval_only", tools=[], rationale=rationale)
+                
+                if not tools:
+                    heuristic = self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+                    tools = self._normalize_tool_chain(heuristic.tools)
+                    if tools:
+                        rationale = f"{rationale} | Tool chain recovered via heuristic fallback."
                 return PlanResult(mode=mode, tools=tools, rationale=rationale)
         except Exception as exc:
             logger.warning("plan_generation_failed", extra={"error": str(exc)})
-
+        
         return self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
 
     def _heuristic_plan_fallback(self, *, query: str, valid_tools: list[str]) -> PlanResult:
@@ -420,6 +433,91 @@ class CentralIntelligenceOrchestrator:
             tools=[],
             rationale="LLM plan parsing failed and no heuristic tool match.",
         )
+
+    def _normalize_tool_chain(self, tools: list[str]) -> list[str]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+        valid_tools = set(self.tool_registry.keys())
+
+        def add_with_dependencies(tool_name: str) -> None:
+            if tool_name not in valid_tools:
+                return
+            for src_tool, _, _ in _CHAIN_MAPPINGS.get(tool_name, {}).values():
+                add_with_dependencies(src_tool)
+            if tool_name in seen:
+                return
+            seen.add(tool_name)
+            normalized.append(tool_name)
+
+        for tool in tools:
+            add_with_dependencies(tool)
+
+        return normalized
+
+    def _plan_tools_after_retrieval(
+        self,
+        *,
+        query: str,
+        retrieved: list[RetrievedClause],
+        initial_tools: list[str],
+    ) -> tuple[list[str], str]:
+        valid_tools = list(self.tool_registry.keys())
+        fallback_tools = self._normalize_tool_chain(
+            [tool for tool in initial_tools if tool in self.tool_registry]
+        )
+
+        if not self.orchestrator_llm.available:
+            if fallback_tools:
+                return fallback_tools, "Used initial tool plan (LLM unavailable for post-retrieval planning)."
+            heuristic = self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+            return self._normalize_tool_chain(heuristic.tools), "Post-retrieval planner unavailable; used heuristic tools."
+
+        tool_descriptions = "\n".join(
+            f"- {name}: {self.tool_registry[name].description} "
+            f"| inputs: {list(self.tool_registry[name].input_schema.get('properties', {}).keys())}"
+            for name in valid_tools
+        )
+        retrieved_context = "\n".join(
+            f"- {item.clause.standard}, Cl. {item.clause.clause_id}: {item.clause.clause_title}"
+            for item in retrieved[:8]
+        )
+        if not retrieved_context:
+            retrieved_context = "(no clauses retrieved)"
+
+        try:
+            raw = self.orchestrator_llm.generate(
+                system_prompt=(
+                    "You select calculator tools for a Eurocode 3 query AFTER retrieval has already run. "
+                    "Return JSON only: {\"tools\":[...],\"rationale\":\"...\"}. "
+                    "Pick the minimal necessary tools and order them by dependency."
+                ),
+                user_prompt=(
+                    "###TASK:PLAN_TOOLS###\n"
+                    f"User query: {query}\n\n"
+                    f"Retrieved clause evidence:\n{retrieved_context}\n\n"
+                    f"Available tools:\n{tool_descriptions}\n\n"
+                    f"Initial tool proposal:\n{initial_tools}\n\n"
+                    "Return JSON only."
+                ),
+                temperature=0,
+                max_tokens=700,
+            )
+            parsed = parse_json_loose(raw)
+            if isinstance(parsed, dict):
+                selected = self._normalize_tool_chain(
+                    [tool for tool in parsed.get("tools", []) if tool in self.tool_registry]
+                )
+                rationale = str(parsed.get("rationale", "Tool plan refined from retrieval context."))
+                if selected:
+                    return selected, rationale
+        except Exception as exc:
+            logger.warning("post_retrieval_tool_plan_failed", extra={"error": str(exc)})
+
+        if fallback_tools:
+            return fallback_tools, "Kept initial tool plan after retrieval."
+
+        heuristic = self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+        return self._normalize_tool_chain(heuristic.tools), "Used heuristic tool plan after retrieval."
 
     # ---- FOLLOW-UP RESOLUTION ----
     def _resolve_followup(self, query: str, history: list) -> str:
@@ -627,103 +725,17 @@ class CentralIntelligenceOrchestrator:
         retrieved: list[RetrievedClause],
         tool_outputs: dict[str, dict[str, Any]],
     ) -> str:
-        text = re.sub(r"\s+", " ", (narrative or "")).strip()
-        if not text:
-            text = "Results computed from the available tools and EC3 database."
-
-        text = self._ensure_sentence_complete(text)
-        text = self._sanitize_bold_markers(text)
-
         headline = self._compose_result_headline(
             plan=plan,
             tool_outputs=tool_outputs,
             query=query,
         )
-        if headline and not self._has_unitized_headline(text):
-            replaced = self._replace_leading_result_sentence(text, headline)
-            text = replaced if replaced else f"{headline} {text}".strip()
-
         basis = self._compose_clause_basis_sentence(retrieved=retrieved, tool_outputs=tool_outputs)
-        if basis and "Cl." not in text:
-            text = f"{text} {basis}".strip()
-
-        return self._ensure_sentence_complete(text)
-
-    @staticmethod
-    def _sanitize_bold_markers(text: str) -> str:
-        return text.replace("**", "") if text.count("**") % 2 else text
-
-    @staticmethod
-    def _ensure_sentence_complete(text: str) -> str:
-        cleaned = (text or "").strip()
-        if not cleaned:
-            return cleaned
-
-        terminal = cleaned[-1] if cleaned[-1] in ".!?" else ""
-        body = cleaned[:-1].rstrip() if terminal else cleaned
-
-        if _BROKEN_HYPHEN_TAIL_RE.search(body):
-            body = _BROKEN_HYPHEN_TAIL_RE.sub("", body).rstrip(" ,;:-")
-            cause_match = re.search(r"\b(?:because|due to|as)\b", body, re.IGNORECASE)
-            if cause_match:
-                prefix = body[: cause_match.start()].rstrip(" ,;:-")
-                if prefix:
-                    body = f"{prefix} because required section properties are missing"
-                else:
-                    body = "Required section properties are missing"
-            elif body:
-                body = f"{body} required section properties are missing"
-            else:
-                body = "Required section properties are missing"
-            terminal = ""
-
-        if _INCOMPLETE_CAUSE_TAIL_RE.search(body):
-            cause_match = re.search(r"\b(?:because|due to|as)\b", body, re.IGNORECASE)
-            if cause_match:
-                prefix = body[: cause_match.start()].rstrip(" ,;:-")
-                if prefix:
-                    body = f"{prefix} because required section properties are missing"
-                else:
-                    body = "Required section properties are missing"
-            else:
-                body = f"{body} required section properties are missing"
-            terminal = ""
-
-        if _DANGLING_TAIL_RE.search(body):
-            body = f"{body} additional required inputs are missing"
-            terminal = ""
-
-        cleaned = f"{body}{terminal}".strip()
-        if cleaned[-1] not in ".!?":
-            cleaned = f"{cleaned}."
-        return cleaned
-
-    @staticmethod
-    def _has_unitized_headline(text: str) -> bool:
-        first_sentence = text.split(".", 1)[0]
-        has_equation = "=" in first_sentence
-        has_unit = bool(re.search(r"\b(kNm|kN|MPa|GPa|mm|cm²|cm³|cm⁴|m)\b", first_sentence))
-        return has_equation and has_unit
-
-    def _replace_leading_result_sentence(self, text: str, headline: str) -> str:
-        match = re.match(r"^(?P<first>.*?[.!?])(?:\s+(?P<rest>.*))?$", text.strip())
-        if not match:
-            return ""
-        first = (match.group("first") or "").strip()
-        rest = (match.group("rest") or "").strip()
-        if not self._looks_like_result_sentence(first):
-            return ""
-        return f"{headline} {rest}".strip() if rest else headline
-
-    @staticmethod
-    def _looks_like_result_sentence(sentence: str) -> bool:
-        cleaned = re.sub(r"<[^>]+>", "", sentence or "")
-        cleaned = cleaned.replace("**", "").lower()
-        if "=" not in cleaned:
-            return False
-        symbol_hit = any(token in cleaned for token in ("mrd", "m_rd", "nrd", "n_rd", "vrd", "v_rd"))
-        result_word_hit = any(token in cleaned for token in ("resistance", "capacity", "utilization", "result"))
-        return symbol_hit or result_word_hit
+        return self.response_formatter.polish_narrative(
+            narrative,
+            headline=headline,
+            basis=basis,
+        )
 
     def _compose_result_headline(
         self,
@@ -741,9 +753,9 @@ class CentralIntelligenceOrchestrator:
         if not key:
             return ""
 
-        base_key = self._strip_unit_suffix(key)
-        symbol = self._pretty_key(base_key)
-        value_text = self._format_value(key, value)
+        base_key = self.response_formatter.strip_unit_suffix(key)
+        symbol = self.response_formatter.pretty_key(base_key)
+        value_text = self.response_formatter.format_value(key, value)
         quantity = self._describe_output_quantity(base_key)
 
         inputs = payload.get("inputs_used", {})
@@ -873,13 +885,6 @@ class CentralIntelligenceOrchestrator:
         return "", None
 
     @staticmethod
-    def _strip_unit_suffix(key: str) -> str:
-        for suffix, _ in _UNIT_SUFFIXES:
-            if key.endswith(suffix):
-                return key[: -len(suffix)]
-        return key
-
-    @staticmethod
     def _describe_output_quantity(base_key: str) -> str:
         lowered = base_key.lower()
         if "m_rd" in lowered:
@@ -929,21 +934,21 @@ class CentralIntelligenceOrchestrator:
                 lines.append("")
 
                 if inputs_used:
-                    lines.append("**Inputs**")
-                    lines.append("")
                     lines.append("| Input | Value |")
                     lines.append("| --- | --- |")
                     for k, v in inputs_used.items():
-                        lines.append(f"| {self._pretty_key(k)} | {self._format_value(k, v)} |")
+                        lines.append(
+                            f"| {self.response_formatter.pretty_key(k)} | {self.response_formatter.format_value(k, v)} |"
+                        )
                     lines.append("")
 
-                lines.append("**Outputs**")
-                lines.append("")
                 lines.append("| Output | Value |")
                 lines.append("| --- | --- |")
                 for k, v in outputs.items():
                     if isinstance(v, (int, float, str, bool)):
-                        lines.append(f"| {self._pretty_key(k)} | **{self._format_value(k, v)}** |")
+                        lines.append(
+                            f"| {self.response_formatter.pretty_key(k)} | **{self.response_formatter.format_value(k, v)}** |"
+                        )
                 lines.append("")
 
                 notes = payload.get("notes", [])
@@ -994,58 +999,7 @@ class CentralIntelligenceOrchestrator:
                     ref_idx += 1
                     lines.append(f"{ref_idx}. EN 1993-1-1, Cl. {s.clause_id} — {s.clause_title}")
 
-        return self._format_subscripts("\n".join(lines).strip())
-
-    def _format_value(self, key: str, val: Any) -> str:
-        if isinstance(val, bool):
-            return "PASS ✓" if val else "FAIL ✗"
-        if isinstance(val, float):
-            unit = self._guess_unit(key)
-            if val == int(val) and abs(val) < 1e6:
-                return f"{int(val)} {unit}".strip()
-            return f"{val:.2f} {unit}".strip()
-        if isinstance(val, int):
-            unit = self._guess_unit(key)
-            return f"{val} {unit}".strip()
-        return str(val)
-
-    def _pretty_key(self, key: str) -> str:
-        unit = ""
-        base = key
-        for suffix, label in _UNIT_SUFFIXES:
-            if base.endswith(suffix):
-                unit = label
-                base = base[: -len(suffix)]
-                break
-
-        sorted_subs = sorted(_KEY_SUBSCRIPTS.items(), key=lambda x: -len(x[0]))
-        for pattern, replacement in sorted_subs:
-            if base == pattern:
-                return replacement + unit
-            if base.startswith(pattern + "_"):
-                rest = base[len(pattern) + 1 :].replace("_", " ")
-                return f"{replacement} {rest}" + unit
-
-        return base.replace("_", " ") + unit
-
-    @staticmethod
-    def _format_subscripts(text: str) -> str:
-        for pattern, replacement in _NARRATIVE_SUB_RE:
-            text = pattern.sub(replacement, text)
-        return text
-
-    def _guess_unit(self, key: str) -> str:
-        key_lower = key.lower()
-        if "knm" in key_lower: return "kNm"
-        if "kn" in key_lower: return "kN"
-        if "mpa" in key_lower: return "MPa"
-        if "gpa" in key_lower: return "GPa"
-        if "_mm" in key_lower: return "mm"
-        if key_lower.endswith("_m"): return "m"
-        if "cm2" in key_lower: return "cm²"
-        if "cm3" in key_lower: return "cm³"
-        if "cm4" in key_lower: return "cm⁴"
-        return ""
+        return self.response_formatter.format_markdown("\n".join(lines).strip())
 
     @staticmethod
     def _normalize_clause_id(clause_id: str) -> str:
@@ -1075,7 +1029,12 @@ class CentralIntelligenceOrchestrator:
         return [s for s in sources if self._normalize_clause_id(s.clause_id) in relevant_ids]
 
     def _build_what_i_used(self, plan: PlanResult, retrieval_trace: list[dict[str, object]], tool_trace: list[ToolTraceStep]) -> list[str]:
-        summaries = [f"Plan: {plan.mode} — {plan.rationale}", f"Retrieval: {len(retrieval_trace)} search pass(es)"]
+        retrieval_summary = (
+            f"Retrieval: {len(retrieval_trace)} search pass(es)"
+            if retrieval_trace
+            else "Retrieval: skipped"
+        )
+        summaries = [f"Plan: {plan.mode} — {plan.rationale}", retrieval_summary]
         if tool_trace:
             chain = " → ".join(s.tool_name for s in tool_trace)
             summaries.append(f"Tool chain: {chain}")
