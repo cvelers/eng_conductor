@@ -40,13 +40,18 @@ const devToggle = $("#dev-mode-toggle");
 const devPanel = $("#dev-panel");
 const sidebarToggle = $("#sidebar-toggle");
 const sidebar = $("#sidebar");
+const signInBtn = $("#signin-btn");
+const registerBtn = $("#register-btn");
+const sidebarSigninBtn = $("#sidebar-signin-btn");
+const sidebarSignupBtn = $("#sidebar-signup-btn");
 
-const state = { threads: [], activeThreadId: null, filter: "", devMode: false };
+const state = { threads: [], activeThreadId: null, guestThread: null, filter: "", devMode: false };
 
 function uid() {
   return crypto?.randomUUID?.() || `id_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
 }
 function now() { return new Date().toISOString(); }
+function emptyThread(title = "New chat") { return { id: uid(), title, createdAt: now(), updatedAt: now(), messages: [] }; }
 
 function fmtTime(iso) {
   return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
@@ -76,40 +81,213 @@ function escHtml(s) {
 }
 
 // ---- State persistence ----
-function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ threads: state.threads, activeThreadId: state.activeThreadId })); }
-function load() {
+function canUseStoredThreads() {
+  if (!auth.ready) return false;
+  return !!auth.user;
+}
+
+function storageKey() {
+  if (!auth.user) return STORAGE_KEY;
+  const identity = auth.user.user_id || auth.user.email || "user";
+  return `${STORAGE_KEY}:${identity}`;
+}
+
+function resetThreadState() {
+  state.threads = [];
+  state.activeThreadId = null;
+}
+
+function resetGuestThread() {
+  state.guestThread = emptyThread("Temporary chat");
+}
+
+function save() {
+  if (!canUseStoredThreads()) return;
+  if (auth.threadsSync) return;
+  localStorage.setItem(storageKey(), JSON.stringify({ threads: state.threads, activeThreadId: state.activeThreadId }));
+}
+
+async function load() {
+  resetThreadState();
+  if (!canUseStoredThreads()) return;
+  if (auth.threadsSync) {
+    try {
+      const res = await fetchWithAuth("/api/threads");
+      if (!res.ok) return;
+      const data = await res.json();
+      const threads = (data.threads || []).map((t) => ({
+        id: t.id,
+        title: t.title || "New chat",
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        messages: [],
+      }));
+      state.threads = threads;
+      if (threads.length && !state.activeThreadId) {
+        state.activeThreadId = threads[0].id;
+      }
+      if (state.activeThreadId) {
+        const full = await loadThreadFromApi(state.activeThreadId);
+        if (full) {
+          const idx = state.threads.findIndex((t) => t.id === full.id);
+          if (idx >= 0) state.threads[idx] = full;
+        }
+      }
+    } catch {
+      state.threads = [];
+    }
+    return;
+  }
   try {
-    const p = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    const key = storageKey();
+    const current = localStorage.getItem(key);
+    const fallback = key !== STORAGE_KEY ? localStorage.getItem(STORAGE_KEY) : null;
+    const raw = current || fallback;
+    if (!raw) return;
+    const p = JSON.parse(raw);
     if (p?.threads) { state.threads = p.threads; state.activeThreadId = p.activeThreadId || null; }
+    if (!current && fallback && key !== STORAGE_KEY) {
+      localStorage.setItem(key, fallback);
+    }
   } catch { state.threads = []; state.activeThreadId = null; }
 }
 
-function createThread(title = "New chat") {
-  const t = { id: uid(), title, createdAt: now(), updatedAt: now(), messages: [] };
+async function addMessageToApi(threadId, role, content, responsePayload = null) {
+  const res = await fetchWithAuth(`/api/threads/${threadId}/messages`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ role, content, response_payload: responsePayload }),
+  });
+  return res.ok;
+}
+
+async function updateThreadTitleApi(threadId, title) {
+  const res = await fetchWithAuth(`/api/threads/${threadId}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ title }),
+  });
+  return res.ok;
+}
+
+async function loadThreadFromApi(threadId) {
+  const res = await fetchWithAuth(`/api/threads/${threadId}`);
+  if (!res.ok) return null;
+  const t = await res.json();
+  return {
+    id: t.id,
+    title: t.title || "New chat",
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+    messages: (t.messages || []).map((m) => ({
+      id: m.id,
+      role: m.role,
+      content: m.content || "",
+      responsePayload: m.responsePayload,
+      createdAt: m.createdAt,
+    })),
+  };
+}
+
+async function createThread(title = "New chat") {
+  if (!canUseStoredThreads()) {
+    state.guestThread = emptyThread("Temporary chat");
+    return state.guestThread;
+  }
+  if (auth.threadsSync) {
+    try {
+      const res = await fetchWithAuth("/api/threads", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: title || "New chat" }),
+      });
+      if (!res.ok) throw new Error("Failed to create thread");
+      const t = await res.json();
+      const thread = {
+        id: t.id,
+        title: t.title || "New chat",
+        createdAt: t.createdAt,
+        updatedAt: t.updatedAt,
+        messages: [],
+      };
+      state.threads.unshift(thread);
+      state.activeThreadId = thread.id;
+      return thread;
+    } catch {
+      const t = emptyThread(title);
+      state.threads.unshift(t);
+      state.activeThreadId = t.id;
+      save();
+      return t;
+    }
+  }
+  const t = emptyThread(title);
   state.threads.unshift(t);
   state.activeThreadId = t.id;
   save();
   return t;
 }
 
-function activeThread() { return state.threads.find(t => t.id === state.activeThreadId) || null; }
-function ensureThread() { return activeThread() || createThread(); }
+function activeThread() { return state.threads.find((t) => t.id === state.activeThreadId) || null; }
+function currentThread() { return canUseStoredThreads() ? activeThread() : state.guestThread; }
+async function ensureThread() { return currentThread() || await createThread(canUseStoredThreads() ? "New chat" : "Temporary chat"); }
 
-function setActive(id) {
-  if (!state.threads.some(t => t.id === id)) return;
+async function setActive(id) {
+  if (!canUseStoredThreads()) return;
+  if (!state.threads.some((t) => t.id === id)) return;
   state.activeThreadId = id;
-  save();
+  if (auth.threadsSync) {
+    const full = await loadThreadFromApi(id);
+    if (full) {
+      const idx = state.threads.findIndex((t) => t.id === id);
+      if (idx >= 0) state.threads[idx] = full;
+    }
+  } else {
+    save();
+  }
   renderThreadList();
   renderMessages();
 }
 
 function updateWelcome() {
-  const a = activeThread();
+  const a = currentThread();
   welcome.classList.toggle("hidden", !!(a && a.messages.length));
 }
 
 // ---- Thread list ----
 function renderThreadList() {
+  const chatsSection = $("#sidebar-chats-section");
+  const ctaSection = $("#sidebar-chats-cta");
+  const authDisabledSection = $("#sidebar-auth-disabled");
+
+  if (!auth.ready) {
+    threadList.innerHTML = '<li class="empty-threads">Loading...</li>';
+    if (chatsSection) chatsSection.classList.remove("hidden");
+    if (ctaSection) ctaSection.classList.add("hidden");
+    if (authDisabledSection) authDisabledSection.classList.add("hidden");
+    return;
+  }
+
+  if (!auth.enabled) {
+    if (chatsSection) chatsSection.classList.add("hidden");
+    if (ctaSection) ctaSection.classList.add("hidden");
+    if (authDisabledSection) authDisabledSection.classList.remove("hidden");
+    threadList.innerHTML = "";
+    return;
+  }
+
+  if (!canUseStoredThreads()) {
+    if (chatsSection) chatsSection.classList.add("hidden");
+    if (ctaSection) ctaSection.classList.remove("hidden");
+    if (authDisabledSection) authDisabledSection.classList.add("hidden");
+    threadList.innerHTML = "";
+    return;
+  }
+
+  if (chatsSection) chatsSection.classList.remove("hidden");
+  if (ctaSection) ctaSection.classList.add("hidden");
+  if (authDisabledSection) authDisabledSection.classList.add("hidden");
+
   threadList.innerHTML = "";
   const f = state.filter.trim().toLowerCase();
   const vis = state.threads.filter(t => !f || t.title.toLowerCase().includes(f));
@@ -662,7 +840,7 @@ function createMsg(role, content = "", opts = {}) {
 
 function renderMessages() {
   messagesEl.innerHTML = "";
-  const t = activeThread();
+  const t = currentThread();
   if (!t) { updateWelcome(); return; }
   for (const m of t.messages || []) {
     if (m.role === "assistant") {
@@ -697,9 +875,9 @@ async function streamChat(prompt, assistantNode, thread) {
     content: m.role === "assistant" ? (m.content || "").slice(0, 500) : (m.content || ""),
   }));
 
-  const res = await fetch("/api/chat/stream", {
+  const res = await fetchWithAuth("/api/chat/stream", {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...authHeaders() },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ message: prompt, history }),
   });
   if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
@@ -745,7 +923,13 @@ async function streamChat(prompt, assistantNode, thread) {
         if (!finalized) {
           thread.messages.push({ id: uid(), role: "assistant", content: payload.answer, responsePayload: payload, createdAt: now() });
           thread.updatedAt = now();
-          save();
+          if (canUseStoredThreads()) {
+            if (auth.threadsSync) {
+              await addMessageToApi(thread.id, "assistant", payload.answer, payload);
+            } else {
+              save();
+            }
+          }
           renderThreadList();
           finalized = true;
         }
@@ -759,7 +943,13 @@ async function streamChat(prompt, assistantNode, thread) {
         if (!finalized) {
           thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
           thread.updatedAt = now();
-          save();
+          if (canUseStoredThreads()) {
+            if (auth.threadsSync) {
+              await addMessageToApi(thread.id, "assistant", errMsg, null);
+            } else {
+              save();
+            }
+          }
           renderThreadList();
           finalized = true;
         }
@@ -833,106 +1023,352 @@ function initDevMode() {
 }
 
 // ---- Auth ----
-const auth = { token: null, user: null, enabled: false, mode: "login" };
+const auth = {
+  token: null,
+  user: null,
+  refreshToken: null,
+  expiresAt: null,
+  enabled: true,
+  threadsSync: false,
+  ready: false,
+  mode: "login",
+};
+
+function syncAuthControls() {
+  const signedIn = !!auth.user;
+  const showAuthArea = auth.ready && auth.enabled && !signedIn;
+
+  const authArea = $("#sidebar-auth-area");
+  const userArea = $("#sidebar-user-area");
+  if (authArea) authArea.classList.toggle("hidden", !showAuthArea);
+  if (userArea) userArea.classList.toggle("hidden", showAuthArea);
+
+  if (chatSearch) {
+    const canSearch = canUseStoredThreads();
+    chatSearch.disabled = !canSearch;
+    chatSearch.placeholder = !auth.ready
+      ? "Loading chats..."
+      : (!auth.enabled
+        ? "History unavailable without auth"
+        : (chatSearch.disabled ? "Sign in to search saved chats..." : "Search chats..."));
+    if (chatSearch.disabled) {
+      chatSearch.value = "";
+      state.filter = "";
+    }
+  }
+}
+
+async function applyAuthState() {
+  if (canUseStoredThreads()) {
+    await load();
+    await ensureThread();
+  } else {
+    resetThreadState();
+    resetGuestThread();
+  }
+  updateUserPill();
+  syncAuthControls();
+  renderThreadList();
+  renderMessages();
+}
 
 async function checkAuthStatus() {
+  auth.ready = false;
   try {
     const res = await fetch("/api/auth/status");
     const data = await res.json();
     auth.enabled = data.enabled === true;
-  } catch { auth.enabled = false; }
+    auth.threadsSync = data.threads_sync === true;
+  } catch { auth.enabled = false; auth.threadsSync = false; }
 
-  if (!auth.enabled) return true;
+  if (!auth.enabled) {
+    auth.ready = true;
+    return;
+  }
 
   const saved = sessionStorage.getItem("ec3_auth");
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      auth.token = parsed.access_token;
-      auth.user = parsed;
-      updateUserPill();
-      return true;
-    } catch { /* stale */ }
+      auth.token = parsed.access_token || null;
+      auth.user = { user_id: parsed.user_id, email: parsed.email };
+      auth.refreshToken = parsed.refresh_token || null;
+      auth.expiresAt = parsed.expires_at || null;
+      await maybeRefreshSession();
+    } catch {
+      sessionStorage.removeItem("ec3_auth");
+    }
   }
-  return false;
+  auth.ready = true;
 }
 
-function showAuthOverlay() {
+function persistAuth(data) {
+  auth.token = data.access_token;
+  auth.refreshToken = data.refresh_token ?? auth.refreshToken;
+  auth.expiresAt = data.expires_at ?? auth.expiresAt;
+  if (data.user_id || data.email) {
+    auth.user = { ...auth.user, user_id: data.user_id || auth.user?.user_id, email: data.email || auth.user?.email };
+  }
+  const toStore = {
+    access_token: auth.token,
+    refresh_token: auth.refreshToken,
+    expires_at: auth.expiresAt,
+    user_id: auth.user?.user_id,
+    email: auth.user?.email,
+  };
+  sessionStorage.setItem("ec3_auth", JSON.stringify(toStore));
+}
+
+function isTokenExpiringSoon() {
+  if (!auth.expiresAt) return false;
+  const secLeft = auth.expiresAt - Math.floor(Date.now() / 1000);
+  return secLeft < 300;
+}
+
+async function refreshSession() {
+  if (!auth.refreshToken) return false;
+  try {
+    const res = await fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ refresh_token: auth.refreshToken }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    persistAuth({
+      access_token: data.access_token,
+      refresh_token: data.refresh_token ?? auth.refreshToken,
+      expires_at: data.expires_at,
+      user_id: auth.user?.user_id,
+      email: auth.user?.email,
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function maybeRefreshSession() {
+  if (isTokenExpiringSoon() && auth.refreshToken) {
+    await refreshSession();
+  }
+}
+
+async function fetchWithAuth(url, opts = {}) {
+  await maybeRefreshSession();
+  opts.headers = { ...authHeaders(), ...opts.headers };
+  let res = await fetch(url, opts);
+  if (res.status === 401 && auth.refreshToken) {
+    const ok = await refreshSession();
+    if (ok) {
+      opts.headers = { ...authHeaders(), ...opts.headers };
+      res = await fetch(url, opts);
+    }
+  }
+  return res;
+}
+
+function showAuthOverlay(mode = "login") {
+  if (!auth.enabled) return;
+  switchAuthTab(mode);
+  $("#auth-error")?.classList.add("hidden");
   $("#auth-overlay")?.classList.remove("hidden");
+  if (mode === "login") $("#auth-email-login")?.focus();
+  else $("#auth-email-signup")?.focus();
 }
 
 function hideAuthOverlay() {
   $("#auth-overlay")?.classList.add("hidden");
 }
 
+function updateSidebarUser() {
+  const avatarEl = $("#sidebar-user-avatar");
+  const nameEl = $("#sidebar-user-name");
+  if (!auth.user) return;
+
+  const email = auth.user.email || "";
+  const name = email.split("@")[0] || "User";
+  const initials = name.slice(0, 2).toUpperCase();
+
+  if (avatarEl) avatarEl.textContent = initials;
+  if (nameEl) nameEl.textContent = name;
+}
+
 function updateUserPill() {
-  const pill = $("#user-pill");
-  if (!pill) return;
-  if (auth.user) {
-    pill.innerHTML = `<span>${escHtml(auth.user.email)}</span><button id="logout-btn" type="button">Sign Out</button>`;
-    pill.classList.remove("hidden");
-    $("#logout-btn")?.addEventListener("click", async () => {
-      try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
-      sessionStorage.removeItem("ec3_auth");
-      auth.token = null;
-      auth.user = null;
-      pill.classList.add("hidden");
-      if (auth.enabled) showAuthOverlay();
-    });
-  } else {
-    pill.classList.add("hidden");
-  }
+  updateSidebarUser();
 }
 
 function initAuth() {
   const overlay = $("#auth-overlay");
-  const form = $("#auth-form");
-  const emailInput = $("#auth-email");
-  const passInput = $("#auth-password");
-  const submitBtn = $("#auth-submit");
-  const switchBtn = $("#auth-switch-btn");
-  const switchText = $("#auth-switch-text");
   const errorEl = $("#auth-error");
+  const closeBtn = $("#auth-close");
+  const tabLogin = $("#auth-tab-login");
+  const tabSignup = $("#auth-tab-signup");
+  const formLogin = $("#auth-form-login");
+  const formSignup = $("#auth-form-signup");
+  const forgotLink = $("#auth-forgot-password");
 
-  switchBtn?.addEventListener("click", () => {
-    auth.mode = auth.mode === "login" ? "signup" : "login";
-    submitBtn.textContent = auth.mode === "login" ? "Sign In" : "Sign Up";
-    switchText.textContent = auth.mode === "login" ? "Don't have an account?" : "Already have an account?";
-    switchBtn.textContent = auth.mode === "login" ? "Sign Up" : "Sign In";
-    errorEl.classList.add("hidden");
-  });
+  // Sidebar: open auth modal
+  signInBtn?.addEventListener("click", () => showAuthOverlay("login"));
+  registerBtn?.addEventListener("click", () => showAuthOverlay("signup"));
+  sidebarSigninBtn?.addEventListener("click", () => showAuthOverlay("login"));
+  sidebarSignupBtn?.addEventListener("click", () => showAuthOverlay("signup"));
 
-  form?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = emailInput.value.trim();
-    const password = passInput.value;
-    if (!email || !password) return;
-
-    submitBtn.disabled = true;
-    errorEl.classList.add("hidden");
-
-    const endpoint = auth.mode === "login" ? "/api/auth/login" : "/api/auth/signup";
-    try {
-      const res = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "Auth failed");
-
-      auth.token = data.access_token;
-      auth.user = data;
-      sessionStorage.setItem("ec3_auth", JSON.stringify(data));
-      updateUserPill();
-      hideAuthOverlay();
-    } catch (err) {
-      errorEl.textContent = err.message;
-      errorEl.classList.remove("hidden");
-    } finally {
-      submitBtn.disabled = false;
+  // Sidebar user area: toggle menu & logout (event delegation)
+  sidebar?.addEventListener("click", (e) => {
+    if (e.target.closest("#sidebar-user-btn")) {
+      if (e.target.closest("#sidebar-logout-btn")) return;
+      const btn = $("#sidebar-user-btn");
+      const menu = $("#sidebar-user-menu");
+      const expanded = btn?.getAttribute("aria-expanded") === "true";
+      btn?.setAttribute("aria-expanded", !expanded);
+      menu?.classList.toggle("hidden", expanded);
+    }
+    if (e.target.closest("#sidebar-logout-btn")) {
+      (async () => {
+        try { await fetch("/api/auth/logout", { method: "POST" }); } catch {}
+        sessionStorage.removeItem("ec3_auth");
+        auth.token = null;
+        auth.user = null;
+        auth.refreshToken = null;
+        auth.expiresAt = null;
+        $("#sidebar-user-menu")?.classList.add("hidden");
+        hideAuthOverlay();
+        applyAuthState();
+      })();
     }
   });
+
+  // Auth modal: close
+  closeBtn?.addEventListener("click", hideAuthOverlay);
+  overlay?.addEventListener("click", (e) => {
+    if (e.target === overlay) hideAuthOverlay();
+  });
+
+  // Auth tabs
+  tabLogin?.addEventListener("click", () => switchAuthTab("login"));
+  tabSignup?.addEventListener("click", () => switchAuthTab("signup"));
+
+  // Forgot password
+  forgotLink?.addEventListener("click", (e) => {
+    e.preventDefault();
+    handleForgotPassword();
+  });
+
+  // Login form
+  formLogin?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleAuthSubmit("login");
+  });
+
+  // Signup form
+  formSignup?.addEventListener("submit", (e) => {
+    e.preventDefault();
+    handleAuthSubmit("signup");
+  });
+}
+
+function switchAuthTab(mode) {
+  auth.mode = mode;
+  const isLogin = mode === "login";
+  $("#auth-tab-login")?.classList.toggle("active", isLogin);
+  $("#auth-tab-signup")?.classList.toggle("active", !isLogin);
+  $("#auth-form-login")?.classList.toggle("hidden", !isLogin);
+  $("#auth-form-signup")?.classList.toggle("hidden", isLogin);
+  const errEl = $("#auth-error");
+  errEl?.classList.add("hidden");
+  errEl?.classList.remove("auth-success");
+}
+
+async function handleForgotPassword() {
+  const emailInput = $("#auth-email-login");
+  const email = emailInput?.value?.trim();
+  if (!email) {
+    $("#auth-error").textContent = "Enter your email address.";
+    $("#auth-error").classList.remove("hidden");
+    return;
+  }
+  const btn = $("#auth-submit-login");
+  const btnText = btn?.querySelector(".auth-btn-text");
+  const spinner = btn?.querySelector(".auth-btn-spinner");
+  btnText && (btnText.textContent = "Sending...");
+  spinner?.classList.remove("hidden");
+  btn?.setAttribute("disabled", "true");
+  const errEl = $("#auth-error");
+  try {
+    const res = await fetch("/api/auth/forgot-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    errEl.textContent = data.message || "If an account exists, you will receive a reset link.";
+    errEl.classList.remove("hidden");
+    errEl.classList.add("auth-success");
+  } catch (err) {
+    errEl.textContent = err.message || "Failed to send reset email.";
+    errEl.classList.remove("hidden");
+    errEl.classList.remove("auth-success");
+  } finally {
+    btnText && (btnText.textContent = "Sign in");
+    spinner?.classList.add("hidden");
+    btn?.removeAttribute("disabled");
+  }
+}
+
+async function handleAuthSubmit(mode) {
+  const isLogin = mode === "login";
+  const emailInput = isLogin ? $("#auth-email-login") : $("#auth-email-signup");
+  const passInput = isLogin ? $("#auth-password-login") : $("#auth-password-signup");
+  const passConfirm = $("#auth-password-confirm");
+  const submitBtn = isLogin ? $("#auth-submit-login") : $("#auth-submit-signup");
+  const btnText = submitBtn?.querySelector(".auth-btn-text");
+  const spinner = submitBtn?.querySelector(".auth-btn-spinner");
+
+  const email = emailInput?.value?.trim();
+  const password = passInput?.value;
+  if (!email || !password) return;
+
+  if (!isLogin) {
+    const confirmVal = passConfirm?.value;
+    if (password !== confirmVal) {
+      $("#auth-error").textContent = "Passwords do not match.";
+      $("#auth-error").classList.remove("hidden");
+      return;
+    }
+  }
+
+  $("#auth-error")?.classList.add("hidden");
+  submitBtn?.setAttribute("disabled", "true");
+  btnText && (btnText.classList.add("hidden"));
+  spinner?.classList.remove("hidden");
+
+  const endpoint = isLogin ? "/api/auth/login" : "/api/auth/signup";
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "Auth failed");
+    if (!data.access_token) throw new Error("Account created. Confirm your email, then sign in.");
+
+    auth.token = data.access_token;
+    auth.user = { user_id: data.user_id, email: data.email };
+    auth.refreshToken = data.refresh_token || null;
+    auth.expiresAt = data.expires_at || null;
+    persistAuth(data);
+    applyAuthState();
+    hideAuthOverlay();
+  } catch (err) {
+    $("#auth-error").textContent = err.message;
+    $("#auth-error").classList.remove("hidden");
+  } finally {
+    submitBtn?.removeAttribute("disabled");
+    btnText?.classList.remove("hidden");
+    spinner?.classList.add("hidden");
+  }
 }
 
 function authHeaders() {
@@ -940,17 +1376,59 @@ function authHeaders() {
   return {};
 }
 
+async function handleAuthRedirectFromHash() {
+  const hash = window.location.hash;
+  if (!hash) return;
+  const params = new URLSearchParams(hash.slice(1));
+  const accessToken = params.get("access_token");
+  if (!accessToken) return;
+
+  const refreshToken = params.get("refresh_token") || "";
+  const expiresAt = params.get("expires_at");
+  let user = { user_id: params.get("user_id") || "", email: params.get("email") || "" };
+
+  auth.token = accessToken;
+  auth.refreshToken = refreshToken;
+  auth.expiresAt = expiresAt ? parseInt(expiresAt, 10) : null;
+  auth.user = user;
+
+  if (!user.user_id || !user.email) {
+    try {
+      const res = await fetch("/api/auth/me", { headers: { Authorization: `Bearer ${accessToken}` } });
+      if (res.ok) {
+        const data = await res.json();
+        user = { user_id: data.user_id || "", email: data.email || "" };
+        auth.user = user;
+      }
+    } catch {}
+  }
+
+  const toStore = {
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_at: auth.expiresAt,
+    user_id: user.user_id,
+    email: user.email,
+  };
+  sessionStorage.setItem("ec3_auth", JSON.stringify(toStore));
+
+  window.history.replaceState(null, "", window.location.pathname + window.location.search);
+  applyAuthState();
+}
+
 // ---- Init ----
-function initialize() {
-  load();
-  ensureThread();
+async function initialize() {
+  resetGuestThread();
   renderThreadList();
   renderMessages();
   initDevMode();
   initAuth();
+  syncAuthControls();
 
-  newChatBtn.addEventListener("click", () => {
-    createThread();
+  await handleAuthRedirectFromHash();
+
+  newChatBtn.addEventListener("click", async () => {
+    await createThread();
     renderThreadList();
     renderMessages();
     input.focus();
@@ -972,19 +1450,38 @@ function initialize() {
     });
   }
 
-  checkAuthStatus().then(ok => { if (!ok) showAuthOverlay(); });
+  checkAuthStatus().finally(() => {
+    applyAuthState();
+  });
+
+  setInterval(() => maybeRefreshSession(), 45 * 60 * 1000);
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const prompt = input.value.trim();
     if (!prompt) return;
 
-    const thread = ensureThread();
-    if (!thread.messages.length || thread.title === "New chat") thread.title = truncTitle(prompt);
+    const thread = await ensureThread();
+    if (canUseStoredThreads() && (!thread.messages.length || thread.title === "New chat")) {
+      thread.title = truncTitle(prompt);
+      if (auth.threadsSync) {
+        await updateThreadTitleApi(thread.id, thread.title);
+        const idx = state.threads.findIndex((t) => t.id === thread.id);
+        if (idx >= 0) state.threads[idx].title = thread.title;
+      }
+    } else if (!canUseStoredThreads() && (!thread.messages.length || thread.title === "Temporary chat")) {
+      thread.title = truncTitle(prompt);
+    }
 
     thread.messages.push({ id: uid(), role: "user", content: prompt, createdAt: now() });
     thread.updatedAt = now();
-    save();
+    if (canUseStoredThreads()) {
+      if (auth.threadsSync) {
+        await addMessageToApi(thread.id, "user", prompt);
+      } else {
+        save();
+      }
+    }
     renderThreadList();
 
     input.value = "";
@@ -1006,7 +1503,13 @@ function initialize() {
       appendLog(assistantNode, `Transport error: ${err.message}`);
       thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
       thread.updatedAt = now();
-      save();
+      if (canUseStoredThreads()) {
+        if (auth.threadsSync) {
+          await addMessageToApi(thread.id, "assistant", errMsg, null);
+        } else {
+          save();
+        }
+      }
       renderThreadList();
     } finally {
       sendBtn.disabled = false;

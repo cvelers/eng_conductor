@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from backend.auth import create_auth_router, require_auth
 from backend.config import Settings
+from backend.threads import create_threads_router
 from backend.llm.factory import get_orchestrator_provider, get_search_provider, get_tool_writer_provider
 from backend.logging_config import configure_logging
 from backend.orchestrator.engine import CentralIntelligenceOrchestrator
@@ -114,6 +115,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         tool_runner=tool_runner,
         tool_registry=tool_registry,
         document_registry=doc_registry,
+        clauses=clauses,
     )
 
     tool_writer_provider = get_tool_writer_provider(active_settings)
@@ -131,6 +133,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.state.settings = active_settings
 
     app.include_router(create_auth_router(active_settings))
+    app.include_router(create_threads_router(active_settings))
     auth_dep = require_auth(active_settings)
 
     frontend_dir = active_settings.project_root / "frontend"

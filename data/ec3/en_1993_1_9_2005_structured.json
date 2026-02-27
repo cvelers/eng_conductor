@@ -1,0 +1,560 @@
+{
+  "source_file": "EN 1993-1-9-2005.json",
+  "clauses": [
+    {
+      "clause_id": "7.2",
+      "title": "Fatigue strength modifications",
+      "text": "8. Fatigue verification ... 18",
+      "pointer": "en_1993_1_9_2005#/7.2",
+      "keywords": [
+        "7.2",
+        "fatigue",
+        "modifications",
+        "strength"
+      ]
+    },
+    {
+      "clause_id": "1.1",
+      "title": "Scope",
+      "text": "(1) EN 1993-1-9 gives methods for the assessment of fatigue resistance of members, connections and joints subjected to fatigue loading.\n\n(2) These methods are derived from fatigue tests with large scale specimens, that include effects of geometrical and structural imperfections from material production and execution (e.g. the effects of tolerances and residual stresses from welding).\n\nNOTE 1 For tolerances see EN 1090. The choice of the execution standard may be given in the National Annex, until such time as EN 1090 is published.\n\nNOTE 2 The National Annex may give supplementary information on inspection requirements during fabrication.\n\n(3) The rules are applicable to structures where execution conforms with EN 1090.\n\nNOTE Where appropriate, supplementary requirements are indicated in the detail category tables.\n\n(4) The assessment methods given in this part are applicable to all grades of structural steels, stainless steels and unprotected weathering steels except where noted otherwise in the detail category tables. This part only applies to materials which conform to the toughness requirements of EN 1993-1-10.\n\n(5) Fatigue assessment methods other than the $\\Delta\\sigma_{R}-N$ methods as the notch strain method or fracture mechanics methods are not covered by this part.\n\n(6) Post fabrication treatments to improve the fatigue strength other than stress relief are not covered in this part.\n\n(7) The fatigue strengths given in this part apply to structures operating under normal atmospheric conditions and with sufficient corrosion protection and regular maintenance. The effect of seawater corrosion is not covered. Microstructural damage from high temperature ($>150^{\\circ}\\text{C}$) is not covered.",
+      "pointer": "en_1993_1_9_2005#/1.1",
+      "keywords": [
+        "1.1",
+        "annex",
+        "connection",
+        "fatigue",
+        "fracture",
+        "imperfection",
+        "resistance",
+        "scope",
+        "stainless",
+        "table",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "1.2",
+      "title": "Normative references",
+      "text": "This European Standard incorporates by dated or undated reference, provisions from other publications. These normative references are cited at the appropriate places in the text and the publications are listed hereafter. For dated references, subsequent amendments to or revisions of any of these publications apply to this European Standard only when incorporated in it by amendment or revision. For undated references the latest edition of the publication referred to applies (including amendments).\n\nThe following general standards are referred to in this standard.\n\nEN 1090 Execution of steel structures – Technical requirements\nEN 1990 Basis of structural design\nEN 1991 Actions on structures\nEN 1993 Design of Steel Structures\nEN 1994-2 Design of Composite Steel and Concrete Structures: Part 2: Bridges",
+      "pointer": "en_1993_1_9_2005#/1.2",
+      "keywords": [
+        "1.2",
+        "normative",
+        "references"
+      ]
+    },
+    {
+      "clause_id": "1.3",
+      "title": "Terms and definitions",
+      "text": "(1) For the purpose of this European Standard the following terms and definitions apply.",
+      "pointer": "en_1993_1_9_2005#/1.3",
+      "keywords": [
+        "1.3",
+        "definitions",
+        "terms"
+      ]
+    },
+    {
+      "clause_id": "1.3.1",
+      "title": "General",
+      "text": "1.3.1.1\nfatigue\nThe process of initiation and propagation of cracks through a structural part due to action of fluctuating stress.\n\n1.3.1.2\nnominal stress\nA stress in the parent material or in a weld adjacent to a potential crack location calculated in accordance with elastic theory excluding all stress concentration effects.\n\nNOTE The nominal stress as specified in this part can be a direct stress, a shear stress, a principal stress or an equivalent stress.\n\n1.3.1.3\nmodified nominal stress\nA nominal stress multiplied by an appropriate stress concentration factor $k_f$, to allow for a geometric discontinuity that has not been taken into account in the classification of a particular constructional detail.\n\n1.3.1.4\ngeometric stress\nhot spot stress\nThe maximum principal stress in the parent material adjacent to the weld toe, taking into account stress concentration effects due to the overall geometry of a particular constructional detail.\n\nNOTE Local stress concentration effects e.g. from the weld profile shape (which is already included in the detail categories in Annex B) need not be considered.\n\n1.3.1.5\nresidual stress\nResidual stress is a permanent state of stress in a structure that is in static equilibrium and is independent of any applied action. Residual stresses can arise from rolling stresses, cutting processes, welding shrinkage or lack of fit between members or from any loading event that causes yielding of part of the structure.",
+      "pointer": "en_1993_1_9_2005#/1.3.1",
+      "keywords": [
+        "1.3.1",
+        "annex",
+        "classification",
+        "elastic",
+        "fatigue",
+        "general",
+        "shear",
+        "weld",
+        "yield"
+      ]
+    },
+    {
+      "clause_id": "1.3.2",
+      "title": "Fatigue loading parameters",
+      "text": "1.3.2.1\nloading event\nA defined loading sequence applied to the structure and giving rise to a stress history, which is normally repeated a defined number of times in the life of the structure.\n\n1.3.2.2\nstress history\nA record or a calculation of the stress variation at a particular point in a structure during a loading event.\n\n1.3.2.3\nrainflow method\nParticular cycle counting method of producing a stress-range spectrum from a given stress history.\n\n1.3.2.4\nreservoir method\nParticular cycle counting method of producing a stress-range spectrum from a given stress history.\n\nNOTE For the mathematical determination see annex A.\n\n1.3.2.5\nstress range\nThe algebraic difference between the two extremes of a particular stress cycle derived from a stress history.\n\n1.3.2.6\nstress-range spectrum\nHistogram of the number of occurrences for all stress ranges of different magnitudes recorded or calculated for a particular loading event.\n\n1.3.2.7\ndesign spectrum\nThe total of all stress-range spectra in the design life of a structure relevant to the fatigue assessment.\n\n1.3.2.8\ndesign life\nThe reference period of time for which a structure is required to perform safely with an acceptable probability that failure by fatigue cracking will not occur.\n\n1.3.2.9\nfatigue life\nThe predicted period of time to cause fatigue failure under the application of the design spectrum.\n\n1.3.2.10\nMiner's summation\nA linear cumulative damage calculation based on the Palmgren-Miner rule.\n\n1.3.2.11\nequivalent constant amplitude stress range\nThe constant-amplitude stress range that would result in the same fatigue life as for the design spectrum, when the comparison is based on a Miner's summation.\n\nNOTE For the mathematical determination see Annex A.\n\n1.3.2.12\nfatigue loading\nA set of action parameters based on typical loading events described by the positions of loads, their magnitudes, frequencies of occurrence, sequence and relative phasing.\n\nNOTE 1 The fatigue actions in EN 1991 are upper bound values based on evaluations of measurements of loading effects according to Annex A.\n\nNOTE 2 The action parameters as given in EN 1991 are either\n- $Q_{\\text{max}}, n_{\\text{max}}$, standardized spectrum or\n- $Q_{\\text{E}, n_{\\text{max}}}$, related to $n_{\\text{max}}$ or\n- $Q_{\\text{E}, 2}$, corresponding to $n = 2 \\times 10^6$ cycles.\n\nDynamic effects are included in these parameters unless otherwise stated.\n\n1.3.2.13\nequivalent constant amplitude fatigue loading\nSimplified constant amplitude loading causing the same fatigue damage effects as a series of actual variable amplitude loading events",
+      "pointer": "en_1993_1_9_2005#/1.3.2",
+      "keywords": [
+        "1.3.2",
+        "annex",
+        "fatigue",
+        "loading",
+        "parameters",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "1.3.3",
+      "title": "Fatigue strength",
+      "text": "1.3.3.1\nfatigue strength curve\nThe quantitative relationship between the stress range and number of stress cycles to fatigue failure, used for the fatigue assessment of a particular category of structural detail.\n\nNOTE The fatigue strengths given in this part are lower bound values based on the evaluation of fatigue tests with large scale test specimens in accordance with EN 1990 – Annex D.\n\n1.3.3.2\ndetail category\nThe numerical designation given to a particular detail for a given direction of stress fluctuation, in order to indicate which fatigue strength curve is applicable for the fatigue assessment (The detail category number indicates the reference fatigue strength $\\Delta \\sigma_C$ in N/mm$^2$).\n\n1.3.3.3\nconstant amplitude fatigue limit\nThe limiting direct or shear stress range value below which no fatigue damage will occur in tests under constant amplitude stress conditions. Under variable amplitude conditions all stress ranges have to be below this limit for no fatigue damage to occur.\n\n1.3.3.4\ncut-off limit\nLimit below which stress ranges of the design spectrum do not contribute to the calculated cumulative damage.\n\n1.3.3.5\nendurance\nThe life to failure expressed in cycles, under the action of a constant amplitude stress history.\n\n1.3.3.6\nreference fatigue strength\nThe constant amplitude stress range $\\Delta \\sigma_C$, for a particular detail category for an endurance $N = 2 \\times 10^6$ cycles",
+      "pointer": "en_1993_1_9_2005#/1.3.3",
+      "keywords": [
+        "1.3.3",
+        "annex",
+        "fatigue",
+        "shear",
+        "strength"
+      ]
+    },
+    {
+      "clause_id": "1.4",
+      "title": "Symbols",
+      "text": "$\\Delta \\sigma$ stress range (direct stress)\n$\\Delta \\tau$ stress range (shear stress)\n$\\Delta \\sigma_E, \\Delta \\tau_E$ equivalent constant amplitude stress range related to $n_{\\text{max}}$\n$\\Delta \\sigma_E, 2, \\Delta \\tau_E, 2$ equivalent constant amplitude stress range related to 2 million cycles\n$\\Delta \\sigma_C, \\Delta \\tau_C$ reference value of the fatigue strength at $N_C = 2$ million cycles\n$\\Delta \\sigma_D, \\Delta \\tau_D$ fatigue limit for constant amplitude stress ranges at the number of cycles $N_D$\n$\\Delta \\sigma_L, \\Delta \\tau_L$ cut-off limit for stress ranges at the number of cycle $N_L$\n$\\Delta \\sigma_{\\text{eq}}$ equivalent stress range for connections in webs of orthotropic decks\n$\\Delta \\sigma_{C, \\text{red}}$ reduced reference value of the fatigue strength\n$\\gamma_{\\text{Ff}}$ partial factor for equivalent constant amplitude stress ranges $\\Delta \\sigma_E, \\Delta \\tau_E$\n$\\gamma_{\\text{Mf}}$ partial factor for fatigue strength $\\Delta \\sigma_C, \\Delta \\tau_C$\n$m$ slope of fatigue strength curve\n$\\lambda_i$ damage equivalent factors\n$\\psi_1$ factor for frequent value of a variable action\n$Q_k$ characteristic value of a single variable action\n$k_s$ reduction factor for fatigue stress to account for size effects\n$k_l$ magnification factor for nominal stress ranges to account for secondary bending moments in trusses\n$k_f$ stress concentration factor\n$N_R$ design life time expressed as number of cycles related to a constant stress range",
+      "pointer": "en_1993_1_9_2005#/1.4",
+      "keywords": [
+        "1.4",
+        "bending",
+        "connection",
+        "fatigue",
+        "moment",
+        "shear",
+        "symbols",
+        "web"
+      ]
+    },
+    {
+      "clause_id": "2",
+      "title": "Basic requirements and methods",
+      "text": "(1)P Structural members shall be designed for fatigue such that there is an acceptable level of probability that their performance will be satisfactory throughout their design life.\n\n**NOTE** Structures designed using fatigue actions from EN 1991 and fatigue resistance according to this part are deemed to satisfy this requirement.\n\n(2) Annex A may be used to determine a specific loading model, if\n- no fatigue load model is available in EN 1991,\n- a more realistic fatigue load model is required.\n\n**NOTE** Requirements for determining specific fatigue loading models may be specified in the National Annex.\n\n(3) Fatigue tests may be carried out\n- to determine the fatigue strength for details not included in this part,\n- to determine the fatigue life of prototypes, for actual or for damage equivalent fatigue loads.\n\n(4) In performing and evaluating fatigue tests EN 1990 should be taken into account (see also 7.1).\n\n**NOTE** Requirements for determining fatigue strength from tests may be specified in the National Annex.\n\n(5) The methods for the fatigue assessment given in this part follow the principle of design verification by comparing action effects and fatigue strengths; such a comparison is only possible when fatigue actions are determined with parameters of fatigue strengths contained in this standard.\n\n(6) Fatigue actions are determined according to the requirements of the fatigue assessment. They are different from actions for ultimate limit state and serviceability limit state verifications.\n\n**NOTE** Any fatigue cracks that develop during service life do not necessarily mean the end of the service life. Cracks should be repaired with particular care for execution to avoid introducing more severe notch conditions.",
+      "pointer": "en_1993_1_9_2005#/2",
+      "keywords": [
+        "2",
+        "annex",
+        "basic",
+        "fatigue",
+        "methods",
+        "requirements",
+        "resistance",
+        "serviceability",
+        "table",
+        "ultimate"
+      ]
+    },
+    {
+      "clause_id": "3",
+      "title": "Assessment methods",
+      "text": "(1) Fatigue assessment should be undertaken using either:\n- damage tolerant method or\n- safe life method.\n\n(2) The damage tolerant method should provide an acceptable reliability that a structure will perform satisfactorily for its design life, provided that a prescribed inspection and maintenance regime for detecting and correcting fatigue damage is implemented throughout the design life of the structure.\n\n**NOTE 1** The damage tolerant method may be applied when in the event of fatigue damage occurring a load redistribution between components of structural elements can occur.\n\n**NOTE 2** The National Annex may give provisions for inspection programmes.\n\n**NOTE 3** Structures that are assessed to this part, the material of which is chosen according to EN 1993-1-10 and which are subjected to regular maintenance are deemed to be damage tolerant.\n\n(3) The safe life method should provide an acceptable level of reliability that a structure will perform satisfactorily for its design life without the need for regular in-service inspection for fatigue damage. The safe life method should be applied in cases where local formation of cracks in one component could rapidly lead to failure of the structural element or structure.\n\n(4) For the purpose of fatigue assessment using this part, an acceptable reliability level may be achieved by adjustment of the partial factor for fatigue strength $\\gamma_{Mf}$ taking into account the consequences of failure and the design assessment used.\n\n(5) Fatigue strengths are determined by considering the structural detail together with its metallurgical and geometric notch effects. In the fatigue details presented in this part the probable site of crack initiation is also indicated.\n\n(6) The assessment methods presented in this code use fatigue resistance in terms of fatigue strength curves for\n- standard details applicable to nominal stresses\n- reference weld configurations applicable to geometric stresses.\n\n(7) The required reliability can be achieved as follows:\na) damage tolerant method\n   - selecting details, materials and stress levels so that in the event of the formation of cracks a low rate of crack propagation and a long critical crack length would result,\n   - provision of multiple load path\n   - provision of crack-arresting details,\n   - provision of readily inspectable details during regular inspections.\nb) safe-life method\n   - selecting details and stress levels resulting in a fatigue life sufficient to achieve the $\\beta$-values to be at least equal to those required for ultimate limit state verifications at the end of the design service life.\n\nNOTE The National Annex may give the choice of the assessment method, definitions of classes of consequences and numerical values for $\\gamma_{Mf}$. Recommended values for $\\gamma_{Mf}$ are given in Table 3.1.",
+      "pointer": "en_1993_1_9_2005#/3",
+      "keywords": [
+        "3",
+        "annex",
+        "assessment",
+        "fatigue",
+        "methods",
+        "resistance",
+        "table",
+        "ultimate",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "Table 3.1",
+      "title": "Recommended values for partial factors for fatigue strength",
+      "text": "| Assessment method | Consequence of failure |\n| :--- | :--- |\n| Low consequence | High consequence |\n| Damage tolerant | 1,00 | 1,15 |\n| Safe life | 1,15 | 1,35 |",
+      "pointer": "en_1993_1_9_2005#/Table 3.1",
+      "keywords": [
+        "Table 3.1",
+        "factors",
+        "fatigue",
+        "partial",
+        "recommended",
+        "strength",
+        "values"
+      ]
+    },
+    {
+      "clause_id": "4",
+      "title": "Stresses from fatigue actions",
+      "text": "(1) Modelling for nominal stresses should take into account all action effects including distortional effects and should be based on a linear elastic analysis for members and connections.\n\n(2) For latticed girders made of hollow sections the modelling may be based on a simplified truss model with pinned connections. Provided that the stresses due to external loading applied to members between joints are taken into account the effects from secondary moments due to the stiffness of the connection can be allowed for by the use of $k_1$-factors (see Table 4.1 for circular hollow sections, Table 4.2 for rectangular hollow sections; these sections are subject to the geometrical restrictions according to Table 8.7).",
+      "pointer": "en_1993_1_9_2005#/4",
+      "keywords": [
+        "4",
+        "actions",
+        "connection",
+        "elastic",
+        "fatigue",
+        "from",
+        "moment",
+        "section",
+        "stresses",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "Table 4.1",
+      "title": "$k_1$-factors for circular hollow sections under in-plane loading",
+      "text": "| Type of joint | Chords | Verticals | Diagonals |\n| :--- | :--- | :--- | :--- |\n| Gap joints | K type | 1,5 | - | 1,3 |\n| Gap joints | N type / KT type | 1,5 | 1,8 | 1,4 |\n| Overlap joints | K type | 1,5 | - | 1,2 |\n| Overlap joints | N type / KT type | 1,5 | 1,65 | 1,25 |",
+      "pointer": "en_1993_1_9_2005#/Table 4.1",
+      "keywords": [
+        "Table 4.1",
+        "circular",
+        "hollow",
+        "loading",
+        "sections",
+        "under"
+      ]
+    },
+    {
+      "clause_id": "Table 4.2",
+      "title": "$k_1$-factors for rectangular hollow sections under in-plane loading",
+      "text": "| Type of joint | Chords | Verticals | Diagonals |\n| :--- | :--- | :--- | :--- |\n| Gap joints | K type | 1,5 | $AC_1 - AC_1$ | 1,5 |\n| Gap joints | N type / KT type | 1,5 | 2,2 | 1,6 |\n| Overlap joints | K type | 1,5 | $AC_1 - AC_1$ | 1,3 |\n| Overlap joints | N type / KT type | 1,5 | 2,0 | 1,4 |\n\n**NOTE 1** For the definition of joint types see EN 1993-1-8.\n\n**NOTE 2** Ranges of geometric validity:\n\nFor CHS planar joints (K-, N-, KT-joints):\n\n$$0, 30 \\leq \\beta \\leq 0, 60$$\n$$12, 0 \\leq \\gamma \\leq 30, 0$$\n$$0, 25 \\leq \\tau \\leq 1, 00$$\n$$30^\\circ \\leq \\theta \\leq 60^\\circ$$\n\nFor SHS joints (K-, N-, KT-joints):\n\n$$0, 40 \\leq \\beta \\leq 0, 60$$\n$$6, 25 \\leq \\gamma \\leq 12, 5$$\n$$0, 25 \\leq \\tau \\leq 1, 00$$\n$$30^\\circ \\leq \\theta \\leq 60^\\circ$$",
+      "pointer": "en_1993_1_9_2005#/Table 4.2",
+      "keywords": [
+        "Table 4.2",
+        "hollow",
+        "loading",
+        "rectangular",
+        "sections",
+        "under"
+      ]
+    },
+    {
+      "clause_id": "5",
+      "title": "Calculation of stresses",
+      "text": "(1) Stresses should be calculated at the serviceability limit state.\n\n(2) Class 4 cross sections are assessed for fatigue loads according to EN 1993-1-5.\n\n**NOTE 1** For guidance see EN 1993-2 to EN 1993-6.\n\n**NOTE 2** The National Annex may give limitations for class 4 sections.\n\n(3) Nominal stresses should be calculated at the site of potential fatigue initiation. Effects producing stress concentrations at details other than those included in Table 8.1 to Table 8.10 should be accounted for by using a stress concentration factor (SCF) according to 6.3 to give a modified nominal stress.\n\n(4) When using geometrical (hot spot) stress methods for details covered by Table B.1, the stresses should be calculated as shown in 6.5.\n\n(5) The relevant stresses for details in the parent material are:\n\n- nominal direct stresses $\\sigma$\n- nominal shear stresses $\\tau$\n\n**NOTE 2** For effects of combined nominal stresses see 8(3).\n\n(6) The relevant stresses in the welds are (see Figure 5.1)\n\n- normal stresses $\\sigma_{wf}$ transverse to the axis of the weld: $\\sigma_{wf} = \\sqrt{\\sigma_{\\perp}^2 + \\tau_{\\perp}^2}$\n- shear stresses $\\tau_{wf}$ longitudinal to the axis of the weld: $\\tau_{wf} = \\tau_{\\parallel}$\n\nfor which two separate checks should be performed.\n\n**NOTE** The above procedure differs from the procedure given for the verification of fillet welds for the ultimate limit state, given in EN 1993-1-8.\n\nFigure 5.1: Relevant stresses in the fillet welds",
+      "pointer": "en_1993_1_9_2005#/5",
+      "keywords": [
+        "5",
+        "annex",
+        "calculation",
+        "fatigue",
+        "section",
+        "serviceability",
+        "shear",
+        "stresses",
+        "table",
+        "ultimate",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "6.1",
+      "title": "General",
+      "text": "(1) The fatigue assessment should be carried out using\n- nominal stress ranges for details shown in Table 8.1 to Table 8.10,\n- modified nominal stress ranges where, e.g. abrupt changes of section occur close to the initiation site which are not included in Table 8.1 to Table 8.10 or\n- geometric stress ranges where high stress gradients occur close to a weld toe in joints covered by Table B.1\n\nNOTE The National Annex may give information on the use of the nominal stress ranges, modified nominal stress ranges or the geometric stress ranges. For detail categories for geometric stress ranges see Annex B.\n\n(2) The design value of stress range to be used for the fatigue assessment should be the stress ranges $\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}$ corresponding to $N_C = 2 \\times 10^6$ cycles.",
+      "pointer": "en_1993_1_9_2005#/6.1",
+      "keywords": [
+        "6.1",
+        "annex",
+        "fatigue",
+        "general",
+        "section",
+        "table",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "6.2",
+      "title": "Design value of nominal stress range",
+      "text": "(1) The design value of nominal stress ranges $\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}$ and $\\gamma_{\\text{Ff}} \\Delta \\tau_{\\text{E,2}}$ should be determined as follows:\n\n$$\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}} = \\lambda_1 \\times \\lambda_2 \\times \\lambda_i \\times \\ldots \\times \\lambda_n \\times \\Delta \\sigma(\\gamma_{\\text{Ff}} Q_k)$$\n\n$$\\gamma_{\\text{Ff}} \\Delta \\tau_{\\text{E,2}} = \\lambda_1 \\times \\lambda_2 \\times \\lambda_i \\times \\ldots \\times \\lambda_n \\times \\Delta \\tau(\\gamma_{\\text{Ff}} Q_k)$$\n\nwhere $\\Delta \\sigma(\\gamma_{\\text{Ff}} Q_k), \\Delta \\tau(\\gamma_{\\text{Ff}} Q_k)$ is the stress range caused by the fatigue loads specified in EN 1991\n\n$\\lambda_i$ are damage equivalent factors depending on the spectra as specified in the relevant parts of EN 1993.\n\n(2) Where no appropriate data for $\\lambda_i$ are available the design value of nominal stress range may be determined using the principles in Annex A.\n\nNOTE The National Annex may give informations supplementing Annex A.",
+      "pointer": "en_1993_1_9_2005#/6.2",
+      "keywords": [
+        "6.2",
+        "annex",
+        "design",
+        "fatigue",
+        "nominal",
+        "range",
+        "stress",
+        "value"
+      ]
+    },
+    {
+      "clause_id": "6.3",
+      "title": "Design value of modified nominal stress range",
+      "text": "(1) The design value of modified nominal stress ranges $\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}$ and $\\gamma_{\\text{Ff}} \\Delta \\tau_{\\text{E,2}}$ should be determined as follows:\n\n$$\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}} = k_f \\times \\lambda_1 \\times \\lambda_2 \\times \\lambda_i \\times \\ldots \\times \\lambda_n \\times \\Delta \\sigma(\\gamma_{\\text{Ff}} Q_k)$$\n\n$$\\gamma_{\\text{Ff}} \\Delta \\tau_{\\text{E,2}} = k_f \\times \\lambda_1 \\times \\lambda_2 \\times \\lambda_i \\times \\ldots \\times \\lambda_n \\times \\Delta \\tau(\\gamma_{\\text{Ff}} Q_k)$$\n\nwhere $k_f$ is the stress concentration factor to take account of the local stress magnification in relation to detail geometry not included in the reference $\\Delta \\sigma_R$-N-curve\n\nNOTE $k_f$-values may be taken from handbooks or from appropriate finite element calculations.",
+      "pointer": "en_1993_1_9_2005#/6.3",
+      "keywords": [
+        "6.3",
+        "design",
+        "modified",
+        "nominal",
+        "range",
+        "stress",
+        "value"
+      ]
+    },
+    {
+      "clause_id": "6.4",
+      "title": "Design value of stress range for welded joints of hollow sections",
+      "text": "(1) Unless more accurate calculations are carried out the design value of modified nominal stress range $\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}$ should be determined as follows using the simplified model in 4(2):\n\n$$\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}} = k_1 \\left( \\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}^* \\right)$$\n\nwhere $\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}^*$ is the design value of stress range calculated with a simplified truss model with pinned joints\n\n$k_1$ is the magnification factor according to Table 4.1 and Table 4.2.",
+      "pointer": "en_1993_1_9_2005#/6.4",
+      "keywords": [
+        "6.4",
+        "design",
+        "hollow",
+        "joints",
+        "range",
+        "sections",
+        "stress",
+        "table",
+        "value",
+        "welded"
+      ]
+    },
+    {
+      "clause_id": "6.5",
+      "title": "Design value of stress range for geometrical (hot spot) stress",
+      "text": "(1) The design value of geometrical (hot spot) stress range $\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}$ should be determined as follows:\n\n$$\\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}} = k_f \\left( \\gamma_{\\text{Ff}} \\Delta \\sigma_{\\text{E,2}}^* \\right)$$\n\nwhere $k_f$ is the stress concentration factor",
+      "pointer": "en_1993_1_9_2005#/6.5",
+      "keywords": [
+        "6.5",
+        "design",
+        "geometrical",
+        "range",
+        "spot",
+        "stress",
+        "value"
+      ]
+    },
+    {
+      "clause_id": "7.1",
+      "title": "General",
+      "text": "(1) The fatigue strength for nominal stress ranges is represented by a series of $(\\log \\Delta \\sigma_R) - (\\log N)$ curves and $(\\log \\Delta \\tau_R) - (\\log N)$ curves (S-N-curves), which correspond to typical detail categories. Each detail category is designated by a number which represents, in $N/mm^2$, the reference value $\\Delta \\sigma_C$ and $\\Delta \\tau_C$ for the fatigue strength at 2 million cycles.\n\n(2) For constant amplitude nominal stress ranges the fatigue strength can be obtained as follows:\n\n$$\\Delta \\sigma_R^m N_R = \\Delta \\sigma_C^m 2 \\times 10^6$$\n\nwith $m = 3$ for $N \\leq 5 \\times 10^6$, see Figure 7.1\n\n$$\\Delta \\tau_R^m N_R = \\Delta \\tau_C^m 2 \\times 10^6$$\n\nwith $m = 5$ for $N \\leq 10^8$, see Figure 7.2\n\n$$\\Delta \\sigma_D = \\left( \\frac{2}{5} \\right)^{1/3} \\Delta \\sigma_C = 0,737 \\Delta \\sigma_C$$\n\nis the constant amplitude fatigue limit, see Figure 7.1, and\n\n$$\\Delta \\tau_L = \\left(\\frac{2}{100}\\right)^{1/5} \\Delta \\tau_C = 0.457 \\Delta \\tau_C$$\nis the cut off limit, see Figure 7.2.\n\n(3) For nominal stress spectra with stress ranges above and below the constant amplitude fatigue limit $\\Delta \\sigma_D$ the fatigue strength should be based on the extended fatigue strength curves as follows:\n\n$$\\Delta \\sigma_R^m N_R = \\Delta \\sigma_C^m 2 \\times 10^6 \\quad \\text{with } m = 3 \\text{ for } N \\leq 5 \\times 10^6$$\n$$\\Delta \\sigma_R^m N_R = \\Delta \\sigma_D^m 5 \\times 10^6 \\quad \\text{with } m = 5 \\text{ for } 5 \\times 10^6 \\leq N \\leq 10^8$$\n\n$$\\Delta \\sigma_L = \\left(\\frac{5}{100}\\right)^{1/5} \\Delta \\sigma_D = 0.549 \\Delta \\sigma_D$$\nis the cut off limit, see\n\nFigure 7.1.\n\nFigure 7.1: Fatigue strength curves for direct stress ranges\n\nFigure 7.2: Fatigue strength curves for shear stress ranges\n\nNOTE 1 When test data were used to determine the appropriate detail category for a particular constructional detail, the value of the stress range $\\Delta \\sigma_C$ corresponding to a value of $N_C = 2$ million cycles were calculated for a 75% confidence level of 95% probability of survival for log N, taking into account the standard deviation and the sample size and residual stress effects. The number of data points (not lower than 10) was considered in the statistical analysis, see annex D of EN 1990.\n\nNOTE 2 The National Annex may permit the verification of a fatigue strength category for a particular application provided that it is evaluated in accordance with NOTE 1.\n\nNOTE 3 Test data for some details do not exactly fit the fatigue strength curves in\n\nFigure 7.1. In order to ensure that non conservative conditions are avoided, such details, marked with an asterisk, are located one detail category lower than their fatigue strength at $2 \\times 10^6$ cycles would require. An alternative assessment may increase the classification of such details by one detail category provided that the constant amplitude fatigue limit $\\Delta \\sigma_D$ is defined as the fatigue strength at $10^7$ cycles for $m=3$ (see Figure 7.3).\n\nFigure 7.3: Alternative ...",
+      "pointer": "en_1993_1_9_2005#/7.1",
+      "keywords": [
+        "7.1",
+        "annex",
+        "classification",
+        "fatigue",
+        "general",
+        "shear"
+      ]
+    },
+    {
+      "clause_id": "7.2.1",
+      "title": "Non-welded or stress-relieved welded details in compression",
+      "text": "(1) In non-welded details or stress-relieved welded details, the mean stress influence on the fatigue strength may be taken into account by determining a reduced effective stress range $\\Delta \\sigma_{E,2}$ in the fatigue assessment when part or all of the stress cycle is compressive.\n\n(2) The effective stress range may be calculated by adding the tensile portion of the stress range and 60% of the magnitude of the compressive portion of the stress range, see Figure 7.4.",
+      "pointer": "en_1993_1_9_2005#/7.2.1",
+      "keywords": [
+        "7.2.1",
+        "compression",
+        "details",
+        "fatigue",
+        "weld",
+        "welded"
+      ]
+    },
+    {
+      "clause_id": "7.2.2",
+      "title": "Size effect",
+      "text": "(1) The size effect due to thickness or other dimensional effects should be taken into account as given in Table 8.1 to Table 8.10. The fatigue strength then is given by:\n\n$$\\Delta \\sigma_{C,red} = k_s \\Delta \\sigma_C$$  (7.1)",
+      "pointer": "en_1993_1_9_2005#/7.2.2",
+      "keywords": [
+        "7.2.2",
+        "effect",
+        "fatigue",
+        "size",
+        "table"
+      ]
+    },
+    {
+      "clause_id": "8",
+      "title": "Fatigue verification",
+      "text": "(1) Nominal, modified nominal or geometric stress ranges due to frequent loads $\\psi_1 Q_k$ (see EN 1990) should not exceed\n\n$$\\Delta \\sigma \\leq 1,5 f_y \\quad \\text{for direct stress ranges}$$\n$$\\Delta \\tau \\leq 1,5 f_y / \\sqrt{3} \\quad \\text{for shear stress ranges}$$  (8.1)\n\n(2) It should be verified that under fatigue loading\n\n$$\\frac{\\gamma_{Ff} \\Delta \\sigma_{E,2}}{\\Delta \\sigma_C / \\gamma_{Mf}} \\leq 1,0$$\n\nand\n\n$$\\frac{\\gamma_{Ff} \\Delta \\tau_{E,2}}{\\Delta \\tau_C / \\gamma_{Mf}} \\leq 1,0$$\n\nNOTE Table 8.1 to Table 8.9 require stress ranges to be based on principal stresses for some details.\n\n(3) Unless otherwise stated in the fatigue strength categories in Table 8.8 and Table 8.9, in the case of combined stress ranges $\\Delta \\sigma_{E,2}$ and $\\Delta \\tau_{E,2}$ it should be verified that:\n\n$$\\left( \\frac{\\gamma_{Ff} \\Delta \\sigma_{E,2}}{\\Delta \\sigma_C / \\gamma_{Mf}} \\right)^3 + \\left( \\frac{\\gamma_{Ff} \\Delta \\tau_{E,2}}{\\Delta \\tau_C / \\gamma_{Mf}} \\right)^5 \\leq 1,0$$  (8.3)\n\n(4) When no data for $\\Delta \\sigma_{E,2}$ or $\\Delta \\tau_{E,2}$ are available the verification format in Annex A may be used.\n\n**NOTE 1** Annex A is presented for stress ranges in longitudinal direction. This presentation may be adopted also for shear stress ranges.\n\n**NOTE 2** The National Annex may give information on the use of Annex A.\n\n<table class=\"table table-bordered\"><thead><tr><th>Detail category</th><th>Constructional detail</th><th>Description</th><th>Requirements</th></tr></thead><tbody><tr><td>160</td><td>NOTE The fatigue strength curve associated with category 160 is the highest. No detail can reach a better fatigue strength at any number of cycles.</td><td>AC2 Rolled or extruded products:<br>1) Plates and flats with as rolled edges;<br>2) Rolled sections with as rolled edges;<br>3) Seamless hollow sections, either rectangular or circular.</td><td>Details 1) to 3):<br>Sharp edges, surface and rolling flaws to be improved by grinding until removed and smooth transition achieved.</td></tr><tr><td>140</td><td></td><td>Sheared or gas cut plates:<br>4) Machine gas cut or sheared material with subsequent dressing.<br>5) Material with machine gas cut edges having shallow and regular drag lines or manual gas cut material, subsequently dressed to remove all edge discontinuities.<br>Machine gas cut with cut quality according to EN 1090.</td><td>4) All visible signs of edge discontinuities to be removed. The cut areas are to be machined or ground and all burrs to be removed.<br>Any machinery scratches for example from grinding operations, can only be parallel to the stresses.<br>Details 4) and 5):<br>- Re-entrant corners to be improved by grinding (slope ≤ ¼) or evaluated using the appropriate stress concentration factors.<br>- No repair by weld refill.</td></tr><tr><td>125</td><td></td><td>AC2 6) and 7) Rolled or extruded products as in details 1), 2), 3) AC2</td><td>Details 6) and 7):<br>Δτ calculated from: τ = V S(t) / 1 t</td></tr><tr><td>100 m = 5</td><...",
+      "pointer": "en_1993_1_9_2005#/8",
+      "keywords": [
+        "8",
+        "annex",
+        "fatigue",
+        "section",
+        "shear",
+        "table",
+        "verification",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "Table 8.3",
+      "title": "Transverse butt welds",
+      "text": "| Detail category | Constructional detail | Description | Requirements |\n| :--- | :--- | :--- | :--- |\n| 112 | size effect for t>25mm: $k_s=(25/t)^{0.2}$ | Without backing bar:  \n1) Transverse splices in plates and flats.  \n2) Flange and web splices in plate girders before assembly.  \n3) Full cross-section butt welds of rolled sections without cope holes.  \n4) Transverse splices in plates or flats tapered in width or in thickness, with a slope ≤1/4. | - All welds ground flush to plate surface parallel to direction of the arrow.  \n- Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress.  \n- Welded from both sides; checked by NDT.  \nDetail 3): Applies only to joints of rolled AC2 sections, cut and welded. |\n| 90 | size effect for t>25mm: $k_s=(25/t)^{0.2}$ | 5) Transverse splices in plates or flats.  \n6) Full cross-section butt welds of rolled sections without cope holes.  \n7) Transverse splices in plates or flats tapered in width or in thickness with a slope ≤1/4. Translation of welds to be machined notch free. | - The height of the weld convexity to be not greater than 10% of the weld width, with smooth transition to the plate surface.  \n- Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress.  \n- Welded from both sides; checked by NDT.  \nDetails 5 and 7: Welds made in flat position. |\n| 90 | size effect for t>25mm: $k_s=(25/t)^{0.2}$ | 8) As detail 3) but with cope holes. | - All welds ground flush to plate surface parallel to direction of the arrow.  \n- Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress.  \n- Welded from both sides; checked by NDT.  \n- Rolled sections with the same dimensions without tolerance differences |\n| 80 | size effect for t>25mm: $k_s=(25/t)^{0.2}$ | 9) Transverse splices in welded plate girders without cope hole.  \n10) Full cross-section butt welds of rolled sections with cope holes.  \n11) Transverse splices in plates, flats, rolled sections or plate girders. | - The height of the weld convexity to be not greater than 20% of the weld width, with smooth transition to the plate surface.  \n- Weld not ground flush  \n- Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress.  \n- Welded from both sides; checked by NDT.  \nDetail 10: The height of the weld convexity to be not greater than 10% of the weld width, with smooth transition to the plate surface. |\n| 63 | | 12) Full cross-section butt welds of rolled sections without cope hole. | - Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress.  \n- Welded from both sides. |\n\n<table class=\"table table-bordered\"><thead><tr><th colspan=\"2\">Detail category</th><th colspan=\"2\">Constructional detail</th><th>Description</th><th>Requirements</th></tr>...",
+      "pointer": "en_1993_1_9_2005#/Table 8.3",
+      "keywords": [
+        "Table 8.3",
+        "butt",
+        "cross-section",
+        "flange",
+        "section",
+        "table",
+        "transverse",
+        "web",
+        "weld",
+        "welds"
+      ]
+    },
+    {
+      "clause_id": "Table 8.7",
+      "title": "Lattice girder node joints",
+      "text": "| Detail category | Constructional detail | Requirements |\n| :--- | :--- | :--- |\n| 90 m=5 | Gap joints: Detail 1): K and N joints, circular structural hollow sections: | Details 1) and 2): |\n| 45 m=5 | Gap joints: Detail 2): K and N joints, rectangular structural hollow sections: | |\n| 71 m=5 | Overlap joints: Detail 3): K joints, circular or rectangular structural hollow sections: | |\n| 56 m=5 | Overlap joints: Detail 4): N joints, circular or rectangular structural hollow sections: | |\n\nDetails 1) and 2): |\n- Separate assessments needed for the chords and the braces.\n- For intermediate values of the ratio $t_0/t_i$ interpolate linearly between detail categories.\n- Fillet welds permitted for braces with wall thickness $t \\leq 8$ mm.\n- $t_0$ and $t_i \\leq 8$ mm\n- $35^\\circ \\leq 0 \\leq 50^\\circ$\n- $b_0/t_0 \\times t_0/t_i \\leq 25$\n- $d_0/t_0 \\times t_0/t_i \\leq 25$\n- $0.4 \\leq b_i/b_0 \\leq 1.0$\n- $0.25 \\leq d_i/d_0 \\leq 1.0$\n- $b_0 \\leq 200$ mm\n- $d_0 \\leq 300$ mm\n- $-0.5h_0 \\leq e_{ip} \\leq 0.25h_0$\n- $-0.5d_0 \\leq e_{ip} \\leq 0.25d_0$\n- $e_{op} \\leq 0.02b_0$ or $\\leq 0.02d_0$\n\n[ $e_{op}$ is out-of-plane eccentricity]\n\nDetail 2): |\n$0.5(b_0 - b_i) \\leq g \\leq 1.1(b_0 - b_i)$ and $g \\geq 2t_0$ |\n\nDetails 3) and 4): |",
+      "pointer": "en_1993_1_9_2005#/Table 8.7",
+      "keywords": [
+        "Table 8.7",
+        "girder",
+        "joints",
+        "lattice",
+        "node",
+        "section",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "30",
+      "title": "\\% \\leq overlap \\leq 100 \\%",
+      "text": "- overlap = (q/p) \\times 100 \\%\n- Separate assessments needed for the chords and the braces.\n- For intermediate values of the ratio $t_0/t_i$ interpolate linearly between detail categories.\n- Fillet welds permitted for braces with wall thickness $t \\leq 8$ mm.\n- $t_0$ and $t_i \\leq 8$ mm\n- $35^\\circ \\leq 0 \\leq 50^\\circ$\n- $b_0/t_0 \\times t_0/t_i \\leq 25$\n- $d_0/t_0 \\times t_0/t_i \\leq 25$\n- $0.4 \\leq b_i/b_0 \\leq 1.0$\n- $0.25 \\leq d_i/d_0 \\leq 1.0$\n- $b_0 \\leq 200$ mm\n- $d_0 \\leq 300$ mm\n- $-0.5h_0 \\leq e_{ip} \\leq 0.25h_0$\n- $-0.5d_0 \\leq e_{ip} \\leq 0.25d_0$\n- $e_{op} \\leq 0.02b_0$ or $\\leq 0.02d_0$\n\n[ $e_{op}$ is out-of-plane eccentricity]\n\nDefinition of $p$ and $q$:\n\n<table><thead><tr><th>Detail category</th><th colspan=\"2\">Constructional detail</th><th>Description</th><th>Requirements</th></tr></thead><tbody><tr><td>80</td><td colspan=\"2\">t≤12mm</td><td>1) Continuous longitudinal stringer, with additional cutout in cross girder.</td><td>1) Assessment based on the direct stress range Δσ in the longitudinal stringer.</td></tr><tr><td>71</td><td colspan=\"2\">t&gt;12mm</td><td>2) Continuous longitudinal stringer, no additional cutout in cross girder.</td><td>2) Assessment based on the direct stress range Δσ in the stringer.</td></tr><tr><td>80</td><td colspan=\"2\">t≤12mm</td><td>3) Separate longitudinal stringer each side of the cross girder.</td><td>3) Assessment based on the direct stress range Δσ in the stringer.</td></tr><tr><td>71</td><td colspan=\"2\"></td><td>4) Joint in rib, full penetration butt weld with steel backing plate.</td><td>4) Assessment based on the direct stress range Δσ in the stringer.</td></tr><tr><td>112</td><td colspan=\"2\">As detail 1, 2, 4 in Table 8.3</td><td>5) Full penetration butt weld in rib, welded from both sides, without backing plate.</td><td>5) Assessment based on the direct stress range Δσ in the stringer. Tack welds inside the shape of butt welds.</td></tr><tr><td>90</td><td colspan=\"2\">As detail 5, 7 in Table 8.3</td><td></td><td></td></tr><tr><td>80</td><td colspan=\"2\">As detail 9, 11 in Table 8.3</td><td></td><td></td></tr><tr><td>71</td><td colspan=\"2\"></td><td>6) Critical section in web of cross girder due to cut outs.</td><td>6) Assessment based on stress range in critical section taking account of Vierendeel effects.<br>NOTE In case the stress range is determined according to EN 1993-2, 9.4.2.2(3), detail category 112 may be used.</td></tr><tr><td>71</td><td colspan=\"2\"></td><td>Weld connecting deck plate to trapezoidal or V-section rib<br>7) Partial penetration weld with a ≥ t</td><td>7) Assessment based on direct stress range from bending in the plate.</td></tr><tr><td>50</td><td colspan=\"2\"></td><td>8) Fillet weld or partial penetration welds out of the range of detail 7)</td><td>8) Assessment based on direct stress range from bending in the plate.</td></tr></tbody></table>",
+      "pointer": "en_1993_1_9_2005#/30",
+      "keywords": [
+        "30",
+        "bending",
+        "overlap",
+        "section",
+        "table",
+        "web",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "Table 8.9",
+      "title": "Orthotropic decks - open stringers",
+      "text": "| Detail category | Constructional detail | Description | Requirements |\n| :--- | :--- | :--- | :--- |\n| 80 | t≤12mm | 1) Connection of longitudinal stringer to cross girder. | 1) Assessment based on the direct stress range $\\Delta\\sigma$ in the stringer. |\n| 71 | t>12mm | 2) Connection of continuous longitudinal stringer to cross girder. | 2) Assessment based on combining the shear stress range $\\Delta\\tau$ and direct stress range $\\Delta\\sigma$ in the web of the cross girder, as an equivalent stress range: $\\Delta\\sigma_{eq} = \\frac{1}{2}\\left(\\Delta\\sigma + \\sqrt{\\Delta\\sigma^2 + 4\\Delta\\tau^2}\\right)$ |\n| 56 | | 3) Check also stress range between stringers as defined in EN 1993-2. |",
+      "pointer": "en_1993_1_9_2005#/Table 8.9",
+      "keywords": [
+        "Table 8.9",
+        "connection",
+        "decks",
+        "open",
+        "orthotropic",
+        "shear",
+        "stringers",
+        "web"
+      ]
+    },
+    {
+      "clause_id": "Table 8.10",
+      "title": "Top flange to web junction of runway beams",
+      "text": "| Detail category | Constructional detail | Description | Requirements |\n| :--- | :--- | :--- | :--- |\n| 160 | $\\textcircled{1}$ | 1) Rolled I- or H-sections | 1) Vertical compressive stress range $\\Delta\\sigma_{vent}$ in web due to wheel loads |\n| 71 | $\\textcircled{2}$ | 2) Full penetration tee-butt weld | 2) Vertical compressive stress range $\\Delta\\sigma_{vent}$ in web due to wheel loads |\n| 36* | $\\textcircled{3}$ | 3) Partial penetration tee-butt welds, or effective full penetration tee-butt weld conforming with EN 1993-1-8 | 3) Stress range $\\Delta\\sigma_{vent}$ in weld throat due to vertical compression from wheel loads |\n| 36* | $\\textcircled{4}$ | 4) Fillet welds | 4) Stress range $\\Delta\\sigma_{vent}$ in weld throat due to vertical compression from wheel loads |\n| 71 | $\\textcircled{5}$ | 5) T-section flange with full penetration tee-butt weld | 5) Vertical compressive stress range $\\Delta\\sigma_{vent}$ in web due to wheel loads |\n| 36* | $\\textcircled{6}$ | 6) T-section flange with partial penetration tee-butt weld, or effective full penetration tee-butt weld conforming with EN 1993-1-8 | 6) Stress range $\\Delta\\sigma_{vent}$ in weld throat due to vertical compression from wheel loads |\n| 36* | $\\textcircled{7}$ | 7) T-section flange with fillet welds | 7) Stress range $\\Delta\\sigma_{vent}$ in weld throat due to vertical compression from wheel loads |",
+      "pointer": "en_1993_1_9_2005#/Table 8.10",
+      "keywords": [
+        "Table 8.10",
+        "beams",
+        "compression",
+        "flange",
+        "junction",
+        "runway",
+        "section",
+        "web",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "A.1",
+      "title": "Determination of loading events",
+      "text": "(1) Typical loading sequences that represent a credible estimated upper bound of all service load events expected during the fatigue design life should be determined using prior knowledge from similar structures, see Figure A.1 a).",
+      "pointer": "en_1993_1_9_2005#/A.1",
+      "keywords": [
+        "A.1",
+        "determination",
+        "events",
+        "fatigue",
+        "loading"
+      ]
+    },
+    {
+      "clause_id": "A.2",
+      "title": "Stress history at detail",
+      "text": "(1) A stress history should be determined from the loading events at the structural detail under consideration taking account of the type and shape of the relevant influence lines to be considered and the effects of dynamic magnification of the structural response, see Figure A.1 b).\n\n(2) Stress histories may also be determined from measurements on similar structures or from dynamic calculations of the structural response.",
+      "pointer": "en_1993_1_9_2005#/A.2",
+      "keywords": [
+        "A.2",
+        "detail",
+        "history",
+        "stress"
+      ]
+    },
+    {
+      "clause_id": "A.3",
+      "title": "Cycle counting",
+      "text": "(1) Stress histories may be evaluated by either of the following cycle counting methods:\n- rainflow method\n- reservoir method, see Figure A.1 c).\nto determine\n- stress ranges and their numbers of cycles\n- mean stresses, where the mean stress influence needs to be taken into account.",
+      "pointer": "en_1993_1_9_2005#/A.3",
+      "keywords": [
+        "A.3",
+        "counting",
+        "cycle"
+      ]
+    },
+    {
+      "clause_id": "A.4",
+      "title": "Stress range spectrum",
+      "text": "(1) The stress range spectrum should be determined by presenting the stress ranges and the associated number of cycles in descending order, see Figure A.1 d).\n\n(2) Stress range spectra may be modified by neglecting peak values of stress ranges representing less than 1% of the total damage and small stress ranges below the cut off limit.\n\n(3) Stress range spectra may be standardized according to their shape, e.g. with the coordinates $\\overline{\\Delta\\sigma} = 1,0$ and $\\overline{\\Sigma n} = 1,0$.",
+      "pointer": "en_1993_1_9_2005#/A.4",
+      "keywords": [
+        "A.4",
+        "range",
+        "spectrum",
+        "stress"
+      ]
+    },
+    {
+      "clause_id": "A.5",
+      "title": "Cycles to failure",
+      "text": "(1) When using the design spectrum the applied stress ranges $\\Delta\\sigma_i$ should be multiplied by $\\gamma_{Ff}$ and the fatigue strength values $\\Delta\\sigma_C$ divided by $\\gamma_{Mf}$ in order to obtain the endurance value $N_{Ri}$ for each band in the spectrum. The damage $D_d$ during the design life should be calculated from:\n\n$$D_d = \\sum_i \\frac{n_{Ei}}{N_{Ri}}$$\n\n(A.1)\n\nwhere $n_{Ei}$ is the number of cycles associated with the stress range $\\gamma_{Ff}\\Delta\\sigma_i$ for band $i$ in the factored spectrum\n\n$N_{Ri}$ is the endurance (in cycles) obtained from the factored $\\frac{\\Delta\\sigma_C}{\\gamma_{Mf}} - N_R$ curve for a stress range of $\\gamma_{Ff}\\Delta\\sigma_i$\n\n(2) On the basis of equivalence of $D_d$ the design stress range spectrum may be transformed into any equivalent design stress range spectrum, e.g. a constant amplitude design stress range spectrum yielding the fatigue equivalent load $Q_e$ associated with the cycle number $n_{\\text{max}} = \\sum n_i$ or $Q_{E,2}$ associated with the cycle number $N_C = 2 \\times 10^6$.",
+      "pointer": "en_1993_1_9_2005#/A.5",
+      "keywords": [
+        "A.5",
+        "cycles",
+        "failure",
+        "fatigue",
+        "yield"
+      ]
+    },
+    {
+      "clause_id": "A.6",
+      "title": "Verification formats",
+      "text": "(1) The fatigue assessment based on damage accumulation should meet the following criteria:\n\n- based on damage accumulation:\n\n$$D_d \\leq 1,0$$\n\n(A.2)\n\n- based on stress range:\n\n$$\\gamma_{Ff}\\Delta\\sigma_{E,2} \\leq \\sqrt{m}D_d \\frac{\\Delta\\sigma_C}{\\gamma_{Mf}}$$\n\nwhere $m = 3$\n\n(A.3)\n\nFigure A.1: Cumulative damage method\n\n$$\\sum \\frac{n_i}{N_i} = \\frac{n_1}{N_1} + \\frac{n_2}{N_2} + \\frac{n_3}{N_3} + \\frac{n_4}{N_4} \\leq D_L$$",
+      "pointer": "en_1993_1_9_2005#/A.6",
+      "keywords": [
+        "A.6",
+        "fatigue",
+        "formats",
+        "verification"
+      ]
+    },
+    {
+      "clause_id": "Annex B",
+      "title": "Fatigue resistance using the geometric (hot spot) stress method",
+      "text": "(1) For the application of the geometric stress method detail categories are given in Table B.1 for cracks initiating from\n- toes of butt welds,\n- toes of fillet welded attachments,\n- toes of fillet welds in cruciform joints.",
+      "pointer": "en_1993_1_9_2005#/Annex B",
+      "keywords": [
+        "Annex B",
+        "fatigue",
+        "geometric",
+        "method",
+        "resistance",
+        "spot",
+        "stress",
+        "table",
+        "using",
+        "weld"
+      ]
+    },
+    {
+      "clause_id": "Table B.1",
+      "title": "Detail categories for use with geometric (hot spot) stress method",
+      "text": "| Detail category | Constructional detail | Description | Requirements |\n| :--- | :--- | :--- | :--- |\n| 112 | $\\textcircled{1}$ | 1) Full penetration butt joint. | 1) All welds ground flush to plate surface parallel to direction of the arrow. Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress. Welded from both sides, checked by NDT. For misalignment see NOTE 1. |\n| 100 | $\\textcircled{2}$ | 2) Full penetration butt joint. | 2) Weld not ground flush. Weld run-on and run-off pieces to be used and subsequently removed, plate edges to be ground flush in direction of stress. Welded from both sides. For misalignment see NOTE 1. |\n| 100 | $\\textcircled{3}$ | 3) Cruciform joint with full penetration K-butt welds. | 3) Weld toe angle $\\leq 60^\\circ$. For misalignment see NOTE 1. |\n| 100 | $\\textcircled{4}$ | 4) Non load-carrying fillet welds. | 4) Weld toe angle $\\leq 60^\\circ$. See also NOTE 2. |\n| 100 | $\\textcircled{5}$ | 5) Bracket ends, ends of longitudinal stiffeners. | 5) Weld toe angle $\\leq 60^\\circ$. See also NOTE 2. |\n| 100 | $\\textcircled{6}$ | 6) Cover plate ends and similar joints. | 6) Weld toe angle $\\leq 60^\\circ$. See also NOTE 2. |\n| 90 | $\\textcircled{7}$ | 7) Cruciform joints with load-carrying fillet welds. | 7) Weld toe angle $\\leq 60^\\circ$. For misalignment see NOTE 1. See also NOTE 2. |\n\nNOTE 1 Table B.1 does not cover effects of misalignment. They have to be considered explicitly in determination of stress.\n\nNOTE 2 Table B.1 does not cover fatigue initiation from the root followed by propagation through the throat.\n\nNOTE 3 For the definition of the weld toe angle see EN 1090.\n\nblank",
+      "pointer": "en_1993_1_9_2005#/Table B.1",
+      "keywords": [
+        "Table B.1",
+        "categories",
+        "detail",
+        "fatigue",
+        "geometric",
+        "method",
+        "spot",
+        "stress",
+        "table",
+        "weld",
+        "with"
+      ]
+    }
+  ]
+}

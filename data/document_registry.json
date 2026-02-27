@@ -84,6 +84,48 @@
     }
   },
   {
+    "id": "ec3.en1993-1-7.2007",
+    "title": "Eurocode 3: Design of steel structures - Part 1-7: Plated structures subject to out of plane loading",
+    "standard": "EN 1993-1-7",
+    "year_version": "2007",
+    "file_path": "data/ec3/en_1993_1_7_2007_structured.json",
+    "coverage_notes": "84 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-8.2005",
+    "title": "Eurocode 3: Design of steel structures - Part 1-8: Design of joints",
+    "standard": "EN 1993-1-8",
+    "year_version": "2005",
+    "file_path": "data/ec3/en_1993_1_8_2005_structured.json",
+    "coverage_notes": "193 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
+    "id": "ec3.en1993-1-9.2005",
+    "title": "Eurocode 3: Design of steel structures - Part 1-9: Fatigue",
+    "standard": "EN 1993-1-9",
+    "year_version": "2005",
+    "file_path": "data/ec3/en_1993_1_9_2005_structured.json",
+    "coverage_notes": "37 structured clauses extracted from OCR, including annex headings and annex subclauses where detected.",
+    "clause_locator": {
+      "id_field": "clause_id",
+      "title_field": "title",
+      "text_field": "text",
+      "pointer_field": "pointer"
+    }
+  },
+  {
     "id": "ec3.en1993-1-10.2005",
     "title": "Eurocode 3: Design of steel structures - Part 1-10: Material toughness and through-thickness properties",
     "standard": "EN 1993-1-10",

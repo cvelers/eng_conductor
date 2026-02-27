@@ -1,0 +1,11 @@
+{
+  "users": [
+    {
+      "user_id": "e207416188a2d5aec0a0300036d8f110",
+      "email": "cvelers@gmail.com",
+      "salt_b64": "qdOyVC2IGw9O6am3GtmfMA==",
+      "password_hash_b64": "8ANOzux83NRynBITKljj5p/BPoI8Kd7rLbBaHFBeKmE=",
+      "created_at": "2026-02-27T10:10:00.025381+00:00"
+    }
+  ]
+}

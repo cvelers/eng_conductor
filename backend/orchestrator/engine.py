@@ -67,6 +67,7 @@ class CentralIntelligenceOrchestrator:
         tool_runner: MCPToolRunner,
         tool_registry: list[ToolRegistryEntry],
         document_registry: list[DocumentRegistryEntry] | None = None,
+        clauses: list[ClauseRecord] | None = None,
         response_formatter: ResponseFormatterTool | None = None,
     ) -> None:
         self.settings = settings
@@ -75,6 +76,13 @@ class CentralIntelligenceOrchestrator:
         self.tool_runner = tool_runner
         self.tool_registry = {entry.tool_name: entry for entry in tool_registry}
         self.document_registry = document_registry or []
+        self.clauses = clauses or []
+        self._clause_lookup: dict[tuple[str, str], ClauseRecord] = {}
+        for c in self.clauses:
+            self._clause_lookup[(c.doc_id, c.clause_id)] = c
+            norm = self._normalize_clause_id(c.clause_id)
+            if norm and norm != c.clause_id:
+                self._clause_lookup[(c.doc_id, norm)] = c
         self.response_formatter = response_formatter or ResponseFormatterTool()
 
     def run(self, query: str, *, history: list | None = None) -> ChatResponse:
@@ -934,21 +942,25 @@ class CentralIntelligenceOrchestrator:
                 lines.append("")
 
                 if inputs_used:
-                    lines.append("| Input | Value |")
-                    lines.append("| --- | --- |")
+                    lines.append("<table class=\"tool-io-table\">")
+                    lines.append("<thead><tr><th scope=\"col\">Parameter</th><th scope=\"col\">Value</th></tr></thead>")
+                    lines.append("<tbody>")
                     for k, v in inputs_used.items():
-                        lines.append(
-                            f"| {self.response_formatter.pretty_key(k)} | {self.response_formatter.format_value(k, v)} |"
-                        )
+                        key_cell = self.response_formatter.pretty_key(k)
+                        val_cell = self.response_formatter.format_value(k, v)
+                        lines.append(f"<tr><td>{key_cell}</td><td>{val_cell}</td></tr>")
+                    lines.append("</tbody></table>")
                     lines.append("")
 
-                lines.append("| Output | Value |")
-                lines.append("| --- | --- |")
+                lines.append("<table class=\"tool-io-table tool-output\">")
+                lines.append("<thead><tr><th scope=\"col\">Output</th><th scope=\"col\">Value</th></tr></thead>")
+                lines.append("<tbody>")
                 for k, v in outputs.items():
                     if isinstance(v, (int, float, str, bool)):
-                        lines.append(
-                            f"| {self.response_formatter.pretty_key(k)} | **{self.response_formatter.format_value(k, v)}** |"
-                        )
+                        key_cell = self.response_formatter.pretty_key(k)
+                        val_cell = self.response_formatter.format_value(k, v)
+                        lines.append(f"<tr><td>{key_cell}</td><td><strong>{val_cell}</strong></td></tr>")
+                lines.append("</tbody></table>")
                 lines.append("")
 
                 notes = payload.get("notes", [])
@@ -989,22 +1001,59 @@ class CentralIntelligenceOrchestrator:
             if relevant:
                 lines.append("\n---\n")
                 lines.append("**References:**")
+                lines.append("")
                 seen_refs: set[str] = set()
                 ref_idx = 0
-                for s in relevant[:5]:
+                for s in relevant[:8]:
                     ref_key = self._normalize_clause_id(s.clause_id)
                     if ref_key in seen_refs:
                         continue
                     seen_refs.add(ref_key)
+
+                    clause_record = self._lookup_clause(s.doc_id, s.clause_id)
                     ref_idx += 1
-                    lines.append(f"{ref_idx}. EN 1993-1-1, Cl. {s.clause_id} — {s.clause_title}")
+                    standard = clause_record.standard if clause_record else "EN 1993-1-1"
+                    label = f"{standard}, Cl. {s.clause_id} — {s.clause_title}"
+
+                    if clause_record and clause_record.text.strip():
+                        text_preview = self._format_clause_text_for_display(clause_record.text)
+                        lines.append(f"<details class=\"ref-clause\">")
+                        lines.append(f"<summary><strong>{ref_idx}.</strong> {label}</summary>")
+                        lines.append("")
+                        lines.append(f"<div class=\"clause-text\">")
+                        lines.append(text_preview)
+                        lines.append("</div>")
+                        lines.append("</details>")
+                        lines.append("")
+                    else:
+                        lines.append(f"{ref_idx}. {label}")
+                        lines.append("")
 
         return self.response_formatter.format_markdown("\n".join(lines).strip())
 
     @staticmethod
     def _normalize_clause_id(clause_id: str) -> str:
         idx = clause_id.find("(")
-        return clause_id[:idx] if idx > 0 else clause_id
+        return clause_id[:idx].strip() if idx > 0 else clause_id.strip()
+
+    def _lookup_clause(self, doc_id: str, clause_id: str) -> ClauseRecord | None:
+        key = (doc_id, clause_id)
+        if key in self._clause_lookup:
+            return self._clause_lookup[key]
+        norm = self._normalize_clause_id(clause_id)
+        return self._clause_lookup.get((doc_id, norm))
+
+    def _format_clause_text_for_display(self, text: str, max_length: int = 1400) -> str:
+        """Format clause text for clean display: trim, escape HTML, preserve paragraphs."""
+        t = (text or "").strip()
+        if not t:
+            return ""
+        if len(t) > max_length:
+            t = t[:max_length].rstrip() + " …"
+        t = t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        paragraphs = re.split(r"\n\s*\n", t)
+        blocks = [f"<p class=\"clause-p\">{p.strip().replace(chr(10), '<br>')}</p>" for p in paragraphs if p.strip()]
+        return "\n".join(blocks)
 
     def _select_relevant_sources(
         self,

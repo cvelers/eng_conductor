@@ -27,12 +27,37 @@
           </label>
         </div>
 
-        <section class="sidebar-section">
-          <h2>Conversations</h2>
+        <section id="sidebar-chats-section" class="sidebar-section hidden">
+          <h2>Your chats</h2>
           <ul id="thread-list" class="thread-list"></ul>
+        </section>
+        <section id="sidebar-chats-cta" class="sidebar-section sidebar-cta">
+          <p id="sidebar-cta-text" class="sidebar-cta-text">Sign in to save and access your chat history</p>
+          <button id="sidebar-signin-btn" class="sidebar-btn primary" type="button">Sign in</button>
+          <button id="sidebar-signup-btn" class="sidebar-btn secondary" type="button">Create account</button>
+        </section>
+        <section id="sidebar-auth-disabled" class="sidebar-section sidebar-cta hidden">
+          <p class="sidebar-cta-text">History unavailable — auth not configured</p>
         </section>
 
         <footer class="sidebar-footer">
+          <div id="sidebar-user-area" class="sidebar-user-area hidden">
+            <button id="sidebar-user-btn" class="sidebar-user-btn" type="button" aria-label="Account">
+              <span id="sidebar-user-avatar" class="sidebar-user-avatar"></span>
+              <div class="sidebar-user-info">
+                <span id="sidebar-user-name" class="sidebar-user-name"></span>
+                <span id="sidebar-user-plan" class="sidebar-user-plan">Free</span>
+              </div>
+              <svg class="sidebar-user-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div id="sidebar-user-menu" class="sidebar-user-menu hidden">
+              <button id="sidebar-logout-btn" type="button">Sign out</button>
+            </div>
+          </div>
+          <div id="sidebar-auth-area" class="sidebar-auth-area">
+            <button id="register-btn" class="sidebar-auth-btn" type="button">Create account</button>
+            <button id="signin-btn" class="sidebar-auth-btn signin" type="button">Sign in</button>
+          </div>
           <div class="sidebar-info">
             <span>13 tools available</span>
             <span class="dot"></span>
@@ -50,13 +75,7 @@
             <span class="status-dot online"></span>
             Eurocodes Assistant
           </div>
-          <div class="top-actions">
-            <label class="dev-toggle" title="Developer Mode — enables tool writer and technical internals">
-              <input type="checkbox" id="dev-mode-toggle" />
-              <span class="dev-toggle-label">Dev Mode</span>
-            </label>
-            <div id="user-pill" class="user-pill hidden"></div>
-          </div>
+          <div class="top-actions"></div>
         </header>
 
         <section id="messages" class="messages" aria-live="polite"></section>
@@ -103,6 +122,12 @@
         </div>
 
         <footer class="composer-shell">
+          <div class="composer-meta">
+            <label class="composer-dev-toggle" title="Developer Mode — enables tool writer and technical internals">
+              <input type="checkbox" id="dev-mode-toggle" />
+              <span class="dev-toggle-label">Dev Mode</span>
+            </label>
+          </div>
           <form id="chat-form" class="composer">
             <input
               id="prompt-input"
@@ -120,25 +145,52 @@
       </main>
     </div>
 
-    <!-- Auth modal -->
+    <!-- Auth modal (production-ready) -->
     <div id="auth-overlay" class="auth-overlay hidden">
-      <div class="auth-card">
-        <div class="auth-brand">
-          <div class="brand-mark">EC</div>
-          <div>
-            <strong>Eurocodes Chatbot</strong>
-            <span>Sign in to continue</span>
+      <div class="auth-modal">
+        <div class="auth-modal-inner">
+          <button id="auth-close" class="auth-close" type="button" aria-label="Close">&times;</button>
+          <div class="auth-brand">
+            <div class="brand-mark">EC</div>
+            <div>
+              <strong>Eurocodes Chatbot</strong>
+              <span>Grounded EC3 intelligence</span>
+            </div>
           </div>
-        </div>
-        <div id="auth-error" class="auth-error hidden"></div>
-        <form id="auth-form" class="auth-form">
-          <input id="auth-email" type="email" placeholder="Email" required autocomplete="email" />
-          <input id="auth-password" type="password" placeholder="Password" required autocomplete="current-password" minlength="6" />
-          <button id="auth-submit" type="submit" class="auth-btn">Sign In</button>
-        </form>
-        <div class="auth-switch">
-          <span id="auth-switch-text">Don't have an account?</span>
-          <button id="auth-switch-btn" type="button" class="auth-link">Sign Up</button>
+          <div class="auth-tabs">
+            <button id="auth-tab-login" type="button" class="auth-tab active">Sign in</button>
+            <button id="auth-tab-signup" type="button" class="auth-tab">Create account</button>
+          </div>
+          <div id="auth-error" class="auth-error hidden"></div>
+
+          <form id="auth-form-login" class="auth-form" data-mode="login">
+            <label class="auth-label">Email</label>
+            <input id="auth-email-login" type="email" placeholder="name@example.com" required autocomplete="email" />
+            <label class="auth-label">Password</label>
+            <input id="auth-password-login" type="password" placeholder="••••••••" required autocomplete="current-password" />
+            <a id="auth-forgot-password" href="#" class="auth-forgot">Forgot password?</a>
+            <button id="auth-submit-login" type="submit" class="auth-btn">
+              <span class="auth-btn-text">Sign in</span>
+              <span class="auth-btn-spinner hidden"></span>
+            </button>
+          </form>
+
+          <form id="auth-form-signup" class="auth-form hidden" data-mode="signup">
+            <label class="auth-label">Email</label>
+            <input id="auth-email-signup" type="email" placeholder="name@example.com" required autocomplete="email" />
+            <label class="auth-label">Password</label>
+            <input id="auth-password-signup" type="password" placeholder="At least 6 characters" required autocomplete="new-password" minlength="6" />
+            <label class="auth-label">Confirm password</label>
+            <input id="auth-password-confirm" type="password" placeholder="••••••••" required autocomplete="new-password" minlength="6" />
+            <button id="auth-submit-signup" type="submit" class="auth-btn">
+              <span class="auth-btn-text">Create account</span>
+              <span class="auth-btn-spinner hidden"></span>
+            </button>
+          </form>
+
+          <p class="auth-footer">
+            By continuing, you agree to our terms and privacy policy.
+          </p>
         </div>
       </div>
     </div>
