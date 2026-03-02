@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eurocodes Chatbot (EC3)</title>
-    <link rel="stylesheet" href="/static/styles.css" />
+    <link rel="stylesheet" href="/static/styles.css?v=3" />
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
   </head>
   <body>
@@ -67,16 +67,9 @@
       </aside>
 
       <main class="workspace">
-        <header class="workspace-topbar">
-          <button id="sidebar-toggle" class="icon-btn mobile-only" type="button" aria-label="Toggle sidebar">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-          </button>
-          <div class="model-pill">
-            <span class="status-dot online"></span>
-            Eurocodes Assistant
-          </div>
-          <div class="top-actions"></div>
-        </header>
+        <button id="sidebar-toggle" class="icon-btn floating-sidebar-toggle mobile-only" type="button" aria-label="Toggle sidebar">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
 
         <section id="messages" class="messages" aria-live="polite"></section>
 
@@ -129,17 +122,92 @@
             </label>
           </div>
           <form id="chat-form" class="composer">
-            <input
-              id="prompt-input"
-              name="prompt"
-              type="text"
-              placeholder="Ask about Eurocodes, run calculations, or check resistances..."
-              autocomplete="off"
-              required
-            />
-            <button id="send-btn" type="submit" aria-label="Send">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            </button>
+            <div id="attachments-preview" class="attachments-preview hidden"></div>
+            <div class="composer-main-row">
+              <input
+                id="prompt-input"
+                name="prompt"
+                type="text"
+                placeholder="Ask about Eurocodes, run calculations, or check resistances..."
+                autocomplete="off"
+              />
+            </div>
+            <div class="composer-controls-row">
+              <div class="composer-controls-left">
+                <div class="attach-wrap">
+                  <button
+                    id="attach-trigger"
+                    class="attach-trigger"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="attach-menu"
+                    title="Attach files or photos"
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="12" y1="5" x2="12" y2="19"></line>
+                      <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                  </button>
+                  <div id="attach-menu" class="attach-menu hidden" role="menu">
+                    <button class="attach-option" type="button" role="menuitem" data-type="photo">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                        <polyline points="21 15 16 10 5 21"></polyline>
+                      </svg>
+                      <span>Photo</span>
+                    </button>
+                    <button class="attach-option" type="button" role="menuitem" data-type="file">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                      </svg>
+                      <span>File</span>
+                    </button>
+                  </div>
+                  <input id="photo-input" type="file" accept="image/*" multiple hidden />
+                  <input id="file-input" type="file" multiple hidden />
+                </div>
+              <div class="thinking-mode-wrap" title="Routing depth">
+                <button
+                  id="thinking-mode-trigger"
+                  class="thinking-mode-trigger"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-controls="thinking-mode-menu"
+                >
+                  <svg class="thinking-mode-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="9"></circle>
+                    <polyline points="12,7 12,12 15.5,14"></polyline>
+                  </svg>
+                  <span id="thinking-mode-label">Thinking</span>
+                  <svg class="thinking-mode-chevron" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                    <polyline points="6 9 12 15 18 9"></polyline>
+                  </svg>
+                </button>
+                <div id="thinking-mode-menu" class="thinking-mode-menu hidden" role="listbox" aria-label="Thinking mode">
+                  <button class="thinking-mode-option" type="button" role="option" data-mode="standard">Standard</button>
+                  <button class="thinking-mode-option" type="button" role="option" data-mode="thinking">Thinking</button>
+                  <button class="thinking-mode-option" type="button" role="option" data-mode="extended">Extended Thinking</button>
+                </div>
+                <select id="thinking-mode" name="thinking_mode" class="hidden-thinking-select" aria-hidden="true" tabindex="-1">
+                  <option value="standard">Standard</option>
+                  <option value="thinking" selected>Thinking</option>
+                  <option value="extended">Extended Thinking</option>
+                </select>
+              </div>
+              </div>
+              <button id="send-btn" type="submit" aria-label="Send">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="12" y1="19" x2="12" y2="5"></line>
+                  <polyline points="6 11 12 5 18 11"></polyline>
+                </svg>
+              </button>
+            </div>
           </form>
         </footer>
       </main>
@@ -200,6 +268,9 @@
         <div class="msg-header">
           <div class="role"></div>
           <div class="msg-actions">
+            <button class="icon-btn edit-btn" title="Edit & resubmit" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
             <button class="icon-btn copy-btn" title="Copy to clipboard" type="button">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             </button>
@@ -208,7 +279,12 @@
         <section class="thinking-block hidden">
           <button class="thinking-toggle" type="button">
             <svg class="thinking-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="9 18 15 12 9 6"/></svg>
-            <span class="thinking-label">Thinking...</span>
+            <span class="thinking-label">Thinking</span>
+            <span class="thinking-dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </span>
             <span class="thinking-meta"></span>
           </button>
           <div class="thinking-content">
@@ -230,6 +306,6 @@
       </article>
     </template>
 
-    <script src="/static/app.js" defer></script>
+    <script src="/static/app.js?v=3" defer></script>
   </body>
 </html>

@@ -100,28 +100,50 @@ class AgenticRetriever:
     # ------------------------------------------------------------------
 
     def retrieve(
-        self, query: str, top_k: int | None = None,
+        self,
+        query: str,
+        top_k: int | None = None,
+        *,
+        agentic: bool | None = None,
+        recursive: bool | None = None,
     ) -> tuple[list[RetrievedClause], list[dict[str, object]]]:
         final_results: list[RetrievedClause] = []
         trace: list[dict[str, object]] = []
-        for event in self.iter_retrieve(query, top_k=top_k):
+        for event in self.iter_retrieve(
+            query,
+            top_k=top_k,
+            agentic=agentic,
+            recursive=recursive,
+        ):
             if event.get("type") == "final":
                 final_results = event.get("results", [])
                 trace = event.get("trace", [])
         return final_results, trace
 
     def iter_retrieve(
-        self, query: str, top_k: int | None = None,
+        self,
+        query: str,
+        top_k: int | None = None,
+        *,
+        agentic: bool | None = None,
+        recursive: bool | None = None,
     ) -> Iterator[dict[str, Any]]:
         limit = top_k or self.settings.top_k_clauses
         trace: list[dict[str, object]] = []
         aggregated: dict[str, RetrievedClause] = {}
 
-        agentic = self.settings.agentic_search_enabled and self.search_provider.available
-        max_gap_iters = max(0, self.settings.max_retrieval_iters - 2) if agentic else 0
+        agentic_enabled = (
+            self.settings.agentic_search_enabled if agentic is None else bool(agentic)
+        ) and self.search_provider.available
+        recursive_enabled = (
+            self.settings.recursive_retrieval_enabled
+            if recursive is None
+            else bool(recursive)
+        )
+        max_gap_iters = max(0, self.settings.max_retrieval_iters - 2) if agentic_enabled else 0
 
         # ---- Phase 1: query decomposition ----
-        sub_queries = self._decompose_query(query) if agentic else [self._sanitize(query)]
+        sub_queries = self._decompose_query(query) if agentic_enabled else [self._sanitize(query)]
 
         trace.append({
             "iteration": 1, "query": query,
@@ -161,7 +183,7 @@ class AgenticRetriever:
         }
 
         # ---- Phase 3: LLM relevance re-ranking ----
-        if agentic and candidates:
+        if agentic_enabled and candidates:
             scored = self._llm_score_relevance(query, candidates[:30])
             for item in scored:
                 key = item.clause.citation_address
@@ -249,7 +271,7 @@ class AgenticRetriever:
             key=lambda item: (-item.score, item.clause.doc_id, item.clause.clause_id),
         )
 
-        if self.settings.recursive_retrieval_enabled:
+        if recursive_enabled:
             merged = self._recursive_expand(merged, limit)
             yield {"type": "recursive", "detail": "Recursive retrieval expansion applied."}
 
@@ -433,7 +455,7 @@ class AgenticRetriever:
                     "Return JSON: a search string or null."
                 ),
                 temperature=0,
-                max_tokens=350,
+                max_tokens=600,
             )
             data = parse_json_loose(raw)
             if isinstance(data, str) and data.strip():

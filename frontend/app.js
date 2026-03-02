@@ -1,4 +1,5 @@
 const STORAGE_KEY = "ec3_chat_threads_v2";
+const THINKING_MODE_KEY = "ec3_thinking_mode";
 
 const GRAPH_NODES = [
   { id: "user",         label: "User",          icon: "person", col: 0, row: 1 },
@@ -29,6 +30,10 @@ const $$ = (sel) => document.querySelectorAll(sel);
 
 const form = $("#chat-form");
 const input = $("#prompt-input");
+const thinkingModeSelect = $("#thinking-mode");
+const thinkingModeTrigger = $("#thinking-mode-trigger");
+const thinkingModeMenu = $("#thinking-mode-menu");
+const thinkingModeLabel = $("#thinking-mode-label");
 const sendBtn = $("#send-btn");
 const messagesEl = $("#messages");
 const template = $("#message-template");
@@ -44,8 +49,22 @@ const signInBtn = $("#signin-btn");
 const registerBtn = $("#register-btn");
 const sidebarSigninBtn = $("#sidebar-signin-btn");
 const sidebarSignupBtn = $("#sidebar-signup-btn");
+const attachTrigger = $("#attach-trigger");
+const attachMenu = $("#attach-menu");
+const photoInput = $("#photo-input");
+const fileInput = $("#file-input");
+const attachmentsPreview = $("#attachments-preview");
 
-const state = { threads: [], activeThreadId: null, guestThread: null, filter: "", devMode: false };
+
+const state = {
+  threads: [],
+  activeThreadId: null,
+  guestThread: null,
+  filter: "",
+  devMode: false,
+  thinkingMode: "thinking",
+  attachments: [],
+};
 
 function uid() {
   return crypto?.randomUUID?.() || `id_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
@@ -78,6 +97,196 @@ function escHtml(s) {
   const d = document.createElement("div");
   d.textContent = s;
   return d.innerHTML;
+}
+
+// ---- Attachments ----
+function fmtFileSize(bytes) {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+}
+
+function readFileAsDataUrl(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function isImageFile(file) {
+  return file.type.startsWith("image/");
+}
+
+function closeAttachMenu() {
+  if (!attachMenu) return;
+  attachMenu.classList.add("hidden");
+  attachTrigger?.setAttribute("aria-expanded", "false");
+  attachTrigger?.closest(".attach-wrap")?.classList.remove("open");
+}
+
+async function addAttachments(files) {
+  for (const file of files) {
+    if (state.attachments.length >= 10) break;
+    const att = {
+      id: uid(),
+      file,
+      name: file.name,
+      size: file.size,
+      type: file.type,
+      isImage: isImageFile(file),
+      dataUrl: null,
+    };
+    if (att.isImage) {
+      try { att.dataUrl = await readFileAsDataUrl(file); } catch { /* skip preview */ }
+    }
+    state.attachments.push(att);
+  }
+  renderAttachmentsPreview();
+}
+
+function removeAttachment(id) {
+  state.attachments = state.attachments.filter(a => a.id !== id);
+  renderAttachmentsPreview();
+}
+
+function clearAttachments() {
+  state.attachments = [];
+  renderAttachmentsPreview();
+}
+
+function renderAttachmentsPreview() {
+  if (!attachmentsPreview) return;
+  attachmentsPreview.innerHTML = "";
+  if (!state.attachments.length) {
+    attachmentsPreview.classList.add("hidden");
+    return;
+  }
+  attachmentsPreview.classList.remove("hidden");
+  for (const att of state.attachments) {
+    const chip = document.createElement("div");
+    chip.className = att.isImage ? "attachment-chip photo-chip" : "attachment-chip";
+
+    if (att.isImage && att.dataUrl) {
+      const img = document.createElement("img");
+      img.src = att.dataUrl;
+      img.alt = att.name;
+      chip.appendChild(img);
+    } else {
+      const icon = document.createElement("span");
+      icon.className = "att-icon";
+      icon.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+      const name = document.createElement("span");
+      name.className = "att-name";
+      name.textContent = att.name;
+      name.title = att.name;
+      const size = document.createElement("span");
+      size.className = "att-size";
+      size.textContent = fmtFileSize(att.size);
+      chip.appendChild(icon);
+      chip.appendChild(name);
+      chip.appendChild(size);
+    }
+
+    const removeBtn = document.createElement("button");
+    removeBtn.className = "att-remove";
+    removeBtn.type = "button";
+    removeBtn.innerHTML = "&times;";
+    removeBtn.title = "Remove";
+    removeBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeAttachment(att.id);
+    });
+    chip.appendChild(removeBtn);
+
+    attachmentsPreview.appendChild(chip);
+  }
+}
+
+function buildAttachmentHtml(attachments) {
+  if (!attachments || !attachments.length) return "";
+  let html = '<div class="msg-attachments">';
+  for (const att of attachments) {
+    if (att.isImage && att.dataUrl) {
+      html += `<div class="msg-photo-thumb" data-src="${escHtml(att.dataUrl)}"><img src="${escHtml(att.dataUrl)}" alt="${escHtml(att.name)}" /></div>`;
+    } else {
+      html += `<div class="msg-file-tag"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="file-tag-name" title="${escHtml(att.name)}">${escHtml(att.name)}</span><span class="file-tag-size">${fmtFileSize(att.size)}</span></div>`;
+    }
+  }
+  html += "</div>";
+  return html;
+}
+
+function attachLightboxListeners(container) {
+  const thumbs = container.querySelectorAll(".msg-photo-thumb");
+  for (const thumb of thumbs) {
+    thumb.addEventListener("click", () => {
+      const src = thumb.dataset.src || thumb.querySelector("img")?.src;
+      if (!src) return;
+      const overlay = document.createElement("div");
+      overlay.className = "photo-lightbox";
+      const img = document.createElement("img");
+      img.src = src;
+      overlay.appendChild(img);
+      overlay.addEventListener("click", () => overlay.remove());
+      document.body.appendChild(overlay);
+    });
+  }
+}
+
+function isValidThinkingMode(mode) {
+  return mode === "standard" || mode === "thinking" || mode === "extended";
+}
+
+function thinkingModeLabelText(mode) {
+  if (mode === "standard") return "Standard";
+  if (mode === "extended") return "Extended Thinking";
+  return "Thinking";
+}
+
+function closeThinkingModeMenu() {
+  if (!thinkingModeMenu) return;
+  thinkingModeMenu.classList.add("hidden");
+  thinkingModeTrigger?.setAttribute("aria-expanded", "false");
+  thinkingModeTrigger?.closest(".thinking-mode-wrap")?.classList.remove("open");
+}
+
+function syncThinkingModeUi() {
+  if (thinkingModeSelect && thinkingModeSelect.value !== state.thinkingMode) {
+    thinkingModeSelect.value = state.thinkingMode;
+  }
+  if (thinkingModeLabel) {
+    thinkingModeLabel.textContent = thinkingModeLabelText(state.thinkingMode);
+  }
+  for (const option of $$(".thinking-mode-option")) {
+    const selected = option.dataset.mode === state.thinkingMode;
+    option.classList.toggle("selected", selected);
+    option.setAttribute("aria-selected", selected ? "true" : "false");
+  }
+}
+
+function setThinkingModeDisabled(disabled) {
+  if (thinkingModeSelect) thinkingModeSelect.disabled = disabled;
+  if (thinkingModeTrigger) thinkingModeTrigger.disabled = disabled;
+  for (const option of $$(".thinking-mode-option")) {
+    option.disabled = disabled;
+  }
+  if (disabled) closeThinkingModeMenu();
+}
+
+function loadThinkingModePreference() {
+  const saved = localStorage.getItem(THINKING_MODE_KEY);
+  if (isValidThinkingMode(saved)) {
+    state.thinkingMode = saved;
+  }
+  syncThinkingModeUi();
+}
+
+function setThinkingMode(mode) {
+  state.thinkingMode = isValidThinkingMode(mode) ? mode : "thinking";
+  localStorage.setItem(THINKING_MODE_KEY, state.thinkingMode);
+  syncThinkingModeUi();
 }
 
 // ---- State persistence ----
@@ -251,7 +460,10 @@ async function setActive(id) {
 
 function updateWelcome() {
   const a = currentThread();
-  welcome.classList.toggle("hidden", !!(a && a.messages.length));
+  const hasMessages = !!(a && a.messages.length);
+  welcome.classList.toggle("hidden", hasMessages);
+  document.body.classList.toggle("chat-started", hasMessages);
+  document.body.classList.toggle("pre-chat", !hasMessages);
 }
 
 // ---- Thread list ----
@@ -381,6 +593,7 @@ function initFlowGraph(msgNode, prompt) {
   const graph = msgNode.querySelector(".flow-graph");
   if (!block || !graph) return;
   block.classList.remove("hidden");
+  setThinkingState(msgNode, true);
   graph.innerHTML = "";
 
   const canvas = document.createElement("div");
@@ -540,7 +753,9 @@ function formatDocBadge(entry) {
   const rawDoc = String(entry.doc_id || "").trim();
   const file = rawDoc ? `${rawDoc.replace(/\.json$/i, "")}.json` : "document.json";
   const clause = String(entry.clause_id || "").trim();
-  return clause ? `${file} · Cl. ${clause}` : file;
+  if (!clause) return file;
+  const prefix = /^\d/.test(clause) ? "Cl. " : "";
+  return `${file} · ${prefix}${clause}`;
 }
 
 function pushDocBadges(f, entries) {
@@ -598,7 +813,13 @@ function processEvent(f, ev) {
   } else if (node === "inputs") {
     setNS(f, "orchestrator", s === "done" ? "done" : "active");
   } else if (node === "retrieval") {
+    const skipped = m.skipped === true || /skipped/i.test(String(ev.detail || ""));
     setNS(f, "orchestrator", "done");
+    if (skipped) {
+      setNS(f, "database", "idle");
+      setES(f, "o_d", "idle");
+      return;
+    }
     setNS(f, "database", s === "error" ? "error" : (s === "done" ? "done" : "active"));
     setES(f, "o_d", s === "error" ? "error" : (s === "done" ? "done" : "active"));
     if (m.top?.length) pushDocBadges(f, m.top);
@@ -641,9 +862,64 @@ function appendLog(msgNode, text) {
   while (log.children.length > 12) log.removeChild(log.lastChild);
 }
 
+// ---- Witty rotating phrases while thinking ----
+const _THINKING_PHRASES = [
+  "Sharpening the pencil",
+  "Warming up the calculator",
+  "Flipping through the textbook",
+  "Putting on the hard hat",
+  "Rolling up the sleeves",
+  "Brewing a strong coffee",
+  "Dusting off the slide rule",
+  "Squinting at the fine print",
+  "Stretching before the heavy lifting",
+  "Cracking the knuckles",
+  "Gathering the evidence",
+  "Connecting the dots",
+  "Thinking really hard",
+  "Almost there, probably",
+  "Doing the engineering thing",
+  "Consulting the sacred texts",
+];
+
+function _startPhraseRotation(msgNode) {
+  if (msgNode.__phraseTimer) return;
+  let idx = Math.floor(Math.random() * _THINKING_PHRASES.length);
+  const label = msgNode.querySelector(".thinking-label");
+  if (!label) return;
+  label.textContent = _THINKING_PHRASES[idx];
+  msgNode.__phraseTimer = setInterval(() => {
+    idx = (idx + 1) % _THINKING_PHRASES.length;
+    label.classList.add("phrase-fade");
+    setTimeout(() => {
+      label.textContent = _THINKING_PHRASES[idx];
+      label.classList.remove("phrase-fade");
+    }, 200);
+  }, 2800);
+}
+
+function _stopPhraseRotation(msgNode) {
+  if (msgNode.__phraseTimer) {
+    clearInterval(msgNode.__phraseTimer);
+    msgNode.__phraseTimer = null;
+  }
+}
+
 function updateThinkingLabel(msgNode, text) {
+  _stopPhraseRotation(msgNode);
   const label = msgNode.querySelector(".thinking-label");
   if (label) label.textContent = clamp(text, 120);
+}
+
+function setThinkingState(msgNode, active) {
+  const block = msgNode.querySelector(".thinking-block");
+  if (!block) return;
+  block.classList.toggle("is-thinking", !!active);
+  if (active) {
+    _startPhraseRotation(msgNode);
+  } else {
+    _stopPhraseRotation(msgNode);
+  }
 }
 
 function previewPairs(obj, max = 3) {
@@ -676,9 +952,11 @@ function describeMachineStep(ev) {
   }
 
   if (ev.node === "plan") {
+    const thinking = String(m.thinking_mode || "");
     const mode = String(m.mode || "retrieval_only").replace(/_/g, " ");
     const tools = Array.isArray(m.tools) && m.tools.length ? m.tools.map(normTool).join(" -> ") : "no tools";
-    return `Planned ${mode} path with tool chain: ${tools}.`;
+    const modeLabel = thinking ? `${thinking} mode` : "default mode";
+    return `Planned ${mode} path (${modeLabel}) with tool chain: ${tools}.`;
   }
 
   if (ev.node === "inputs") {
@@ -695,6 +973,8 @@ function describeMachineStep(ev) {
   }
 
   if (ev.node === "retrieval") {
+    const skipped = m.skipped === true || /skipped/i.test(String(ev.detail || ""));
+    if (skipped) return "Skipped database retrieval for calculator-only path.";
     if (s === "active") {
       const iteration = m.iteration?.iteration || m.iteration?.pass || "";
       const clauses = previewClauses(m.top || m.top_clauses);
@@ -724,11 +1004,17 @@ function describeMachineStep(ev) {
   }
 
   if (ev.node === "compose") {
-    if (s === "active") return "Composing response from tool outputs and retrieved clauses.";
+    const usedTools = Array.isArray(m.used_tools) ? m.used_tools.length : 0;
+    const usedSources = Array.isArray(m.used_sources) ? m.used_sources.length : 0;
+    if (s === "active") {
+      return (usedTools || usedSources)
+        ? "Composing response from tool outputs and retrieved clauses."
+        : (ev.detail || "Generating response...");
+    }
     if (s === "done") {
-      const usedTools = Array.isArray(m.used_tools) ? m.used_tools.length : 0;
-      const usedSources = Array.isArray(m.used_sources) ? m.used_sources.length : 0;
-      return `Draft complete with ${usedTools} tool(s) and ${usedSources} source citation(s).`;
+      return (usedTools || usedSources)
+        ? `Draft complete with ${usedTools} tool(s) and ${usedSources} source citation(s).`
+        : (ev.detail || "Response ready.");
     }
     return "Could not fully ground the draft in available evidence.";
   }
@@ -749,7 +1035,7 @@ function updateFlow(msgNode, ev) {
   processEvent(f, ev);
   applyFlow(msgNode);
   const detail = describeMachineStep(ev);
-  updateThinkingLabel(msgNode, detail || ev.detail || `${ev.node}: ${ev.status || "active"}`);
+  // Don't call updateThinkingLabel here — the phrase rotator handles it
   appendLog(msgNode, detail || ev.detail || `${ev.node}: ${ev.status}`);
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
@@ -761,12 +1047,13 @@ function finalizeThinking(msgNode, payload) {
   setNS(f, "user", "done");
   setES(f, "o_r", payload.supported ? "done" : "error");
   applyFlow(msgNode);
+  setThinkingState(msgNode, false);
 
   const elapsed = ((Date.now() - (msgNode.__thinkStart || Date.now())) / 1000).toFixed(1);
   const steps = msgNode.__stepCount || 0;
   const meta = msgNode.querySelector(".thinking-meta");
   if (meta) meta.textContent = `${steps} steps · ${elapsed}s`;
-  updateThinkingLabel(msgNode, "Reasoning complete. Review orchestrator steps below.");
+  updateThinkingLabel(msgNode, "Reasoning complete. Expand to review steps.");
 }
 
 function setTrace(msgNode, payload) {
@@ -797,9 +1084,12 @@ function createMsg(role, content = "", opts = {}) {
   const contentEl = node.querySelector(".content");
   if (role === "assistant") {
     contentEl.innerHTML = renderMd(content);
+    // Assistant messages: hide edit button, keep copy
+    node.querySelector(".edit-btn")?.remove();
     if (opts.showThinking !== false) {
       initFlowGraph(node, opts.prompt || "");
-      if (opts.startCollapsed) node.querySelector(".thinking-block")?.classList.add("collapsed");
+      const startCollapsed = opts.startCollapsed !== false;
+      if (startCollapsed) node.querySelector(".thinking-block")?.classList.add("collapsed");
     } else {
       node.querySelector(".thinking-block")?.classList.add("hidden");
     }
@@ -810,9 +1100,22 @@ function createMsg(role, content = "", opts = {}) {
       }
     }
   } else {
-    contentEl.textContent = content;
+    const attHtml = buildAttachmentHtml(opts.attachments);
+    if (attHtml) {
+      contentEl.innerHTML = attHtml;
+      const textNode = document.createElement("span");
+      textNode.textContent = content;
+      contentEl.appendChild(textNode);
+      attachLightboxListeners(contentEl);
+    } else {
+      contentEl.textContent = content;
+    }
     node.querySelector(".thinking-block")?.remove();
     node.querySelector(".trace")?.remove();
+
+    // Store original prompt + attachments for edit & resubmit
+    node.__editContent = content;
+    node.__editAttachments = opts.attachments || [];
   }
 
   const copyBtn = node.querySelector(".copy-btn");
@@ -823,6 +1126,12 @@ function createMsg(role, content = "", opts = {}) {
       copyBtn.title = "Copied!";
       setTimeout(() => { copyBtn.title = "Copy to clipboard"; }, 1500);
     });
+  }
+
+  // Edit & resubmit for user messages
+  const editBtn = node.querySelector(".edit-btn");
+  if (editBtn && role === "user") {
+    editBtn.addEventListener("click", () => editAndResubmit(node));
   }
 
   const toggle = node.querySelector(".thinking-toggle");
@@ -838,6 +1147,152 @@ function createMsg(role, content = "", opts = {}) {
   return node;
 }
 
+// ---- Inline Edit & Resubmit ----
+function editAndResubmit(userMsgNode) {
+  // Don't allow editing while a request is in flight or already editing
+  if (sendBtn.disabled) return;
+  if (userMsgNode.classList.contains("editing")) return;
+
+  const contentEl = userMsgNode.querySelector(".content");
+  const originalHtml = contentEl.innerHTML;
+  const prompt = userMsgNode.__editContent || "";
+  const attachments = userMsgNode.__editAttachments || [];
+
+  userMsgNode.classList.add("editing");
+
+  // Build inline editor
+  const textarea = document.createElement("textarea");
+  textarea.className = "inline-edit-input";
+  textarea.value = prompt;
+
+  const btnRow = document.createElement("div");
+  btnRow.className = "inline-edit-actions";
+
+  const saveBtn = document.createElement("button");
+  saveBtn.className = "inline-edit-save";
+  saveBtn.textContent = "Save & Submit";
+  saveBtn.type = "button";
+
+  const cancelBtn = document.createElement("button");
+  cancelBtn.className = "inline-edit-cancel";
+  cancelBtn.textContent = "Cancel";
+  cancelBtn.type = "button";
+
+  btnRow.appendChild(saveBtn);
+  btnRow.appendChild(cancelBtn);
+
+  // Replace content with textarea + buttons
+  contentEl.innerHTML = "";
+  contentEl.appendChild(textarea);
+  contentEl.appendChild(btnRow);
+
+  // Auto-size textarea to fit content
+  textarea.style.height = "auto";
+  textarea.style.height = textarea.scrollHeight + "px";
+  textarea.focus();
+  textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+
+  textarea.addEventListener("input", () => {
+    textarea.style.height = "auto";
+    textarea.style.height = textarea.scrollHeight + "px";
+  });
+
+  // Cancel → restore original content
+  cancelBtn.addEventListener("click", () => {
+    contentEl.innerHTML = originalHtml;
+    userMsgNode.classList.remove("editing");
+    if (attachments.length) attachLightboxListeners(contentEl);
+  });
+
+  // Save → resubmit from this point
+  saveBtn.addEventListener("click", async () => {
+    const newText = textarea.value.trim();
+    if (!newText && !attachments.length) return;
+
+    userMsgNode.classList.remove("editing");
+
+    // Update the displayed content
+    const attHtml = buildAttachmentHtml(attachments);
+    if (attHtml) {
+      contentEl.innerHTML = attHtml;
+      const span = document.createElement("span");
+      span.textContent = newText;
+      contentEl.appendChild(span);
+      attachLightboxListeners(contentEl);
+    } else {
+      contentEl.textContent = newText;
+    }
+
+    // Update stored edit content
+    userMsgNode.__editContent = newText;
+
+    // Remove all messages AFTER this one from the DOM
+    const allMsgs = [...messagesEl.querySelectorAll(".message")];
+    const idx = allMsgs.indexOf(userMsgNode);
+    if (idx < 0) return;
+    const toRemove = allMsgs.slice(idx + 1);
+    for (const el of toRemove) el.remove();
+
+    // Update thread: keep this message (with new content), drop everything after
+    const thread = currentThread();
+    if (thread && thread.messages.length > idx) {
+      thread.messages[idx].content = newText;
+      thread.messages.length = idx + 1;
+      thread.updatedAt = now();
+    }
+
+    // Build full prompt with attachment markers
+    let fullPrompt = newText;
+    if (attachments.length) {
+      const fileDescs = attachments.map(a =>
+        a.isImage ? `[Attached image: ${a.name}]` : `[Attached file: ${a.name} (${fmtFileSize(a.size)})]`
+      ).join(" ");
+      fullPrompt = fullPrompt ? `${fileDescs}\n\n${fullPrompt}` : fileDescs;
+    }
+
+    if (canUseStoredThreads() && !auth.threadsSync) save();
+
+    // Create assistant node and stream response
+    sendBtn.disabled = true;
+    setThinkingModeDisabled(true);
+    const assistantNode = createMsg("assistant", "", { showThinking: true, prompt: fullPrompt });
+
+    try {
+      await streamChat(fullPrompt, assistantNode, thread, state.thinkingMode, attachments);
+    } catch (err) {
+      const errMsg = `Error: ${err.message}`;
+      setThinkingState(assistantNode, false);
+      updateThinkingLabel(assistantNode, "Reasoning failed.");
+      assistantNode.querySelector(".content").innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
+      appendLog(assistantNode, `Transport error: ${err.message}`);
+      thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
+      thread.updatedAt = now();
+      if (canUseStoredThreads()) {
+        if (auth.threadsSync) {
+          await addMessageToApi(thread.id, "assistant", errMsg, null);
+        } else {
+          save();
+        }
+      }
+    } finally {
+      sendBtn.disabled = false;
+      setThinkingModeDisabled(false);
+    }
+  });
+
+  // Keyboard shortcuts: Ctrl/Cmd+Enter to submit, Escape to cancel
+  textarea.addEventListener("keydown", (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      saveBtn.click();
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      cancelBtn.click();
+    }
+  });
+}
+
 function renderMessages() {
   messagesEl.innerHTML = "";
   const t = currentThread();
@@ -846,14 +1301,14 @@ function renderMessages() {
     if (m.role === "assistant") {
       createMsg("assistant", m.content || "", { showThinking: false, responsePayload: m.responsePayload });
     } else {
-      createMsg("user", m.content || "");
+      createMsg("user", m.content || "", { attachments: m.attachments });
     }
   }
   updateWelcome();
 }
 
 // ---- Streaming ----
-async function streamChat(prompt, assistantNode, thread) {
+async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinking", attachments = []) {
   const contentEl = assistantNode.querySelector(".content");
   contentEl.innerHTML = "";
   let accumulated = "";
@@ -875,10 +1330,24 @@ async function streamChat(prompt, assistantNode, thread) {
     content: m.role === "assistant" ? (m.content || "").slice(0, 500) : (m.content || ""),
   }));
 
+  // Build attachments payload for the API (with base64 data for images)
+  const apiAttachments = attachments.map(a => ({
+    name: a.name,
+    type: a.type || "",
+    size: a.size || 0,
+    is_image: !!a.isImage,
+    data_url: a.isImage ? (a.dataUrl || null) : null,
+  }));
+
   const res = await fetchWithAuth("/api/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: prompt, history }),
+    body: JSON.stringify({
+      message: prompt,
+      history,
+      thinking_mode: thinkingMode,
+      attachments: apiAttachments,
+    }),
   });
   if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
 
@@ -938,6 +1407,8 @@ async function streamChat(prompt, assistantNode, thread) {
       if (event.type === "error") {
         if (renderTimer) { clearTimeout(renderTimer); renderTimer = null; }
         const errMsg = `Error: ${event.detail || "Unknown error"}`;
+        setThinkingState(assistantNode, false);
+        updateThinkingLabel(assistantNode, "Reasoning failed.");
         contentEl.innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
         appendLog(assistantNode, errMsg);
         if (!finalized) {
@@ -984,7 +1455,9 @@ function showDevActivity(payload) {
       const key = `${s.clause_id}`;
       if (seen.has(key) || key === "0") continue;
       seen.add(key);
-      lines.push(`  Cl. ${s.clause_id} — ${s.clause_title || ""}`);
+      const clauseId = String(s.clause_id || "").trim();
+      const prefix = /^\d/.test(clauseId) ? "Cl. " : "";
+      lines.push(`  ${prefix}${clauseId} — ${s.clause_title || ""}`);
     }
   }
   out.textContent = lines.join("\n");
@@ -1416,6 +1889,7 @@ async function handleAuthRedirectFromHash() {
   applyAuthState();
 }
 
+
 // ---- Init ----
 async function initialize() {
   resetGuestThread();
@@ -1424,6 +1898,119 @@ async function initialize() {
   initDevMode();
   initAuth();
   syncAuthControls();
+  loadThinkingModePreference();
+
+  thinkingModeSelect?.addEventListener("change", (e) => {
+    setThinkingMode(e.target.value);
+  });
+  thinkingModeTrigger?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (thinkingModeTrigger.disabled || !thinkingModeMenu) return;
+    closeAttachMenu();
+    const open = thinkingModeMenu.classList.contains("hidden");
+    if (open) {
+      thinkingModeMenu.classList.remove("hidden");
+      thinkingModeTrigger.setAttribute("aria-expanded", "true");
+      thinkingModeTrigger.closest(".thinking-mode-wrap")?.classList.add("open");
+      return;
+    }
+    closeThinkingModeMenu();
+  });
+  thinkingModeMenu?.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+  for (const option of $$(".thinking-mode-option")) {
+    option.addEventListener("click", () => {
+      setThinkingMode(option.dataset.mode || "thinking");
+      closeThinkingModeMenu();
+    });
+  }
+  document.addEventListener("click", (e) => {
+    const wrap = thinkingModeTrigger?.closest(".thinking-mode-wrap");
+    if (!wrap) return;
+    if (!(e.target instanceof Node)) return;
+    if (!wrap.contains(e.target)) closeThinkingModeMenu();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      closeThinkingModeMenu();
+      closeAttachMenu();
+    }
+  });
+
+  // ---- Attach button ----
+  attachTrigger?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (!attachMenu) return;
+    const isOpen = !attachMenu.classList.contains("hidden");
+    closeThinkingModeMenu();
+    if (isOpen) {
+      closeAttachMenu();
+    } else {
+      attachMenu.classList.remove("hidden");
+      attachTrigger.setAttribute("aria-expanded", "true");
+      attachTrigger.closest(".attach-wrap")?.classList.add("open");
+    }
+  });
+  attachMenu?.addEventListener("click", (e) => {
+    e.stopPropagation();
+  });
+  for (const opt of $$(".attach-option")) {
+    opt.addEventListener("click", () => {
+      const type = opt.dataset.type;
+      closeAttachMenu();
+      if (type === "photo") {
+        photoInput?.click();
+      } else if (type === "file") {
+        fileInput?.click();
+      }
+    });
+  }
+  photoInput?.addEventListener("change", () => {
+    if (photoInput.files?.length) addAttachments(photoInput.files);
+    photoInput.value = "";
+  });
+  fileInput?.addEventListener("change", () => {
+    if (fileInput.files?.length) addAttachments(fileInput.files);
+    fileInput.value = "";
+  });
+  document.addEventListener("click", (e) => {
+    const wrap = attachTrigger?.closest(".attach-wrap");
+    if (wrap && e.target instanceof Node && !wrap.contains(e.target)) closeAttachMenu();
+  });
+
+  // Drag-and-drop on the composer
+  const composerEl = $(".composer");
+  if (composerEl) {
+    let dragCounter = 0;
+    composerEl.addEventListener("dragenter", (e) => {
+      e.preventDefault();
+      dragCounter++;
+      composerEl.style.borderColor = "var(--accent)";
+      composerEl.style.boxShadow = "0 0 0 2px var(--accent-glow), 0 8px 24px rgba(0,0,0,0.25)";
+    });
+    composerEl.addEventListener("dragleave", (e) => {
+      e.preventDefault();
+      dragCounter--;
+      if (dragCounter <= 0) {
+        dragCounter = 0;
+        composerEl.style.borderColor = "";
+        composerEl.style.boxShadow = "";
+      }
+    });
+    composerEl.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+    composerEl.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dragCounter = 0;
+      composerEl.style.borderColor = "";
+      composerEl.style.boxShadow = "";
+      if (e.dataTransfer?.files?.length) {
+        addAttachments(e.dataTransfer.files);
+      }
+    });
+  }
 
   await handleAuthRedirectFromHash();
 
@@ -1459,25 +2046,42 @@ async function initialize() {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const prompt = input.value.trim();
-    if (!prompt) return;
+    const hasAttachments = state.attachments.length > 0;
+    if (!prompt && !hasAttachments) return;
+    const thinkingMode = thinkingModeSelect?.value || state.thinkingMode;
+    setThinkingMode(thinkingMode);
+
+    // Capture attachments before clearing
+    const currentAttachments = state.attachments.map(a => ({
+      id: a.id, name: a.name, size: a.size, type: a.type, isImage: a.isImage, dataUrl: a.dataUrl,
+    }));
+
+    // Build a prompt that includes file context for the AI
+    let fullPrompt = prompt;
+    if (currentAttachments.length) {
+      const fileDescs = currentAttachments.map(a =>
+        a.isImage ? `[Attached image: ${a.name}]` : `[Attached file: ${a.name} (${fmtFileSize(a.size)})]`
+      ).join(" ");
+      fullPrompt = fullPrompt ? `${fileDescs}\n\n${fullPrompt}` : fileDescs;
+    }
 
     const thread = await ensureThread();
     if (canUseStoredThreads() && (!thread.messages.length || thread.title === "New chat")) {
-      thread.title = truncTitle(prompt);
+      thread.title = truncTitle(prompt || currentAttachments[0]?.name || "New chat");
       if (auth.threadsSync) {
         await updateThreadTitleApi(thread.id, thread.title);
         const idx = state.threads.findIndex((t) => t.id === thread.id);
         if (idx >= 0) state.threads[idx].title = thread.title;
       }
     } else if (!canUseStoredThreads() && (!thread.messages.length || thread.title === "Temporary chat")) {
-      thread.title = truncTitle(prompt);
+      thread.title = truncTitle(prompt || currentAttachments[0]?.name || "Temporary chat");
     }
 
-    thread.messages.push({ id: uid(), role: "user", content: prompt, createdAt: now() });
+    thread.messages.push({ id: uid(), role: "user", content: prompt, attachments: currentAttachments, createdAt: now() });
     thread.updatedAt = now();
     if (canUseStoredThreads()) {
       if (auth.threadsSync) {
-        await addMessageToApi(thread.id, "user", prompt);
+        await addMessageToApi(thread.id, "user", fullPrompt);
       } else {
         save();
       }
@@ -1485,9 +2089,12 @@ async function initialize() {
     renderThreadList();
 
     input.value = "";
+    clearAttachments();
+    closeAttachMenu();
     sendBtn.disabled = true;
-    createMsg("user", prompt);
-    const assistantNode = createMsg("assistant", "", { showThinking: true, prompt });
+    setThinkingModeDisabled(true);
+    createMsg("user", prompt, { attachments: currentAttachments });
+    const assistantNode = createMsg("assistant", "", { showThinking: true, prompt: fullPrompt });
     updateWelcome();
 
     if (state.devMode) {
@@ -1496,9 +2103,11 @@ async function initialize() {
     }
 
     try {
-      await streamChat(prompt, assistantNode, thread);
+      await streamChat(fullPrompt, assistantNode, thread, state.thinkingMode, currentAttachments);
     } catch (err) {
       const errMsg = `Error: ${err.message}`;
+      setThinkingState(assistantNode, false);
+      updateThinkingLabel(assistantNode, "Reasoning failed.");
       assistantNode.querySelector(".content").innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
       appendLog(assistantNode, `Transport error: ${err.message}`);
       thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
@@ -1513,6 +2122,7 @@ async function initialize() {
       renderThreadList();
     } finally {
       sendBtn.disabled = false;
+      setThinkingModeDisabled(false);
       input.focus();
     }
   });

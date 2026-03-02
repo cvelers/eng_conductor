@@ -2,6 +2,7 @@
 
 VENV ?= .venv
 PORT ?= 8000
+HOST ?= 127.0.0.1
 PYTHON := $(VENV)/bin/python
 PIP := $(VENV)/bin/pip
 UVICORN := $(VENV)/bin/uvicorn
@@ -15,7 +16,8 @@ install:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(UVICORN) backend.app:app --reload --host 0.0.0.0 --port $(PORT)
+	@echo "Open http://localhost:$(PORT)"
+	$(UVICORN) backend.app:app --reload --host $(HOST) --port $(PORT)
 
 test:
 	$(PYTEST) -q

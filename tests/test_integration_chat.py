@@ -98,3 +98,35 @@ def test_chat_writes_orchestrator_thread_log(tmp_path: Path) -> None:
     assert isinstance(entry["machine_events"], list)
     assert entry["response"] and entry["response"]["answer"]
     assert entry["error"] is None
+
+
+def test_simple_beam_calculation_does_not_emit_ec3_clause_when_retrieval_skipped() -> None:
+    root = Path(__file__).resolve().parents[1]
+    settings = Settings.load().with_overrides(
+        project_root=root,
+        orchestrator_provider="mock",
+        search_provider="mock",
+        orchestrator_api_key="",
+        search_api_key="",
+        document_registry_path=root / "data" / "document_registry.json",
+        tool_registry_path=root / "tools" / "tool_registry.json",
+    )
+
+    app = create_app(settings)
+    client = TestClient(app)
+
+    response = client.post(
+        "/api/chat",
+        json={
+            "message": "Simply supported beam, 6m span, 15 kN/m UDL. What is the maximum bending moment and deflection?",
+            "thinking_mode": "thinking",
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["retrieval_trace"] == []
+    assert any(step["tool_name"] == "simple_beam_calculator" for step in body["tool_trace"])
+    assert "EN 1993-1-1, Cl. simply_supported_beam" not in body["answer"]
+    assert "structural mechanics, Cl. simply_supported_beam" not in body["answer"]

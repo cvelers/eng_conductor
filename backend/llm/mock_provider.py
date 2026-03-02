@@ -21,7 +21,8 @@ class MockProvider(LLMProvider):
         system_prompt: str,
         user_prompt: str,
         temperature: float = 0.0,
-        max_tokens: int = 800,
+        max_tokens: int = 4000,
+        reasoning_effort: str | None = None,
     ) -> str:
         prompt = f"{system_prompt}\n{user_prompt}".lower()
 

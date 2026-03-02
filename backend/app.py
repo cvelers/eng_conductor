@@ -150,7 +150,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         final_response: ChatResponse | None = None
         error_detail: str | None = None
         try:
-            for event_type, payload in orchestrator.run_stream(request.message, history=request.history):
+            for event_type, payload in orchestrator.run_stream(
+                request.message,
+                history=request.history,
+                thinking_mode=request.thinking_mode,
+                attachments=request.attachments,
+            ):
                 if event_type == "machine":
                     machine_events.append(payload)
                 elif event_type == "response":
@@ -172,6 +177,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     "request": {
                         "message": request.message,
                         "history": _history_payload(request.history),
+                        "thinking_mode": request.thinking_mode,
                     },
                     "machine_events": machine_events,
                     "response": final_response.model_dump() if final_response else None,
@@ -187,7 +193,12 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             final_response: ChatResponse | None = None
             error_detail: str | None = None
             try:
-                for event_type, payload in orchestrator.run_stream(request.message, history=request.history):
+                for event_type, payload in orchestrator.run_stream(
+                    request.message,
+                    history=request.history,
+                    thinking_mode=request.thinking_mode,
+                    attachments=request.attachments,
+                ):
                     if event_type == "machine":
                         machine_events.append(payload)
                         yield json.dumps({"type": "machine", **payload}) + "\n"
@@ -217,6 +228,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                         "request": {
                             "message": request.message,
                             "history": _history_payload(request.history),
+                            "thinking_mode": request.thinking_mode,
                         },
                         "machine_events": machine_events,
                         "response": final_response.model_dump() if final_response else None,

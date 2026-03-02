@@ -11,7 +11,7 @@ from backend.llm.base import LLMProvider
 from backend.registries.document_registry import ClauseRecord, DocumentRegistryEntry
 from backend.registries.tool_registry import ToolRegistryEntry
 from backend.retrieval.agentic_search import AgenticRetriever, RetrievedClause
-from backend.schemas import ChatResponse, Citation, RetrievalTraceStep, ToolTraceStep
+from backend.schemas import Attachment, ChatResponse, Citation, RetrievalTraceStep, ToolTraceStep
 from backend.tools.response_formatter import ResponseFormatterTool
 from backend.tools.runner import MCPToolRunner
 from backend.utils.citations import build_citation_address
@@ -56,6 +56,8 @@ _FOLLOWUP_VALUE_RE = re.compile(
     re.IGNORECASE,
 )
 
+_THINKING_MODES = {"standard", "thinking", "extended"}
+
 
 class CentralIntelligenceOrchestrator:
     def __init__(
@@ -76,6 +78,9 @@ class CentralIntelligenceOrchestrator:
         self.tool_runner = tool_runner
         self.tool_registry = {entry.tool_name: entry for entry in tool_registry}
         self.document_registry = document_registry or []
+        self._document_lookup: dict[str, DocumentRegistryEntry] = {
+            entry.id: entry for entry in self.document_registry
+        }
         self.clauses = clauses or []
         self._clause_lookup: dict[tuple[str, str], ClauseRecord] = {}
         for c in self.clauses:
@@ -85,30 +90,75 @@ class CentralIntelligenceOrchestrator:
                 self._clause_lookup[(c.doc_id, norm)] = c
         self.response_formatter = response_formatter or ResponseFormatterTool()
 
-    def run(self, query: str, *, history: list | None = None) -> ChatResponse:
+    def run(
+        self,
+        query: str,
+        *,
+        history: list | None = None,
+        thinking_mode: str = "thinking",
+        attachments: list[Attachment] | None = None,
+    ) -> ChatResponse:
         final_response: ChatResponse | None = None
-        for event_type, payload in self.run_stream(query, history=history):
+        for event_type, payload in self.run_stream(
+            query,
+            history=history,
+            thinking_mode=thinking_mode,
+            attachments=attachments,
+        ):
             if event_type == "response":
                 final_response = payload
         if final_response is None:
             raise RuntimeError("Orchestrator did not produce a final response.")
         return final_response
 
-    def run_stream(self, raw_query: str, *, history: list | None = None) -> Iterator[tuple[str, Any]]:
+    def run_stream(
+        self,
+        raw_query: str,
+        *,
+        history: list | None = None,
+        thinking_mode: str = "thinking",
+        attachments: list[Attachment] | None = None,
+    ) -> Iterator[tuple[str, Any]]:
+        attachments = attachments or []
         query = self._resolve_followup(raw_query, history or [])
+        selected_mode = self._normalize_thinking_mode(thinking_mode)
+
+        # --- INTENT CLASSIFICATION ---
+        # Single multimodal classifier inspects text + images and decides what
+        # pipeline stages are needed.
+        classification = self._classify_intent(query, attachments)
+        intent = classification["intent"]
+        logger.info("intent_classified", extra={"intent": intent, "query_preview": query[:80]})
+
+        if intent in ("decline", "greeting", "answer"):
+            yield from self._handle_direct_response(query, attachments, intent)
+            return
 
         # --- INTAKE ---
         yield ("machine", {"node": "intake", "status": "active", "title": "Query Intake", "detail": "Analyzing your question..."})
-        plan = self._build_plan(query)
+        plan = self._build_plan_for_mode(query, thinking_mode=selected_mode)
         yield ("machine", {"node": "intake", "status": "done", "title": "Query Intake", "detail": "Question understood."})
         yield ("machine", {
             "node": "plan", "status": "done", "title": "Pathway Planning",
             "detail": f"Strategy: {plan.mode} | Tools: {plan.tools or ['none']}",
-            "meta": {"mode": plan.mode, "tools": plan.tools, "rationale": plan.rationale},
+            "meta": {
+                "mode": plan.mode,
+                "thinking_mode": selected_mode,
+                "tools": plan.tools,
+                "rationale": plan.rationale,
+            },
         })
 
-        run_retrieval = plan.mode in {"retrieval_only", "hybrid"}
+        run_retrieval = selected_mode in {"standard", "extended"} or plan.mode in {"retrieval_only", "hybrid"}
         run_tools = plan.mode in {"calculator", "hybrid"}
+        retrieval_agentic: bool | None = None
+        retrieval_recursive: bool | None = None
+        if selected_mode == "standard":
+            retrieval_agentic = False
+            retrieval_recursive = False
+        elif selected_mode == "extended":
+            retrieval_agentic = True
+            retrieval_recursive = True
 
         retrieved: list[RetrievedClause] = []
         retrieval_trace: list[dict[str, object]] = []
@@ -116,7 +166,12 @@ class CentralIntelligenceOrchestrator:
         # --- RETRIEVAL ---
         if run_retrieval:
             yield ("machine", {"node": "retrieval", "status": "active", "title": "Database Search", "detail": "Searching EC3 clauses..."})
-            for retrieval_event in self.retriever.iter_retrieve(query, top_k=self.settings.top_k_clauses):
+            for retrieval_event in self.retriever.iter_retrieve(
+                query,
+                top_k=self.settings.top_k_clauses,
+                agentic=retrieval_agentic,
+                recursive=retrieval_recursive,
+            ):
                 etype = retrieval_event.get("type")
                 if etype == "iteration":
                     step = retrieval_event.get("step", {})
@@ -147,10 +202,50 @@ class CentralIntelligenceOrchestrator:
             yield ("machine", {
                 "node": "retrieval", "status": "done", "title": "Database Search",
                 "detail": "Skipped for calculator-only path.",
-                "meta": {"retrieved_count": 0, "top_clauses": []},
+                "meta": {"retrieved_count": 0, "top_clauses": [], "skipped": True},
             })
 
-        if run_tools and plan.mode == "hybrid":
+        if selected_mode == "extended":
+            yield ("machine", {
+                "node": "plan",
+                "status": "active",
+                "title": "Pathway Planning",
+                "detail": "Extended mode: selecting tools after retrieval...",
+            })
+            planned_tools, tool_plan_note = self._plan_tools_after_retrieval(
+                query=query,
+                retrieved=retrieved,
+                initial_tools=plan.tools,
+            )
+            planned_tools = self._normalize_tool_chain(planned_tools)
+            if planned_tools:
+                rationale = plan.rationale
+                if tool_plan_note:
+                    rationale = f"{rationale} | {tool_plan_note}"
+                plan = PlanResult(mode="hybrid", tools=planned_tools, rationale=rationale)
+                run_tools = True
+            else:
+                rationale = f"{plan.rationale} | {tool_plan_note}" if tool_plan_note else plan.rationale
+                plan = PlanResult(
+                    mode="retrieval_only",
+                    tools=[],
+                    rationale=f"{rationale} | Extended mode found no required calculator.",
+                )
+                run_tools = False
+
+            yield ("machine", {
+                "node": "plan",
+                "status": "done",
+                "title": "Pathway Planning",
+                "detail": f"Final strategy: {plan.mode} | Tools: {plan.tools or ['none']}",
+                "meta": {
+                    "mode": plan.mode,
+                    "thinking_mode": selected_mode,
+                    "tools": plan.tools,
+                    "rationale": plan.rationale,
+                },
+            })
+        elif run_tools and plan.mode == "hybrid":
             yield ("machine", {
                 "node": "plan",
                 "status": "active",
@@ -182,7 +277,12 @@ class CentralIntelligenceOrchestrator:
                 "status": "done",
                 "title": "Pathway Planning",
                 "detail": f"Final strategy: {plan.mode} | Tools: {plan.tools or ['none']}",
-                "meta": {"mode": plan.mode, "tools": plan.tools, "rationale": plan.rationale},
+                "meta": {
+                    "mode": plan.mode,
+                    "thinking_mode": selected_mode,
+                    "tools": plan.tools,
+                    "rationale": plan.rationale,
+                },
             })
         elif run_tools:
             normalized_tools = self._normalize_tool_chain(plan.tools)
@@ -300,17 +400,52 @@ class CentralIntelligenceOrchestrator:
         yield ("response", response)
 
     # ---- PLANNING ----
-    def _build_plan(self, query: str) -> PlanResult:
+    def _normalize_thinking_mode(self, mode: str | None) -> str:
+        normalized = str(mode or "thinking").strip().lower().replace("-", "_")
+        if normalized in _THINKING_MODES:
+            return normalized
+        return "thinking"
+
+    def _build_plan_for_mode(self, query: str, *, thinking_mode: str) -> PlanResult:
+        if thinking_mode == "standard":
+            return PlanResult(
+                mode="retrieval_only",
+                tools=[],
+                rationale="Standard mode: database-only lookup with simple retrieval.",
+            )
+
+        plan = self._build_plan(query, thinking_mode=thinking_mode)
+        if thinking_mode == "extended":
+            forced_mode = "hybrid" if plan.tools else "retrieval_only"
+            return PlanResult(
+                mode=forced_mode,
+                tools=plan.tools,
+                rationale=f"{plan.rationale} | Extended mode enforces retrieval-first flow.",
+            )
+        return plan
+
+    def _build_plan(self, query: str, *, thinking_mode: str = "thinking") -> PlanResult:
         valid_tools = list(self.tool_registry.keys())
+        has_documents = bool(self.document_registry or self.clauses)
+
+        registry_plan = self._registry_first_plan(
+            query=query,
+            valid_tools=valid_tools,
+            has_documents=has_documents,
+        )
+        if registry_plan is not None:
+            return registry_plan
 
         if not self.orchestrator_llm.available:
-            return PlanResult(
-                mode="retrieval_only", tools=[],
-                rationale="LLM unavailable — retrieval-only fallback.",
+            return self._heuristic_plan_fallback(
+                query=query,
+                valid_tools=valid_tools,
+                has_documents=has_documents,
             )
 
         tool_descriptions = "\n".join(
             f"- {name}: {self.tool_registry[name].description} "
+            f"| tags: {self.tool_registry[name].tags} "
             f"| inputs: {list(self.tool_registry[name].input_schema.get('properties', {}).keys())}"
             for name in valid_tools
         )
@@ -327,15 +462,16 @@ class CentralIntelligenceOrchestrator:
                 system_prompt=(
                     "You are the Central Intelligence Orchestrator for a Eurocodes engineering chatbot.\n"
                     "Plan the best execution path for answering a user query.\n"
-                    "You have access to:\n"
-                    "1. A database of Eurocode clauses (for explanations, rules, formulas)\n"
-                    "2. Calculator tools (for numerical computations)\n\n"
+                    "You MUST reason over both registries before deciding:\n"
+                    "1) Eurocode clause database registry\n"
+                    "2) Calculator tool registry\n\n"
                     "Return JSON only: {\"mode\":\"retrieval_only|calculator|hybrid\","
                     "\"tools\":[...],\"rationale\":\"...\"}"
                 ),
                 user_prompt=(
                     "###TASK:PLAN###\n"
                     f"User query: {query}\n\n"
+                    f"Thinking mode: {thinking_mode}\n\n"
                     f"Available calculator tools:\n{tool_descriptions}\n\n"
                     f"Available Eurocode documents in the database:\n{doc_descriptions}\n\n"
                     "Decision rules:\n"
@@ -344,13 +480,15 @@ class CentralIntelligenceOrchestrator:
                     "- 'calculator': direct/trivial numeric computation where clause retrieval is not needed\n"
                     "- 'hybrid': needs both clause evidence and computation, especially when procedure "
                     "must be verified before calculation\n"
+                    "- If a direct numeric query is answerable by available tools and does NOT request clauses, prefer 'calculator'\n"
+                    "- If the query explicitly asks for clause/citation/code basis, prefer retrieval_only or hybrid\n"
                     "- Order tools in execution dependency order "
                     "(e.g. section_classification before member_resistance)\n"
                     "- Only select tools that are directly relevant to the query\n"
                     "- Modes are equal choices: pick the single best mode for this query"
                 ),
                 temperature=0,
-                max_tokens=900,
+                max_tokens=4096,
             )
             parsed = parse_json_loose(raw)
             if not isinstance(parsed, dict):
@@ -363,83 +501,253 @@ class CentralIntelligenceOrchestrator:
             if mode in {"retrieval_only", "calculator", "hybrid"}:
                 if mode == "retrieval_only":
                     return PlanResult(mode="retrieval_only", tools=[], rationale=rationale)
-                
+
                 if not tools:
-                    heuristic = self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+                    heuristic = self._heuristic_plan_fallback(
+                        query=query,
+                        valid_tools=valid_tools,
+                        has_documents=has_documents,
+                    )
                     tools = self._normalize_tool_chain(heuristic.tools)
                     if tools:
                         rationale = f"{rationale} | Tool chain recovered via heuristic fallback."
                 return PlanResult(mode=mode, tools=tools, rationale=rationale)
         except Exception as exc:
             logger.warning("plan_generation_failed", extra={"error": str(exc)})
-        
-        return self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
 
-    def _heuristic_plan_fallback(self, *, query: str, valid_tools: list[str]) -> PlanResult:
-        lowered = query.lower()
-        has_section_profile = bool(
-            re.search(r"\b(?:ipe|hea|heb|hem)\s*\d{2,4}\b", lowered)
+        return self._heuristic_plan_fallback(
+            query=query,
+            valid_tools=valid_tools,
+            has_documents=has_documents,
         )
+
+    def _registry_first_plan(
+        self,
+        *,
+        query: str,
+        valid_tools: list[str],
+        has_documents: bool,
+    ) -> PlanResult | None:
+        if not valid_tools and has_documents:
+            return PlanResult(
+                mode="retrieval_only",
+                tools=[],
+                rationale="No calculator tools registered; using database-only path.",
+            )
+        if not valid_tools and not has_documents:
+            return PlanResult(
+                mode="retrieval_only",
+                tools=[],
+                rationale="No documents or tools are registered for this query.",
+            )
+
+        matched_tools = self._match_tools_for_query(query=query, valid_tools=valid_tools)
+        intent = self._query_intent(query)
+
+        if not has_documents:
+            if matched_tools:
+                return PlanResult(
+                    mode="calculator",
+                    tools=matched_tools,
+                    rationale="No documents loaded; routed to matching calculator tools.",
+                )
+            return PlanResult(
+                mode="retrieval_only",
+                tools=[],
+                rationale="No documents loaded and no tool could be matched to this query.",
+            )
+
+        if intent["lookup_only"]:
+            return PlanResult(
+                mode="retrieval_only",
+                tools=[],
+                rationale="Detected clause/procedure lookup intent without required calculation.",
+            )
+
+        if matched_tools and intent["pure_calculation"]:
+            return PlanResult(
+                mode="calculator",
+                tools=matched_tools,
+                rationale="Pure calculation intent detected; retrieval skipped in thinking mode.",
+            )
+
+        if matched_tools and intent["has_calc_intent"] and intent["code_required"]:
+            return PlanResult(
+                mode="hybrid",
+                tools=matched_tools,
+                rationale="Query requires both code evidence and numeric calculation.",
+            )
+
+        return None
+
+    def _query_intent(self, query: str) -> dict[str, bool]:
+        lowered = query.lower()
+        has_numeric = bool(re.search(r"\d", lowered))
         has_calc_intent = any(
             token in lowered
             for token in (
+                "calculate",
+                "calculation",
+                "compute",
+                "determine",
+                "what is",
+                "max",
+                "maximum",
+                "deflection",
+                "moment",
+                "shear",
+                "reaction",
                 "resistance",
-                "resistan",
                 "capacity",
+                "utilization",
+                "utilisation",
                 "m_rd",
                 "n_rd",
                 "v_rd",
-                "calculate",
-                "calculation",
-                "check",
-                "design value",
+                "beam",
+                "load",
+                "span",
             )
         )
-        has_action_type = any(token in lowered for token in ("shear", "bending", "axial"))
+        has_lookup_intent = any(
+            token in lowered
+            for token in (
+                "explain",
+                "procedure",
+                "method",
+                "what does",
+                "which clause",
+                "clause",
+                "citation",
+                "reference",
+                "requirement",
+                "provision",
+                "rule",
+            )
+        )
+        code_required = bool(
+            re.search(r"\b(?:en\s*1993|ec3|eurocode|cl\.)\b", lowered)
+        ) or any(
+            token in lowered
+            for token in (
+                "according to",
+                "as per",
+                "per ec3",
+                "per en",
+                "cite",
+                "with clauses",
+                "show clauses",
+                "normative",
+            )
+        )
+
+        lookup_only = has_lookup_intent and not has_calc_intent and not has_numeric
+        pure_calculation = has_calc_intent and not code_required and not has_lookup_intent
+        if pure_calculation and any(token in lowered for token in ("explain", "why", "how")):
+            pure_calculation = False
+
+        return {
+            "has_calc_intent": has_calc_intent,
+            "has_lookup_intent": has_lookup_intent,
+            "code_required": code_required,
+            "lookup_only": lookup_only,
+            "pure_calculation": pure_calculation,
+        }
+
+    def _match_tools_for_query(self, *, query: str, valid_tools: list[str]) -> list[str]:
+        lowered = query.lower()
 
         def pick(candidates: list[str]) -> list[str]:
-            return [name for name in candidates if name in valid_tools]
+            return self._normalize_tool_chain(
+                [name for name in candidates if name in valid_tools]
+            )
 
-        if any(token in lowered for token in ("interaction", "combined")):
+        if any(token in lowered for token in ("simply supported", "simple beam", "udl")):
+            tools = pick(["simple_beam_calculator"])
+            if tools:
+                return tools
+
+        if "cantilever" in lowered:
+            tools = pick(["cantilever_beam_calculator"])
+            if tools:
+                return tools
+
+        if any(token in lowered for token in ("interaction", "combined")) and any(
+            token in lowered for token in ("bending", "axial", "moment", "compression", "tension")
+        ):
             tools = pick(["section_classification_ec3", "member_resistance_ec3", "interaction_check_ec3"])
             if tools:
-                return PlanResult(
-                    mode="hybrid",
-                    tools=tools,
-                    rationale="Heuristic tool selection for interaction check query.",
-                )
-
-        if has_calc_intent and (has_section_profile or has_action_type):
-            tools = pick(["section_classification_ec3", "member_resistance_ec3"])
-            if tools:
-                return PlanResult(
-                    mode="hybrid",
-                    tools=tools,
-                    rationale="Heuristic tool selection for member resistance query.",
-                )
+                return tools
 
         if any(token in lowered for token in ("bolt", "m12", "m16", "m20", "m24")) and "shear" in lowered:
             tools = pick(["bolt_shear_ec3"])
             if tools:
-                return PlanResult(
-                    mode="hybrid",
-                    tools=tools,
-                    rationale="Heuristic tool selection for bolt shear query.",
-                )
+                return tools
 
         if "column buckling" in lowered or "flexural buckling" in lowered:
             tools = pick(["column_buckling_ec3"])
             if tools:
+                return tools
+
+        if "moment resistance" in lowered and "ipe" in lowered:
+            tools = pick(["ipe_moment_resistance_ec3"])
+            if tools:
+                return tools
+
+        if any(token in lowered for token in ("resistance", "capacity", "m_rd", "n_rd", "v_rd")):
+            tools = pick(["section_classification_ec3", "member_resistance_ec3"])
+            if tools:
+                return tools
+
+        query_tokens = set(re.findall(r"[a-z0-9_]+", lowered))
+        scored: list[tuple[int, str]] = []
+        for name in valid_tools:
+            entry = self.tool_registry.get(name)
+            if entry is None:
+                continue
+            tool_tokens = set(
+                re.findall(
+                    r"[a-z0-9_]+",
+                    f"{name} {entry.description} {' '.join(entry.tags)}".lower(),
+                )
+            )
+            overlap = query_tokens & tool_tokens
+            score = len(overlap)
+            if score > 0:
+                scored.append((score, name))
+
+        scored.sort(key=lambda item: (-item[0], item[1]))
+        if scored and scored[0][0] >= 2:
+            return self._normalize_tool_chain([scored[0][1]])
+        return []
+
+    def _heuristic_plan_fallback(
+        self,
+        *,
+        query: str,
+        valid_tools: list[str],
+        has_documents: bool,
+    ) -> PlanResult:
+        matched_tools = self._match_tools_for_query(query=query, valid_tools=valid_tools)
+        intent = self._query_intent(query)
+
+        if matched_tools:
+            if has_documents and (intent["code_required"] or intent["has_lookup_intent"]):
                 return PlanResult(
                     mode="hybrid",
-                    tools=tools,
-                    rationale="Heuristic tool selection for column buckling query.",
+                    tools=matched_tools,
+                    rationale="Heuristic fallback selected hybrid path from query intent + tool match.",
                 )
+            return PlanResult(
+                mode="calculator",
+                tools=matched_tools,
+                rationale="Heuristic fallback selected calculator-only path from query intent + tool match.",
+            )
 
         return PlanResult(
             mode="retrieval_only",
             tools=[],
-            rationale="LLM plan parsing failed and no heuristic tool match.",
+            rationale="No tool match found; using retrieval-only fallback.",
         )
 
     def _normalize_tool_chain(self, tools: list[str]) -> list[str]:
@@ -477,7 +785,11 @@ class CentralIntelligenceOrchestrator:
         if not self.orchestrator_llm.available:
             if fallback_tools:
                 return fallback_tools, "Used initial tool plan (LLM unavailable for post-retrieval planning)."
-            heuristic = self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+            heuristic = self._heuristic_plan_fallback(
+                query=query,
+                valid_tools=valid_tools,
+                has_documents=bool(self.document_registry or self.clauses),
+            )
             return self._normalize_tool_chain(heuristic.tools), "Post-retrieval planner unavailable; used heuristic tools."
 
         tool_descriptions = "\n".join(
@@ -508,7 +820,7 @@ class CentralIntelligenceOrchestrator:
                     "Return JSON only."
                 ),
                 temperature=0,
-                max_tokens=700,
+                max_tokens=4096,
             )
             parsed = parse_json_loose(raw)
             if isinstance(parsed, dict):
@@ -524,8 +836,382 @@ class CentralIntelligenceOrchestrator:
         if fallback_tools:
             return fallback_tools, "Kept initial tool plan after retrieval."
 
-        heuristic = self._heuristic_plan_fallback(query=query, valid_tools=valid_tools)
+        heuristic = self._heuristic_plan_fallback(
+            query=query,
+            valid_tools=valid_tools,
+            has_documents=bool(self.document_registry or self.clauses),
+        )
         return self._normalize_tool_chain(heuristic.tools), "Used heuristic tool plan after retrieval."
+
+    # ---- INTENT CLASSIFICATION ----
+    #
+    # Principled routing layer.  A single multimodal LLM call inspects BOTH the
+    # text query AND any attached images, then returns a structured intent that
+    # determines exactly which pipeline stages run.
+    #
+    # Intents
+    # -------
+    #   pipeline   – Full engineering pipeline (retrieval + optional tools).
+    #   answer     – Engineering-related but can be answered conversationally
+    #               by the LLM (e.g. "what's in this beam diagram?").  No
+    #               database / tools needed.
+    #   decline    – Clearly off-topic.  Polite decline, no LLM call.
+    #   greeting   – Social pleasantry.  Short friendly reply.
+
+    _ATTACHMENT_MARKER_RE = re.compile(
+        r"\[Attached (?:image|file): [^\]]*\]\s*", re.IGNORECASE,
+    )
+
+    _ENG_KEYWORDS: list[str] = [
+        "eurocode", "ec3", "ec2", "ec1", "ec0",
+        "en 1993", "en 1992", "en 1991", "en 1990",
+        "steel", "concrete", "beam", "column", "bending", "shear", "buckling",
+        "section class", "resistance", "load", "uls", "sls", "moment",
+        "axial", "bolt", "weld", "connection", "plate", "flange", "web",
+        "elastic", "plastic", "yield", "mpa", "kn", "knm", "n/mm",
+        "ipe", "hea", "heb", "chs", "rhs", "shs",
+        "calculate", "check", "verify", "design",
+        "deflection", "stiffness", "stability", "interaction",
+        "partial factor", "gamma", "national annex", "clause",
+        "reinforcement", "rebar", "prestress", "foundation", "footing",
+        "truss", "frame", "bracing", "diaphragm", "cross-section",
+        "structural", "civil engineer", "stress", "strain", "tension",
+        "compression", "torsion", "fatigue", "seismic", "wind load",
+        "snow load", "dead load", "live load", "imposed load",
+    ]
+
+    _GREETINGS = frozenset({
+        "hi", "hello", "hey", "thanks", "thank you", "ok", "bye",
+        "good morning", "good evening", "good afternoon", "sup",
+        "yo", "howdy", "cheers",
+    })
+
+    # Static polite decline — no LLM call needed.
+    _DECLINE_ANSWER = (
+        "I'm the **EC3 Assistant** — a structural engineering chatbot specialised in "
+        "**Eurocodes** (steel, concrete, timber design, structural calculations, etc.).\n\n"
+        "This doesn't look like a structural engineering question, so I'm not the best "
+        "fit here.  Feel free to ask me about things like:\n"
+        "- Steel or concrete member design to Eurocodes\n"
+        "- Section classification, resistance checks, buckling\n"
+        "- Load combinations, ULS/SLS verifications\n"
+        "- Connection design, bolt/weld checks\n\n"
+        "How can I help you with structural engineering?"
+    )
+
+    _CLASSIFY_SYSTEM = (
+        "You are a router for a structural / civil engineering chatbot that specialises "
+        "in Eurocodes (EC0-EC9).  Given the user's text and any attached images, "
+        "classify the request into EXACTLY one intent.\n\n"
+        "Intents:\n"
+        "  PIPELINE  – The user needs a calculation, code check, or detailed Eurocode "
+        "lookup.  Requires the database and/or calculator tools.\n"
+        "  ANSWER    – The query IS related to structural/civil engineering (or the "
+        "attached image shows engineering content such as a structural drawing, beam "
+        "diagram, steel section, construction plan, FEM model, Eurocode page, load "
+        "diagram, etc.) BUT can be answered conversationally without a database search "
+        "or calculator.  Examples: describing what is in an engineering image, explaining "
+        "a structural concept, interpreting a drawing.\n"
+        "  DECLINE   – The query and image(s) are clearly NOT related to structural "
+        "engineering (e.g. food photos, selfies, animals, landscapes, general "
+        "knowledge, coding questions, weather).\n"
+        "  GREETING  – The message is a social pleasantry (hi, hello, thanks, bye).\n\n"
+        "IMPORTANT: Look at the ACTUAL IMAGE CONTENT when images are attached.  "
+        "A photo of a beam, column, structural drawing, building, or construction site "
+        "is engineering content → ANSWER or PIPELINE, never DECLINE.\n\n"
+        "Respond with ONLY the single word: PIPELINE, ANSWER, DECLINE, or GREETING."
+    )
+
+    def _classify_intent(
+        self,
+        query: str,
+        attachments: list[Attachment],
+    ) -> dict[str, str]:
+        """Single entry-point for intent classification.
+
+        Returns ``{"intent": "pipeline"|"answer"|"decline"|"greeting"}``.
+        Uses heuristics first, falls back to a (multimodal) LLM call for
+        ambiguous cases.
+        """
+        has_images = any(a.is_image and a.data_url for a in attachments)
+
+        # Strip frontend attachment markers so we work on the real user text.
+        cleaned = self._ATTACHMENT_MARKER_RE.sub("", query).strip()
+        lowered = cleaned.lower()
+        words = lowered.split()
+        has_eng = any(kw in lowered for kw in self._ENG_KEYWORDS)
+
+        # ---- Heuristic fast-paths (no LLM call) ----
+
+        # H1: text explicitly contains engineering jargon AND asks for a
+        #     calculation / check / design → full pipeline, no need to ask LLM.
+        calc_verbs = {"calculate", "check", "verify", "design", "determine", "compute", "find"}
+        if has_eng and any(v in lowered for v in calc_verbs):
+            return {"intent": "pipeline"}
+
+        # H2: greeting
+        if len(words) <= 4 and lowered.rstrip("!.,?") in self._GREETINGS:
+            return {"intent": "greeting"}
+
+        # H3: text has engineering keywords but no calc verb and no images →
+        #     could be a conceptual question; still send to pipeline to be safe
+        #     (the compose step handles conversational answers too).
+        if has_eng and not has_images:
+            return {"intent": "pipeline"}
+
+        # ---- LLM classification (multimodal when images present) ----
+        llm_intent = self._llm_classify(cleaned, attachments, has_images)
+        if llm_intent:
+            return {"intent": llm_intent}
+
+        # ---- Fallback when LLM is unavailable / fails ----
+        if has_images:
+            # We can't see the image without the LLM.  Since the text has no
+            # engineering keywords, we don't know — route to 'answer' so the
+            # LLM can at least TRY to respond with vision in the response step.
+            return {"intent": "answer"}
+        if len(words) <= 6:
+            return {"intent": "decline"}
+        return {"intent": "pipeline"}
+
+    def _llm_classify(
+        self,
+        cleaned: str,
+        attachments: list[Attachment],
+        has_images: bool,
+    ) -> str | None:
+        """Call the orchestrator LLM to classify intent.
+
+        Returns one of ``"pipeline"``, ``"answer"``, ``"decline"``,
+        ``"greeting"`` — or *None* if the call fails.
+        """
+        if not self.orchestrator_llm.available:
+            return None
+
+        try:
+            if has_images:
+                # Build multimodal content: images first, then text prompt.
+                content_parts: list[dict[str, Any]] = []
+                for att in attachments:
+                    if att.is_image and att.data_url:
+                        content_parts.append({
+                            "type": "image_url",
+                            "image_url": {"url": att.data_url},
+                        })
+                content_parts.append({
+                    "type": "text",
+                    "text": f"User message: \"{cleaned}\"" if cleaned else "User sent image(s) with no text.",
+                })
+                raw = self.orchestrator_llm.generate_multimodal(
+                    system_prompt=self._CLASSIFY_SYSTEM,
+                    content_parts=content_parts,
+                    temperature=0,
+                    max_tokens=256,
+                    reasoning_effort="low",
+                )
+            else:
+                raw = self.orchestrator_llm.generate(
+                    system_prompt=self._CLASSIFY_SYSTEM,
+                    user_prompt=f"User message: \"{cleaned}\"",
+                    temperature=0,
+                    max_tokens=256,
+                    reasoning_effort="low",
+                )
+
+            token = raw.strip().upper().rstrip(".")
+            logger.info("intent_classification_raw", extra={"raw": raw.strip(), "token": token, "has_images": has_images})
+
+            mapping = {
+                "PIPELINE": "pipeline",
+                "ANSWER": "answer",
+                "DECLINE": "decline",
+                "GREETING": "greeting",
+            }
+            for key, val in mapping.items():
+                if key in token:
+                    return val
+
+            # Model returned something unexpected — log it and fall through.
+            logger.warning("intent_classification_unexpected", extra={"raw": raw.strip()})
+            return None
+
+        except Exception as exc:
+            logger.warning("intent_classification_failed", extra={"error": str(exc)})
+            return None
+
+    # ---- DIRECT RESPONSE HANDLERS ----
+
+    def _handle_direct_response(
+        self,
+        query: str,
+        attachments: list[Attachment],
+        intent: str,
+    ) -> Iterator[tuple[str, Any]]:
+        """Handle intents that bypass the full engineering pipeline.
+
+        Supports three modes:
+          greeting  – short friendly reply
+          decline   – instant polite decline (no LLM call)
+          answer    – conversational LLM answer (with vision if images present)
+        """
+        yield ("machine", {
+            "node": "intake", "status": "active",
+            "title": "Query Intake", "detail": "Analyzing your question...",
+        })
+
+        if intent == "decline":
+            yield ("machine", {
+                "node": "intake", "status": "done",
+                "title": "Query Intake", "detail": "Off-topic query — quick response.",
+            })
+        elif intent == "greeting":
+            yield ("machine", {
+                "node": "intake", "status": "done",
+                "title": "Query Intake", "detail": "Greeting received.",
+            })
+        else:
+            yield ("machine", {
+                "node": "intake", "status": "done",
+                "title": "Query Intake", "detail": "Answering directly — no database or tools needed.",
+            })
+
+        # We intentionally emit NO events for plan / retrieval / inputs / tools
+        # so those boxes stay idle in the UI.
+
+        yield ("machine", {
+            "node": "compose", "status": "active",
+            "title": "Composing Answer", "detail": "Generating response...",
+        })
+
+        answer = self._generate_direct_answer(query, attachments, intent)
+
+        yield ("machine", {
+            "node": "compose", "status": "done",
+            "title": "Composing Answer", "detail": "Response ready.",
+        })
+        yield ("machine", {
+            "node": "output", "status": "active",
+            "title": "Streaming", "detail": "Sending response...",
+        })
+
+        response = ChatResponse(
+            answer=answer,
+            supported=True,
+            user_inputs={},
+            assumed_inputs={},
+            assumptions=[],
+            sources=[],
+            tool_trace=[],
+            retrieval_trace=[],
+            what_i_used=["Direct response (no pipeline)"],
+        )
+        yield ("machine", {
+            "node": "output", "status": "done",
+            "title": "Streaming", "detail": "Complete.",
+        })
+        yield ("response", response)
+
+    def _generate_direct_answer(
+        self,
+        query: str,
+        attachments: list[Attachment],
+        intent: str,
+    ) -> str:
+        """Produce the text answer for a direct-response intent."""
+
+        # -- Decline: instant, no LLM ----
+        if intent == "decline":
+            return self._DECLINE_ANSWER
+
+        # -- Greeting ----
+        _GREETING_FALLBACK = (
+            "Hello! I'm the EC3 Assistant — here to help with structural "
+            "engineering and Eurocodes. What can I help you with?"
+        )
+        if intent == "greeting":
+            try:
+                raw = self.orchestrator_llm.generate(
+                    system_prompt=(
+                        "You are the EC3 Assistant, a structural engineering chatbot "
+                        "specialising in Eurocodes. The user sent a greeting. "
+                        "Reply with a brief, warm greeting (1-2 complete sentences) and "
+                        "offer to help with structural engineering questions. "
+                        "End with a full stop or question mark. Never end with a comma."
+                    ),
+                    user_prompt=query,
+                    temperature=0.5,
+                    max_tokens=500,
+                    reasoning_effort="low",
+                )
+                # Strip trailing whitespace / commas
+                cleaned = raw.rstrip().rstrip(",").rstrip()
+                if not cleaned or len(cleaned) < 10:
+                    return _GREETING_FALLBACK
+                # Detect obviously truncated responses (ends with a
+                # conjunction, preposition, article, etc.)
+                _BROKEN_TAILS = {
+                    "and", "or", "but", "the", "a", "an", "to", "for",
+                    "with", "in", "on", "at", "of", "is", "am", "are",
+                    "i", "we", "you", "that", "this", "my", "your",
+                }
+                last_word = cleaned.rstrip(".!?,;:").rsplit(None, 1)[-1].lower()
+                if last_word in _BROKEN_TAILS:
+                    logger.warning("greeting_truncated", extra={"raw": raw[:120]})
+                    return _GREETING_FALLBACK
+                # Ensure proper ending punctuation
+                if cleaned[-1] not in ".!?":
+                    cleaned += "."
+                return cleaned
+            except Exception:
+                return _GREETING_FALLBACK
+
+        # -- Answer: conversational engineering response (with vision) ----
+        cleaned = self._ATTACHMENT_MARKER_RE.sub("", query).strip()
+        has_images = any(a.is_image and a.data_url for a in attachments)
+        system_prompt = (
+            "You are the EC3 Assistant, a structural engineering chatbot specialising "
+            "in Eurocodes. The user asked a question related to structural engineering "
+            "that can be answered conversationally — no database lookup or calculator "
+            "is needed. If images are provided, describe and interpret them from a "
+            "structural engineering perspective (identify elements like beams, columns, "
+            "loads, connections, section types, etc.). Be professional, concise, and "
+            "helpful. If the user would benefit from a detailed calculation or code "
+            "check, suggest they ask a follow-up question so you can run the full "
+            "pipeline."
+        )
+        try:
+            if has_images:
+                content_parts: list[dict[str, Any]] = []
+                for att in attachments:
+                    if att.is_image and att.data_url:
+                        content_parts.append({
+                            "type": "image_url",
+                            "image_url": {"url": att.data_url},
+                        })
+                content_parts.append({
+                    "type": "text",
+                    "text": cleaned or "Describe what you see in this image from a structural engineering perspective.",
+                })
+                return self.orchestrator_llm.generate_multimodal(
+                    system_prompt=system_prompt,
+                    content_parts=content_parts,
+                    temperature=0.3,
+                    max_tokens=4000,
+                )
+            else:
+                return self.orchestrator_llm.generate(
+                    system_prompt=system_prompt,
+                    user_prompt=cleaned,
+                    temperature=0.3,
+                    max_tokens=4000,
+                )
+        except Exception as exc:
+            logger.exception("direct_answer_generation_failed")
+            return (
+                "I understand this is an engineering-related question, but I encountered "
+                f"an error generating a response: {exc}\n\nPlease try rephrasing or ask "
+                "a more specific question so I can use the full calculation pipeline."
+            )
 
     # ---- FOLLOW-UP RESOLUTION ----
     def _resolve_followup(self, query: str, history: list) -> str:
@@ -576,7 +1262,8 @@ class CentralIntelligenceOrchestrator:
                         "Expanded self-contained query:"
                     ),
                     temperature=0,
-                    max_tokens=150,
+                    max_tokens=1024,
+                    reasoning_effort="low",
                 )
                 resolved = raw.strip()
                 if resolved and len(resolved) > len(query):
@@ -661,12 +1348,13 @@ class CentralIntelligenceOrchestrator:
                     "You are a senior structural engineer giving a concise answer to a colleague. "
                     "Rules:\n"
                     "1. First sentence: state the key result with its value and units. Example: 'The design bending resistance is **M_Rd = 223.08 kNm**'.\n"
-                    "2. Then 1-2 sentences on the method/formula used. Mention the governing clause once, e.g. (EC3-1-1, Cl. 6.2.5).\n"
+                    "2. Then 1-2 sentences on the method/formula used. Mention a governing clause ONLY when explicit EC clause evidence is provided.\n"
                     "3. Bold **key numerical results** with their engineering symbols.\n"
                     "4. Use ONLY the provided evidence. Never invent values.\n"
                     "5. Keep it to 2-4 sentences total. No sections, no bullet lists, no 'Sources' or 'Assumptions'.\n"
                     "6. Write naturally, as if explaining at a desk review. Always finish your sentences.\n"
-                    "7. Ensure markdown emphasis is balanced (never leave dangling '**')."
+                    "7. Ensure markdown emphasis is balanced (never leave dangling '**').\n"
+                    "8. If there is no EC clause evidence, do not reference EN 1993 or clause numbers."
                 ),
                 user_prompt=(
                     f"Question: {query}\n\n"
@@ -675,7 +1363,7 @@ class CentralIntelligenceOrchestrator:
                     "Write a concise answer starting with the result."
                 ),
                 temperature=0.15,
-                max_tokens=700,
+                max_tokens=4000,
             )
             return self._polish_narrative(
                 raw.strip(),
@@ -715,7 +1403,7 @@ class CentralIntelligenceOrchestrator:
 
         text = " ".join(parts).strip()
         if not text:
-            text = "Results computed from the available tools and EC3 database."
+            text = "Results computed from the available tools and supporting sources."
         return self._polish_narrative(
             text,
             query=query,
@@ -739,11 +1427,27 @@ class CentralIntelligenceOrchestrator:
             query=query,
         )
         basis = self._compose_clause_basis_sentence(retrieved=retrieved, tool_outputs=tool_outputs)
+        working = narrative
+        if not basis:
+            working = self._strip_normative_mentions(working)
         return self.response_formatter.polish_narrative(
-            narrative,
+            working,
             headline=headline,
             basis=basis,
         )
+
+    @staticmethod
+    def _strip_normative_mentions(text: str) -> str:
+        if not text:
+            return text
+        cleaned = re.sub(
+            r"(?:\(|\b)(?:EC3|EN\s*1993)[^.!?]*?(?:Cl\.\s*[A-Za-z0-9_.()\-]+)?(?:\)|\b)",
+            "",
+            text,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
+        return cleaned
 
     def _compose_result_headline(
         self,
@@ -788,17 +1492,18 @@ class CentralIntelligenceOrchestrator:
         tool_outputs: dict[str, dict[str, Any]],
     ) -> str:
         seen: set[str] = set()
-        clause_refs: list[tuple[str, str]] = []
+        clause_refs: list[tuple[str, str, str]] = []
 
         for payload in tool_outputs.values():
             for ref in payload.get("clause_references", []):
+                doc_id = str(ref.get("doc_id", "")).strip()
                 cid = str(ref.get("clause_id", "")).strip()
                 title = str(ref.get("title", "")).strip()
                 norm = self._normalize_clause_id(cid)
                 if not norm or norm in seen:
                     continue
                 seen.add(norm)
-                clause_refs.append((cid, title))
+                clause_refs.append((doc_id, cid, title))
                 if len(clause_refs) >= 2:
                     break
             if len(clause_refs) >= 2:
@@ -806,27 +1511,37 @@ class CentralIntelligenceOrchestrator:
 
         if len(clause_refs) < 2:
             for item in retrieved:
+                doc_id = str(item.clause.doc_id).strip()
                 cid = str(item.clause.clause_id).strip()
                 title = str(item.clause.clause_title).strip()
                 norm = self._normalize_clause_id(cid)
                 if not norm or norm in seen:
                     continue
                 seen.add(norm)
-                clause_refs.append((cid, title))
+                clause_refs.append((doc_id, cid, title))
                 if len(clause_refs) >= 2:
                     break
 
-        if not clause_refs:
+        normative_refs = [ref for ref in clause_refs if self._is_normative_doc(ref[0])]
+        if not normative_refs:
             return ""
-        if len(clause_refs) == 1:
-            cid, title = clause_refs[0]
-            return f"This is checked against EN 1993-1-1, Cl. {cid} ({title})."
+        if len(normative_refs) == 1:
+            doc_id, cid, title = normative_refs[0]
+            standard = self._source_standard_label(doc_id)
+            return f"This is checked against {standard}, Cl. {cid} ({title})."
 
-        first_cid, first_title = clause_refs[0]
-        second_cid, second_title = clause_refs[1]
+        first_doc, first_cid, first_title = normative_refs[0]
+        second_doc, second_cid, second_title = normative_refs[1]
+        first_standard = self._source_standard_label(first_doc)
+        second_standard = self._source_standard_label(second_doc)
+        if first_standard == second_standard:
+            return (
+                f"This follows {first_standard}, Cl. {first_cid} ({first_title}) "
+                f"with supporting classification guidance from Cl. {second_cid} ({second_title})."
+            )
         return (
-            f"This follows EN 1993-1-1, Cl. {first_cid} ({first_title}) "
-            f"with supporting classification guidance from Cl. {second_cid} ({second_title})."
+            f"This follows {first_standard}, Cl. {first_cid} ({first_title}) "
+            f"with supporting guidance from {second_standard}, Cl. {second_cid} ({second_title})."
         )
 
     def _pick_tool_payload(
@@ -1012,8 +1727,9 @@ class CentralIntelligenceOrchestrator:
 
                     clause_record = self._lookup_clause(s.doc_id, s.clause_id)
                     ref_idx += 1
-                    standard = clause_record.standard if clause_record else "EN 1993-1-1"
-                    label = f"{standard}, Cl. {s.clause_id} — {s.clause_title}"
+                    standard = clause_record.standard if clause_record else self._source_standard_label(s.doc_id)
+                    locator = self._format_reference_locator(s.doc_id, s.clause_id)
+                    label = f"{standard}, {locator} — {s.clause_title}" if locator else f"{standard} — {s.clause_title}"
 
                     if clause_record and clause_record.text.strip():
                         text_preview = self._format_clause_text_for_display(clause_record.text)
@@ -1042,6 +1758,34 @@ class CentralIntelligenceOrchestrator:
             return self._clause_lookup[key]
         norm = self._normalize_clause_id(clause_id)
         return self._clause_lookup.get((doc_id, norm))
+
+    def _is_normative_doc(self, doc_id: str) -> bool:
+        if not doc_id:
+            return False
+        if doc_id in self._document_lookup:
+            return True
+        return doc_id.lower().startswith("ec3.")
+
+    def _source_standard_label(self, doc_id: str) -> str:
+        entry = self._document_lookup.get(doc_id)
+        if entry:
+            return entry.standard
+        if doc_id.lower().startswith("ec3."):
+            lower = doc_id.lower()
+            match = re.search(r"(?:en)?(1993-\d-\d)", lower)
+            if match:
+                return f"EN {match.group(1)}"
+            return "EN 1993"
+        cleaned = doc_id.replace("_", " ").strip()
+        return cleaned if cleaned else "Source"
+
+    def _format_reference_locator(self, doc_id: str, clause_id: str) -> str:
+        cid = clause_id.strip()
+        if not cid:
+            return ""
+        if self._is_normative_doc(doc_id) and re.match(r"^\d", cid):
+            return f"Cl. {cid}"
+        return cid
 
     def _format_clause_text_for_display(self, text: str, max_length: int = 1400) -> str:
         """Format clause text for clean display: trim, escape HTML, preserve paragraphs."""

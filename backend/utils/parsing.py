@@ -14,6 +14,25 @@ logger = logging.getLogger(__name__)
 
 _SECTION_RE = re.compile(r"\b((?:IPE|HEA|HEB|HEM)\s*\d{2,4})\b", re.IGNORECASE)
 _STEEL_RE = re.compile(r"\b(S(?:235|275|355|420|460))\b", re.IGNORECASE)
+_SPAN_RE = re.compile(
+    r"\b(?:span|l)\s*[=:]?\s*(\d+(?:\.\d+)?)\s*m\b|\b(\d+(?:\.\d+)?)\s*m\s*span\b",
+    re.IGNORECASE,
+)
+_UDL_RE = re.compile(
+    r"\b(\d+(?:\.\d+)?)\s*(?:kN|kn)\s*/\s*m\b|\b(\d+(?:\.\d+)?)\s*(?:kN|kn)\s*per\s*m\b",
+    re.IGNORECASE,
+)
+_POINT_LOAD_RE = re.compile(
+    r"\b(?:point(?:\s+load)?|load)\s*(?:of|=)?\s*(\d+(?:\.\d+)?)\s*(?:kN|kn)\b"
+    r"|\b(\d+(?:\.\d+)?)\s*(?:kN|kn)\s*point\b",
+    re.IGNORECASE,
+)
+_POSITION_RE = re.compile(
+    r"\b(?:at|position(?:_a)?|a)\s*[=:]?\s*(\d+(?:\.\d+)?)\s*m\b",
+    re.IGNORECASE,
+)
+_E_GPA_RE = re.compile(r"\be\s*[=:]?\s*(\d+(?:\.\d+)?)\s*gpa\b", re.IGNORECASE)
+_I_CM4_RE = re.compile(r"\bi\s*[=:]?\s*(\d+(?:\.\d+)?)\s*cm4\b", re.IGNORECASE)
 
 
 @dataclass
@@ -97,7 +116,7 @@ def extract_inputs(
             system_prompt=_EXTRACTION_SYSTEM,
             user_prompt=prompt,
             temperature=0,
-            max_tokens=1400,
+            max_tokens=4096,
         )
         parsed = parse_json_loose(raw)
         return ExtractionResult(
@@ -119,7 +138,11 @@ def _strip_code_fences(text: str) -> str:
 def _fallback_extraction(
     planned_tools: list[str], settings: Settings, *, query: str = "",
 ) -> ExtractionResult:
-    """Minimal fallback when LLM is unavailable."""
+    """Fallback extraction when LLM is unavailable.
+
+    Uses lightweight regex parsing and tool-aware defaults so required tool
+    inputs remain valid even during provider outages.
+    """
     normalized_query = query or ""
     section_match = _SECTION_RE.search(normalized_query)
     steel_match = _STEEL_RE.search(normalized_query)
@@ -132,34 +155,116 @@ def _fallback_extraction(
     parsed_steel = steel_match.group(1).upper() if steel_match else settings.default_steel_grade
 
     user_inputs: dict[str, Any] = {}
+    assumed: dict[str, Any] = {}
     assumptions: list[str] = []
-    if section_match:
-        user_inputs["section_name"] = parsed_section
-    else:
-        assumptions.append(
-            f"Section assumed as {settings.default_section_name} (LLM extraction unavailable)."
-        )
-    if steel_match:
-        user_inputs["steel_grade"] = parsed_steel
-    else:
-        assumptions.append(
-            f"Steel grade assumed as {settings.default_steel_grade} (LLM extraction unavailable)."
-        )
 
-    assumed: dict[str, Any] = {
-        "steel_grade": parsed_steel,
+    span_m = _parse_number(_SPAN_RE, normalized_query)
+    udl_kn_per_m = _parse_number(_UDL_RE, normalized_query)
+    point_kn = _parse_number(_POINT_LOAD_RE, normalized_query)
+    position_a_m = _parse_number(_POSITION_RE, normalized_query)
+    e_gpa = _parse_number(_E_GPA_RE, normalized_query)
+    i_cm4 = _parse_number(_I_CM4_RE, normalized_query)
+    lowered_query = normalized_query.lower()
+
+    inferred_load_type = "point_mid"
+    if any(token in lowered_query for token in ("udl", "uniform", "distributed")):
+        inferred_load_type = "udl"
+    elif "point" in lowered_query:
+        inferred_load_type = "point_mid" if "mid" in lowered_query else "point"
+
+    def mark_user(key: str, value: Any) -> None:
+        if value is not None:
+            user_inputs[key] = value
+
+    def mark_assumed(key: str, value: Any, note: str) -> None:
+        if key not in user_inputs:
+            assumed[key] = value
+            assumptions.append(note)
+
+    ec3_base = {
         "section_name": parsed_section,
+        "steel_grade": parsed_steel,
         "gamma_M0": settings.default_gamma_m0,
     }
-    assumptions.append(f"γ_M0 = {settings.default_gamma_m0:.2f} (LLM extraction unavailable).")
-
     tool_inputs: dict[str, dict[str, Any]] = {}
     for name in planned_tools:
-        tool_inputs[name] = {
-            "section_name": parsed_section,
-            "steel_grade": parsed_steel,
-            "gamma_M0": settings.default_gamma_m0,
-        }
+        if name in {"simple_beam_calculator", "cantilever_beam_calculator"}:
+            tool_payload: dict[str, Any] = {}
+
+            mark_user("span_m", span_m)
+            if span_m is not None:
+                tool_payload["span_m"] = span_m
+            else:
+                tool_payload["span_m"] = 6.0
+                mark_assumed("span_m", 6.0, "Span assumed as 6.0 m (LLM extraction unavailable).")
+
+            mark_user("load_type", inferred_load_type)
+            tool_payload["load_type"] = inferred_load_type
+
+            if inferred_load_type == "udl":
+                mark_user("load_kn_per_m", udl_kn_per_m)
+                if udl_kn_per_m is not None:
+                    tool_payload["load_kn_per_m"] = udl_kn_per_m
+                else:
+                    tool_payload["load_kn_per_m"] = 10.0
+                    mark_assumed(
+                        "load_kn_per_m",
+                        10.0,
+                        "UDL assumed as 10.0 kN/m (LLM extraction unavailable).",
+                    )
+            else:
+                mark_user("load_kn", point_kn)
+                if point_kn is not None:
+                    tool_payload["load_kn"] = point_kn
+                else:
+                    tool_payload["load_kn"] = 50.0
+                    mark_assumed(
+                        "load_kn",
+                        50.0,
+                        "Point load assumed as 50.0 kN (LLM extraction unavailable).",
+                    )
+
+                if inferred_load_type == "point":
+                    mark_user("position_a_m", position_a_m)
+                    if position_a_m is not None:
+                        tool_payload["position_a_m"] = position_a_m
+
+            if e_gpa is not None:
+                mark_user("E_gpa", e_gpa)
+                tool_payload["E_gpa"] = e_gpa
+            else:
+                tool_payload["E_gpa"] = 210.0
+                mark_assumed("E_gpa", 210.0, "Assumed Young's modulus E = 210 GPa for steel.")
+
+            if i_cm4 is not None:
+                mark_user("I_cm4", i_cm4)
+                tool_payload["I_cm4"] = i_cm4
+
+            tool_inputs[name] = tool_payload
+            continue
+
+        if section_match:
+            mark_user("section_name", parsed_section)
+        else:
+            mark_assumed(
+                "section_name",
+                settings.default_section_name,
+                f"Section assumed as {settings.default_section_name} (LLM extraction unavailable).",
+            )
+        if steel_match:
+            mark_user("steel_grade", parsed_steel)
+        else:
+            mark_assumed(
+                "steel_grade",
+                settings.default_steel_grade,
+                f"Steel grade assumed as {settings.default_steel_grade} (LLM extraction unavailable).",
+            )
+        mark_assumed(
+            "gamma_M0",
+            settings.default_gamma_m0,
+            f"γ_M0 = {settings.default_gamma_m0:.2f} (LLM extraction unavailable).",
+        )
+        tool_inputs[name] = dict(ec3_base)
 
     return ExtractionResult(
         user_inputs=user_inputs,
@@ -167,3 +272,17 @@ def _fallback_extraction(
         assumptions=assumptions,
         tool_inputs=tool_inputs,
     )
+
+
+def _parse_number(pattern: re.Pattern[str], text: str) -> float | None:
+    match = pattern.search(text)
+    if not match:
+        return None
+    for group in match.groups():
+        if group is None:
+            continue
+        try:
+            return float(group)
+        except ValueError:
+            continue
+    return None

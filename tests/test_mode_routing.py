@@ -78,10 +78,19 @@ class TrackingRetriever:
     def __init__(self, sequence: list[str]) -> None:
         self.calls = 0
         self.sequence = sequence
+        self.options: list[dict[str, bool | None]] = []
 
-    def iter_retrieve(self, query: str, top_k: int | None = None):
+    def iter_retrieve(
+        self,
+        query: str,
+        top_k: int | None = None,
+        *,
+        agentic: bool | None = None,
+        recursive: bool | None = None,
+    ):
         self.calls += 1
         self.sequence.append("retrieval")
+        self.options.append({"agentic": agentic, "recursive": recursive})
         clause = ClauseRecord(
             doc_id="ec3.en1993-1-1.2005",
             doc_title="EN 1993-1-1",
@@ -150,6 +159,16 @@ def _make_orchestrator(
 ) -> CentralIntelligenceOrchestrator:
     root = Path(__file__).resolve().parents[1]
     settings = Settings.load().with_overrides(project_root=root, top_k_clauses=3)
+    loaded_clause = ClauseRecord(
+        doc_id="ec3.en1993-1-1.2005",
+        doc_title="EN 1993-1-1",
+        standard="EN 1993-1-1",
+        clause_id="6.2.5",
+        clause_title="Bending moment",
+        text="Clause text",
+        keywords=["bending"],
+        pointer="en_1993_1_1_2005#/6.2.5",
+    )
     return CentralIntelligenceOrchestrator(
         settings=settings,
         orchestrator_llm=llm,
@@ -159,7 +178,9 @@ def _make_orchestrator(
             _tool_entry("section_classification_ec3"),
             _tool_entry("member_resistance_ec3"),
             _tool_entry("interaction_check_ec3"),
+            _tool_entry("simple_beam_calculator"),
         ],
+        clauses=[loaded_clause],
     )
 
 
@@ -204,9 +225,70 @@ def test_hybrid_mode_refines_tools_after_retrieval() -> None:
     runner = TrackingToolRunner(sequence)
     orchestrator = _make_orchestrator(llm=llm, retriever=retriever, runner=runner)
 
-    response = orchestrator.run("check bending resistance and verify procedure")
+    response = orchestrator.run("check bending resistance according to EN 1993-1-1 and verify procedure")
 
     assert retriever.calls == 1
+    assert runner.calls == ["section_classification_ec3", "member_resistance_ec3"]
+    assert llm.calls.count("plan_tools") == 1
+    assert sequence.index("retrieval") < sequence.index("tool:section_classification_ec3")
+    assert response.tool_trace
+
+
+def test_standard_mode_forces_database_only_simple_retrieval() -> None:
+    sequence: list[str] = []
+    llm = RoutingLLM(mode="calculator", plan_tools=["member_resistance_ec3"])
+    retriever = TrackingRetriever(sequence)
+    runner = TrackingToolRunner(sequence)
+    orchestrator = _make_orchestrator(llm=llm, retriever=retriever, runner=runner)
+
+    response = orchestrator.run(
+        "calculate moment resistance for ipe300",
+        thinking_mode="standard",
+    )
+
+    assert retriever.calls == 1
+    assert retriever.options[0] == {"agentic": False, "recursive": False}
+    assert runner.calls == []
+    assert response.retrieval_trace
+    assert response.tool_trace == []
+
+
+def test_thinking_mode_pure_calculation_skips_database_and_runs_beam_tool() -> None:
+    sequence: list[str] = []
+    llm = RoutingLLM(mode="retrieval_only", plan_tools=[])
+    retriever = TrackingRetriever(sequence)
+    runner = TrackingToolRunner(sequence)
+    orchestrator = _make_orchestrator(llm=llm, retriever=retriever, runner=runner)
+
+    response = orchestrator.run(
+        "Simply supported beam, 6m span, 15 kN/m UDL. What is the maximum bending moment and deflection?",
+        thinking_mode="thinking",
+    )
+
+    assert retriever.calls == 0
+    assert runner.calls == ["simple_beam_calculator"]
+    assert response.retrieval_trace == []
+    assert response.tool_trace
+
+
+def test_extended_mode_forces_retrieval_first_then_tools() -> None:
+    sequence: list[str] = []
+    llm = RoutingLLM(
+        mode="calculator",
+        plan_tools=["member_resistance_ec3"],
+        post_tools=["member_resistance_ec3"],
+    )
+    retriever = TrackingRetriever(sequence)
+    runner = TrackingToolRunner(sequence)
+    orchestrator = _make_orchestrator(llm=llm, retriever=retriever, runner=runner)
+
+    response = orchestrator.run(
+        "calculate moment resistance for ipe300",
+        thinking_mode="extended",
+    )
+
+    assert retriever.calls == 1
+    assert retriever.options[0] == {"agentic": True, "recursive": True}
     assert runner.calls == ["section_classification_ec3", "member_resistance_ec3"]
     assert llm.calls.count("plan_tools") == 1
     assert sequence.index("retrieval") < sequence.index("tool:section_classification_ec3")

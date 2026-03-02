@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -10,9 +10,19 @@ class ChatMessage(BaseModel):
     content: str
 
 
+class Attachment(BaseModel):
+    name: str
+    type: str = ""
+    size: int = 0
+    is_image: bool = False
+    data_url: Optional[str] = None
+
+
 class ChatRequest(BaseModel):
-    message: str = Field(min_length=1, max_length=4000)
+    message: str = Field(min_length=0, max_length=4000)
     history: list[ChatMessage] = Field(default_factory=list)
+    thinking_mode: Literal["standard", "thinking", "extended"] = "thinking"
+    attachments: list[Attachment] = Field(default_factory=list)
 
 
 class Citation(BaseModel):
@@ -27,8 +37,8 @@ class ToolTraceStep(BaseModel):
     tool_name: str
     status: str
     inputs: dict[str, Any]
-    outputs: dict[str, Any] | None = None
-    error: str | None = None
+    outputs: Optional[dict[str, Any]] = None
+    error: Optional[str] = None
 
 
 class RetrievalTraceStep(BaseModel):
