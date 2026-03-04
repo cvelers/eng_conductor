@@ -370,6 +370,15 @@ async function addMessageToApi(threadId, role, content, responsePayload = null) 
   return res.ok;
 }
 
+async function truncateThreadApi(threadId, keepCount, updatedContent = null) {
+  const res = await fetchWithAuth(`/api/threads/${threadId}/truncate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ keep_count: keepCount, updated_content: updatedContent }),
+  });
+  return res.ok;
+}
+
 async function updateThreadTitleApi(threadId, title) {
   const res = await fetchWithAuth(`/api/threads/${threadId}`, {
     method: "PATCH",
@@ -826,8 +835,14 @@ function processEvent(f, ev) {
     if (m.top_clauses?.length) pushDocBadges(f, m.top_clauses);
   } else if (node === "tools") {
     setNS(f, "orchestrator", "done");
-    setNS(f, "tools", s === "error" ? "error" : (s === "done" ? "done" : "active"));
-    setES(f, "o_t", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    if (ev.skipped) {
+      // No tools used — keep TOOLS node idle (unhighlighted)
+      setNS(f, "tools", "idle");
+      setES(f, "o_t", "idle");
+    } else {
+      setNS(f, "tools", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+      setES(f, "o_t", s === "error" ? "error" : (s === "done" ? "done" : "active"));
+    }
     if (m.tool) pushToolBadge(f, m.tool);
   } else if (node === "compose") {
     setNS(f, "orchestrator", s === "done" ? "done" : (s === "error" ? "error" : "active"));
@@ -960,6 +975,7 @@ function describeMachineStep(ev) {
   }
 
   if (ev.node === "inputs") {
+    if (ev.skipped) return null;  // no tools → no inputs step needed
     if (s === "active") return "Resolving user-provided values and defaults.";
     if (s === "done") {
       const provided = Object.keys(m.user_inputs || {}).length;
@@ -993,6 +1009,7 @@ function describeMachineStep(ev) {
   }
 
   if (ev.node === "tools") {
+    if (ev.skipped) return null;  // no tools used — suppress log line
     const toolName = normTool(m.tool || "");
     if (s === "error") {
       return toolName ? `Tool ${toolName} failed; answer support may be limited.` : "Tool execution failed.";
@@ -1036,7 +1053,9 @@ function updateFlow(msgNode, ev) {
   applyFlow(msgNode);
   const detail = describeMachineStep(ev);
   // Don't call updateThinkingLabel here — the phrase rotator handles it
-  appendLog(msgNode, detail || ev.detail || `${ev.node}: ${ev.status}`);
+  if (detail !== null) {
+    appendLog(msgNode, detail || ev.detail || `${ev.node}: ${ev.status}`);
+  }
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
@@ -1237,6 +1256,7 @@ function editAndResubmit(userMsgNode) {
     const thread = currentThread();
     if (thread && thread.messages.length > idx) {
       thread.messages[idx].content = newText;
+      thread.messages[idx].attachments = attachments;
       thread.messages.length = idx + 1;
       thread.updatedAt = now();
     }
@@ -1250,15 +1270,27 @@ function editAndResubmit(userMsgNode) {
       fullPrompt = fullPrompt ? `${fileDescs}\n\n${fullPrompt}` : fileDescs;
     }
 
-    if (canUseStoredThreads() && !auth.threadsSync) save();
-
-    // Create assistant node and stream response
+    // Lock UI before any async work to prevent concurrent edits/submissions
     sendBtn.disabled = true;
     setThinkingModeDisabled(true);
+
+    if (canUseStoredThreads()) {
+      if (auth.threadsSync) {
+        try {
+          await truncateThreadApi(thread.id, idx + 1, newText);
+        } catch (e) {
+          console.warn("Thread truncation sync failed:", e);
+        }
+      } else {
+        save();
+      }
+    }
+
+    // Create assistant node and stream response
     const assistantNode = createMsg("assistant", "", { showThinking: true, prompt: fullPrompt });
 
     try {
-      await streamChat(fullPrompt, assistantNode, thread, state.thinkingMode, attachments);
+      await streamChat(fullPrompt, assistantNode, thread, state.thinkingMode, attachments, { isEdit: true });
     } catch (err) {
       const errMsg = `Error: ${err.message}`;
       setThinkingState(assistantNode, false);
@@ -1308,7 +1340,7 @@ function renderMessages() {
 }
 
 // ---- Streaming ----
-async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinking", attachments = []) {
+async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinking", attachments = [], { isEdit = false } = {}) {
   const contentEl = assistantNode.querySelector(".content");
   contentEl.innerHTML = "";
   let accumulated = "";
@@ -1347,6 +1379,7 @@ async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinkin
       history,
       thinking_mode: thinkingMode,
       attachments: apiAttachments,
+      is_edit: isEdit,
     }),
   });
   if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);

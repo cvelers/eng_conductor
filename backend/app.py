@@ -155,6 +155,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 history=request.history,
                 thinking_mode=request.thinking_mode,
                 attachments=request.attachments,
+                is_edit=request.is_edit,
             ):
                 if event_type == "machine":
                     machine_events.append(payload)
@@ -178,6 +179,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                         "message": request.message,
                         "history": _history_payload(request.history),
                         "thinking_mode": request.thinking_mode,
+                        "is_edit": request.is_edit,
                     },
                     "machine_events": machine_events,
                     "response": final_response.model_dump() if final_response else None,
@@ -198,6 +200,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     history=request.history,
                     thinking_mode=request.thinking_mode,
                     attachments=request.attachments,
+                    is_edit=request.is_edit,
                 ):
                     if event_type == "machine":
                         machine_events.append(payload)
@@ -229,6 +232,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                             "message": request.message,
                             "history": _history_payload(request.history),
                             "thinking_mode": request.thinking_mode,
+                            "is_edit": request.is_edit,
                         },
                         "machine_events": machine_events,
                         "response": final_response.model_dump() if final_response else None,

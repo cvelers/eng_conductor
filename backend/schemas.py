@@ -23,6 +23,7 @@ class ChatRequest(BaseModel):
     history: list[ChatMessage] = Field(default_factory=list)
     thinking_mode: Literal["standard", "thinking", "extended"] = "thinking"
     attachments: list[Attachment] = Field(default_factory=list)
+    is_edit: bool = False
 
 
 class Citation(BaseModel):

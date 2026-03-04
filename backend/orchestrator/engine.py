@@ -97,6 +97,7 @@ class CentralIntelligenceOrchestrator:
         history: list | None = None,
         thinking_mode: str = "thinking",
         attachments: list[Attachment] | None = None,
+        is_edit: bool = False,
     ) -> ChatResponse:
         final_response: ChatResponse | None = None
         for event_type, payload in self.run_stream(
@@ -104,6 +105,7 @@ class CentralIntelligenceOrchestrator:
             history=history,
             thinking_mode=thinking_mode,
             attachments=attachments,
+            is_edit=is_edit,
         ):
             if event_type == "response":
                 final_response = payload
@@ -118,9 +120,10 @@ class CentralIntelligenceOrchestrator:
         history: list | None = None,
         thinking_mode: str = "thinking",
         attachments: list[Attachment] | None = None,
+        is_edit: bool = False,
     ) -> Iterator[tuple[str, Any]]:
         attachments = attachments or []
-        query = self._resolve_followup(raw_query, history or [])
+        query = raw_query if is_edit else self._resolve_followup(raw_query, history or [])
         selected_mode = self._normalize_thinking_mode(thinking_mode)
 
         # --- INTENT CLASSIFICATION ---
@@ -322,6 +325,7 @@ class CentralIntelligenceOrchestrator:
             yield ("machine", {
                 "node": "inputs", "status": "done", "title": "Input Resolution",
                 "detail": "No calculator inputs required for this path.",
+                "skipped": True,
                 "meta": {"user_inputs": {}, "assumed_inputs": {}, "assumptions": []},
             })
 
@@ -336,7 +340,7 @@ class CentralIntelligenceOrchestrator:
         tool_outputs: dict[str, dict[str, Any]] = {}
 
         if not run_tools:
-            yield ("machine", {"node": "tools", "status": "done", "title": "MCP Tools", "detail": "No tools needed for this strategy."})
+            yield ("machine", {"node": "tools", "status": "done", "title": "MCP Tools", "detail": "No tools needed for this strategy.", "skipped": True})
         elif not plan.tools:
             yield ("machine", {"node": "tools", "status": "error", "title": "MCP Tools", "detail": "Mode requires calculators, but no suitable tool chain was planned."})
         else:
@@ -545,7 +549,7 @@ class CentralIntelligenceOrchestrator:
         intent = self._query_intent(query)
 
         if not has_documents:
-            if matched_tools:
+            if matched_tools and intent.get("has_specific_values", True):
                 return PlanResult(
                     mode="calculator",
                     tools=matched_tools,
@@ -554,7 +558,7 @@ class CentralIntelligenceOrchestrator:
             return PlanResult(
                 mode="retrieval_only",
                 tools=[],
-                rationale="No documents loaded and no tool could be matched to this query.",
+                rationale="No documents loaded and no specific input values provided.",
             )
 
         if intent["lookup_only"]:
@@ -590,7 +594,7 @@ class CentralIntelligenceOrchestrator:
                 "calculation",
                 "compute",
                 "determine",
-                "what is",
+                # "what is" removed — question phrase, not a calculation request
                 "max",
                 "maximum",
                 "deflection",
@@ -641,8 +645,27 @@ class CentralIntelligenceOrchestrator:
             )
         )
 
+        # Detect specific engineering values (section names, grades, dimensions).
+        # Without these, queries containing engineering terms are conceptual —
+        # they should route to retrieval, not to calculator tools with defaults.
+        has_specific_values = bool(re.search(
+            r"\b(?:"
+            r"(?:ipe|heb|hea|hem|ub|uc|chs|rhs|shs)\s*\d+"  # section: IPE300
+            r"|s(?:235|275|355|420|460)\b"                     # steel: S355
+            r"|m(?:12|14|16|20|22|24|27|30|36)\b"             # bolt: M20
+            r"|(?:4\.6|4\.8|5\.6|5\.8|6\.8|8\.8|10\.9|12\.9)" # bolt grade: 8.8
+            r"|\d+(?:\.\d+)?\s*(?:mm|cm|kn|mpa|n/mm|knm)"    # value+unit: 300mm
+            r")",
+            lowered,
+        ))
+
         lookup_only = has_lookup_intent and not has_calc_intent and not has_numeric
-        pure_calculation = has_calc_intent and not code_required and not has_lookup_intent
+        pure_calculation = (
+            has_calc_intent
+            and has_specific_values  # must have concrete inputs to fast-path
+            and not code_required
+            and not has_lookup_intent
+        )
         if pure_calculation and any(token in lowered for token in ("explain", "why", "how")):
             pure_calculation = False
 
@@ -652,6 +675,7 @@ class CentralIntelligenceOrchestrator:
             "code_required": code_required,
             "lookup_only": lookup_only,
             "pure_calculation": pure_calculation,
+            "has_specific_values": has_specific_values,
         }
 
     def _match_tools_for_query(self, *, query: str, valid_tools: list[str]) -> list[str]:
@@ -738,10 +762,17 @@ class CentralIntelligenceOrchestrator:
                     tools=matched_tools,
                     rationale="Heuristic fallback selected hybrid path from query intent + tool match.",
                 )
+            if intent.get("has_specific_values", True):
+                return PlanResult(
+                    mode="calculator",
+                    tools=matched_tools,
+                    rationale="Heuristic fallback selected calculator-only path from query intent + tool match.",
+                )
+            # Tools matched but no specific input values — conceptual question
             return PlanResult(
-                mode="calculator",
-                tools=matched_tools,
-                rationale="Heuristic fallback selected calculator-only path from query intent + tool match.",
+                mode="retrieval_only",
+                tools=[],
+                rationale="Tools matched but no specific input values provided; using retrieval for conceptual answer.",
             )
 
         return PlanResult(
@@ -1232,6 +1263,8 @@ class CentralIntelligenceOrchestrator:
         if not is_short and not is_referential:
             return query
 
+        # Use the FIRST user message as anchor — it establishes the base
+        # engineering query; subsequent messages modify its parameters.
         anchor_msg = None
         for msg in history:
             role = msg.role if hasattr(msg, "role") else msg.get("role", "")
@@ -1278,7 +1311,7 @@ class CentralIntelligenceOrchestrator:
                 logger.warning("followup_resolution_failed", extra={"error": str(exc)})
 
         logger.info("followup_heuristic", extra={"original": query, "context": anchor_msg[:120]})
-        return f"{query}. {anchor_msg}"
+        return f"{query}. {anchor_msg[:200]}"
 
     # ---- TOOL INPUT BUILDERS ----
     def _build_tool_inputs(

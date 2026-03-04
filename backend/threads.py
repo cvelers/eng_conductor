@@ -31,6 +31,15 @@ class MessageCreate(BaseModel):
     response_payload: dict | None = None
 
 
+class ThreadTruncate(BaseModel):
+    """Truncate a thread: keep only the first `keep_count` messages.
+
+    Optionally update the content of the last kept message (for inline edits).
+    """
+    keep_count: int
+    updated_content: str | None = None
+
+
 def create_threads_router(settings: Any) -> APIRouter:
     router = APIRouter(prefix="/api/threads", tags=["threads"])
     user_dep = require_auth(settings)
@@ -280,5 +289,78 @@ def create_threads_router(settings: Any) -> APIRouter:
             "responsePayload": msg_row.get("response_payload"),
             "createdAt": msg_row.get("created_at"),
         }
+
+    @router.post("/{thread_id}/truncate")
+    async def truncate_thread(
+        thread_id: str,
+        body: ThreadTruncate,
+        user: dict = Depends(user_dep),
+    ):
+        """Delete messages after a given position and optionally update the last kept message.
+
+        Used when the user edits a previous message and resubmits — all
+        subsequent messages must be removed and the edited message content
+        updated in the database.
+        """
+        supabase = get_supabase()
+        if not supabase:
+            raise HTTPException(503, "Thread sync not configured")
+
+        user_id = user.get("sub")
+        if not user_id:
+            raise HTTPException(401, "Invalid token")
+
+        # Verify thread belongs to user
+        thread_res = (
+            supabase.table("threads")
+            .select("id")
+            .eq("id", thread_id)
+            .eq("user_id", user_id)
+            .maybe_single()
+            .execute()
+        )
+        if not thread_res.data:
+            raise HTTPException(404, "Thread not found")
+
+        try:
+            # Fetch all messages ordered by creation time
+            msgs_res = (
+                supabase.table("messages")
+                .select("id, created_at")
+                .eq("thread_id", thread_id)
+                .order("created_at", desc=False)
+                .execute()
+            )
+            all_msgs = msgs_res.data or []
+
+            if body.keep_count < 0:
+                raise HTTPException(400, "keep_count must be >= 0")
+
+            # Delete messages beyond keep_count
+            to_delete = all_msgs[body.keep_count:]
+            if to_delete:
+                delete_ids = [m["id"] for m in to_delete]
+                supabase.table("messages").delete().in_("id", delete_ids).execute()
+
+            # Optionally update the content of the last kept message
+            if body.updated_content is not None and 0 < body.keep_count <= len(all_msgs):
+                last_kept = all_msgs[body.keep_count - 1]
+                supabase.table("messages").update(
+                    {"content": body.updated_content}
+                ).eq("id", last_kept["id"]).execute()
+
+            # Update thread timestamp
+            now_iso = datetime.now(timezone.utc).isoformat()
+            supabase.table("threads").update({"updated_at": now_iso}).eq(
+                "id", thread_id
+            ).eq("user_id", user_id).execute()
+
+        except HTTPException:
+            raise
+        except Exception as exc:
+            logger.exception("thread_truncate_failed")
+            raise HTTPException(500, str(exc)) from exc
+
+        return {"ok": True, "kept": min(body.keep_count, len(all_msgs)), "deleted": len(to_delete)}
 
     return router
