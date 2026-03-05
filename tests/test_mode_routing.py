@@ -70,6 +70,34 @@ class RoutingLLM(LLMProvider):
                 }
             )
 
+        if "###task:resolve_tool_chain###" in prompt:
+            self.calls.append("resolve_chain")
+            # The LLM figures out that member_resistance needs
+            # section_classification as a prerequisite.
+            selected = json.loads(
+                user_prompt.split("Selected tools: ")[1].split("\n")[0]
+            )
+            result: list[str] = []
+            needs_classification = any(
+                t in selected
+                for t in ("member_resistance_ec3", "interaction_check_ec3")
+            )
+            if needs_classification:
+                result.append("section_classification_ec3")
+            result.extend(selected)
+            # Deduplicate preserving order
+            seen: set[str] = set()
+            deduped: list[str] = []
+            for t in result:
+                if t not in seen:
+                    seen.add(t)
+                    deduped.append(t)
+            return json.dumps(deduped)
+
+        if "###task:resolve_inputs###" in prompt:
+            self.calls.append("resolve_inputs")
+            return json.dumps({})
+
         self.calls.append("compose")
         return "Routing test answer."
 
@@ -141,13 +169,107 @@ class TrackingToolRunner:
         }
 
 
+# Tool entries with realistic schemas so the orchestrator can reason about
+# input/output relationships.
+_TOOL_SCHEMAS: dict[str, dict[str, Any]] = {
+    "section_classification_ec3": {
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "section_name": {"type": "string"},
+                "steel_grade": {"type": "string"},
+            },
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "outputs": {
+                    "type": "object",
+                    "properties": {
+                        "governing_class": {"type": "integer"},
+                        "web_class": {"type": "integer"},
+                        "flange_class": {"type": "integer"},
+                    },
+                }
+            },
+        },
+    },
+    "member_resistance_ec3": {
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "section_name": {"type": "string"},
+                "steel_grade": {"type": "string"},
+                "section_class": {"type": "integer"},
+            },
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "outputs": {
+                    "type": "object",
+                    "properties": {
+                        "M_Rd_kNm": {"type": "number"},
+                        "N_Rd_kN": {"type": "number"},
+                    },
+                }
+            },
+        },
+    },
+    "interaction_check_ec3": {
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "MEd_kNm": {"type": "number"},
+                "M_Rd_kNm": {"type": "number"},
+            },
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "outputs": {
+                    "type": "object",
+                    "properties": {
+                        "utilization": {"type": "number"},
+                    },
+                }
+            },
+        },
+    },
+    "simple_beam_calculator": {
+        "input_schema": {
+            "type": "object",
+            "properties": {
+                "span_m": {"type": "number"},
+                "load_kn_per_m": {"type": "number"},
+            },
+        },
+        "output_schema": {
+            "type": "object",
+            "properties": {
+                "outputs": {
+                    "type": "object",
+                    "properties": {
+                        "M_max_kNm": {"type": "number"},
+                    },
+                }
+            },
+        },
+    },
+}
+
+
 def _tool_entry(name: str) -> ToolRegistryEntry:
+    schema = _TOOL_SCHEMAS.get(name, {})
     return ToolRegistryEntry(
         tool_name=name,
         description=f"{name} test tool",
         script_path="tools/mcp/runner.py",
-        input_schema={"type": "object", "properties": {"section_name": {"type": "string"}}},
-        output_schema={"type": "object"},
+        input_schema=schema.get(
+            "input_schema",
+            {"type": "object", "properties": {"section_name": {"type": "string"}}},
+        ),
+        output_schema=schema.get("output_schema", {"type": "object"}),
     )
 
 

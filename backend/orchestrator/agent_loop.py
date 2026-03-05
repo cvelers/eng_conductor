@@ -21,8 +21,7 @@ from backend.config import Settings
 from backend.orchestrator.engine import (
     CentralIntelligenceOrchestrator,
     PlanResult,
-    _CHAIN_MAPPINGS,
-    _resolve_nested,
+    _flatten_tool_outputs,
 )
 from backend.schemas import (
     Attachment,
@@ -95,7 +94,11 @@ _DECOMPOSE_SYSTEM = (
     "- Only split when there are genuinely separate engineering questions.\n"
     "- Order tasks logically (dependencies first).\n"
     "- Only include tools that are directly relevant.\n"
-    "- Extract concrete input values from the query into 'inputs'.\n"
+    "- In 'inputs', only include values the user explicitly states in their query.\n"
+    "- NEVER guess or invent values for parameters that an earlier task's tool\n"
+    "  will compute (e.g. section_class from section_classification, fy_mpa from\n"
+    "  steel_grade_properties).  Omit those parameters entirely — the orchestrator\n"
+    "  will resolve them automatically from the session context.\n"
     "- Return valid JSON only, no markdown fences, no explanation."
 )
 
@@ -273,11 +276,14 @@ class AgentLoop:
             task_tool_outputs: dict[str, dict[str, Any]] = {}
             tool_failures: list[str] = []
             if task.tools:
-                ordered = self.cio._normalize_tool_chain(task.tools)
+                ordered = self.cio._normalize_tool_chain(
+                    task.tools,
+                    already_run=set(all_tool_outputs.keys()),
+                )
                 yield ("machine", {"node": "tools", "status": "active", "title": "Tools", "detail": "Executing tool chain."})
                 for tool_name in ordered:
                     inputs = self._build_task_tool_inputs(
-                        tool_name, task, task_tool_outputs
+                        tool_name, task, all_tool_outputs
                     )
                     success = False
                     last_error = ""
@@ -732,9 +738,16 @@ class AgentLoop:
         self,
         tool_name: str,
         task: _TaskSpec,
-        task_tool_outputs: dict[str, dict[str, Any]],
+        all_tool_outputs: dict[str, dict[str, Any]],
     ) -> dict[str, Any]:
-        """Build inputs for a tool within a task context."""
+        """Build inputs for a tool using the full session context.
+
+        Resolution order:
+        1. Values extracted from the user query (task.inputs)
+        2. Settings defaults (section_name, steel_grade, gamma_m0)
+        3. Exact-name match against all accumulated tool outputs
+        4. LLM resolution for remaining unresolved parameters
+        """
         # Start with task-level extracted inputs
         base = dict(task.inputs)
 
@@ -746,25 +759,47 @@ class AgentLoop:
         if "gamma_m0" not in base:
             base["gamma_m0"] = self.settings.default_gamma_m0
 
-        # Apply chain mappings from previous tool outputs in this task
-        for input_key, (src_tool, output_path, default) in _CHAIN_MAPPINGS.get(
-            tool_name, {}
-        ).items():
-            if base.get(input_key) is None:
-                val = _resolve_nested(
-                    task_tool_outputs.get(src_tool, {}), output_path
-                )
-                base[input_key] = val if val is not None else default
+        # Auto-resolve from accumulated session outputs.
+        # Computed values OVERRIDE decomposition guesses — if a prior tool
+        # already calculated a value, that result is authoritative.
+        flat = _flatten_tool_outputs(all_tool_outputs)
 
-        # Filter to only params the tool expects and normalize enums
         entry = self.cio.tool_registry.get(tool_name)
         if entry:
             props = entry.input_schema.get("properties", {})
             expected = set(props.keys())
+
+            # Phase 1: exact-name match — override with computed values
+            phase1_resolved: set[str] = set()
+            for param in expected:
+                if param in flat:
+                    base[param] = flat[param]
+                    phase1_resolved.add(param)
+
+            # Phase 2: LLM resolution for unresolved params AND
+            # decomposition guesses that weren't verified by Phase 1.
+            # If a param has a value from task.inputs but no matching
+            # computed output overrode it, the LLM checks whether a
+            # prior tool output maps to it semantically.
+            needs_llm: list[str] = []
+            for p in expected:
+                if base.get(p) is None:
+                    needs_llm.append(p)  # truly unresolved
+                elif p in task.inputs and p not in phase1_resolved:
+                    needs_llm.append(p)  # decomposition guess, unverified
+
+            if needs_llm and flat and self.cio.orchestrator_llm.available:
+                resolved = self.cio._llm_resolve_inputs(
+                    tool_name, props, needs_llm, base, all_tool_outputs,
+                )
+                base.update(resolved)
+
+            # Filter to expected params
             if expected:
                 base = {k: v for k, v in base.items() if k in expected and v is not None}
             else:
                 base = {k: v for k, v in base.items() if v is not None}
+
             # Normalize enum values (e.g. "UDL" → "udl")
             for k, v in list(base.items()):
                 if isinstance(v, str) and k in props:

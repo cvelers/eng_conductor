@@ -28,27 +28,14 @@ class PlanResult:
     rationale: str
 
 
-_CHAIN_MAPPINGS: dict[str, dict[str, tuple[str, str, Any]]] = {
-    "member_resistance_ec3": {
-        "section_class": ("section_classification_ec3", "outputs.governing_class", 2),
-    },
-    "interaction_check_ec3": {
-        "M_Rd_kNm": ("member_resistance_ec3", "outputs.M_Rd_kNm", None),
-        "N_Rd_kN": ("member_resistance_ec3", "outputs.N_Rd_kN", None),
-    },
-}
 
-def _resolve_nested(data: dict[str, Any] | None, path: str) -> Any:
-    """Walk a dot-separated path into a nested dict."""
-    if data is None:
-        return None
-    current: Any = data
-    for part in path.split("."):
-        if isinstance(current, dict):
-            current = current.get(part)
-        else:
-            return None
-    return current
+def _flatten_tool_outputs(tool_outputs: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    """Flatten all accumulated tool outputs into a single {param: value} dict."""
+    flat: dict[str, Any] = {}
+    for result in tool_outputs.values():
+        for k, v in result.get("outputs", {}).items():
+            flat[k] = v
+    return flat
 
 
 _FOLLOWUP_VALUE_RE = re.compile(
@@ -781,25 +768,212 @@ class CentralIntelligenceOrchestrator:
             rationale="No tool match found; using retrieval-only fallback.",
         )
 
-    def _normalize_tool_chain(self, tools: list[str]) -> list[str]:
-        normalized: list[str] = []
-        seen: set[str] = set()
+    def _normalize_tool_chain(
+        self,
+        tools: list[str],
+        already_run: set[str] | None = None,
+    ) -> list[str]:
+        """Ensure prerequisite tools are included and properly ordered.
+
+        Uses the LLM to determine if any prerequisite tools are missing
+        (e.g. section_classification before member_resistance).  Falls
+        back to exact-name schema matching when the LLM is unavailable.
+
+        ``already_run`` — tools whose outputs are already available in the
+        session context (from earlier tasks).  Only *implicitly added*
+        prerequisites are skipped; tools explicitly requested in ``tools``
+        always run (they may need different inputs in this task).
+        """
+        already_run = already_run or set()
         valid_tools = set(self.tool_registry.keys())
+        planned = [t for t in tools if t in valid_tools]
+        if not planned:
+            return []
+        explicitly_requested = set(planned)
 
-        def add_with_dependencies(tool_name: str) -> None:
-            if tool_name not in valid_tools:
-                return
-            for src_tool, _, _ in _CHAIN_MAPPINGS.get(tool_name, {}).values():
-                add_with_dependencies(src_tool)
-            if tool_name in seen:
-                return
-            seen.add(tool_name)
-            normalized.append(tool_name)
+        # --- LLM path: ask the model to resolve the complete chain ---
+        if self.orchestrator_llm.available:
+            resolved = self._llm_resolve_tool_chain(
+                planned, already_run, explicitly_requested,
+            )
+            if resolved:
+                return resolved
 
-        for tool in tools:
-            add_with_dependencies(tool)
+        # --- Fallback: exact-name output→input matching ---
+        output_producers: dict[str, str] = {}
+        for name, entry in self.tool_registry.items():
+            out_props = (
+                entry.output_schema
+                .get("properties", {})
+                .get("outputs", {})
+                .get("properties", {})
+            )
+            for out_name in out_props:
+                output_producers[out_name] = name
 
-        return normalized
+        all_needed = list(planned)
+        planned_set = set(planned)
+        for tool_name in list(planned):
+            entry = self.tool_registry[tool_name]
+            for in_name in entry.input_schema.get("properties", {}):
+                if in_name in output_producers:
+                    producer = output_producers[in_name]
+                    if producer not in planned_set and producer in valid_tools:
+                        all_needed.insert(0, producer)
+                        planned_set.add(producer)
+
+        # Deduplicate preserving order.
+        # Skip already-run tools only if they were implicitly added as
+        # prerequisites — explicitly requested tools always run.
+        seen: set[str] = set()
+        result: list[str] = []
+        for t in all_needed:
+            if t in seen:
+                continue
+            if t in already_run and t not in explicitly_requested:
+                continue
+            seen.add(t)
+            result.append(t)
+        return result
+
+    # ---- LLM-BASED SESSION RESOLUTION ----
+
+    def _llm_resolve_tool_chain(
+        self,
+        planned: list[str],
+        already_run: set[str] | None = None,
+        explicitly_requested: set[str] | None = None,
+    ) -> list[str] | None:
+        """Ask the LLM to verify / complete a tool chain with prerequisites."""
+        already_run = already_run or set()
+        explicitly_requested = explicitly_requested or set(planned)
+        valid_tools = set(self.tool_registry.keys())
+        tool_lines: list[str] = []
+        for name, entry in self.tool_registry.items():
+            in_params = list(entry.input_schema.get("properties", {}).keys())
+            out_props = (
+                entry.output_schema
+                .get("properties", {})
+                .get("outputs", {})
+                .get("properties", {})
+            )
+            out_params = list(out_props.keys())
+            tool_lines.append(
+                f"- {name}: {entry.description}  "
+                f"inputs={in_params}  outputs={out_params}"
+            )
+
+        # Only tell the LLM about prerequisite tools it can skip —
+        # explicitly requested tools must always be included.
+        skippable = already_run - explicitly_requested
+        already_run_note = ""
+        if skippable:
+            already_run_note = (
+                f"\nPrerequisite tools already executed (outputs available): "
+                f"{json.dumps(sorted(skippable))}\n"
+                "Do NOT include these as prerequisites — their results "
+                "are already available and will be reused automatically.\n"
+            )
+
+        prompt = (
+            "###TASK:RESOLVE_TOOL_CHAIN###\n"
+            f"Selected tools: {json.dumps(planned)}\n\n"
+            "All available tools:\n" + "\n".join(tool_lines) + "\n\n"
+            + already_run_note +
+            "Some tools produce outputs that another tool needs as input "
+            "(names may differ, e.g. 'governing_class' maps to 'section_class').\n"
+            "Return a JSON array of tool names in execution order, "
+            "adding any missing prerequisite tools but excluding any "
+            "already-executed prerequisite tools.\n"
+            "Return ONLY the JSON array."
+        )
+        try:
+            raw = self.orchestrator_llm.generate(
+                system_prompt=(
+                    "You determine tool execution order for engineering "
+                    "calculations. Return only a valid JSON array."
+                ),
+                user_prompt=prompt,
+                temperature=0.0,
+                max_tokens=2000,
+            )
+            parsed = parse_json_loose(raw)
+            if isinstance(parsed, list) and parsed:
+                return [
+                    t for t in parsed
+                    if t in valid_tools
+                    and (t in explicitly_requested or t not in already_run)
+                ]
+        except Exception as exc:
+            logger.warning("LLM tool-chain resolution failed: %s", exc)
+        return None
+
+    def _llm_resolve_inputs(
+        self,
+        tool_name: str,
+        schema_props: dict[str, Any],
+        params_to_resolve: list[str],
+        current_inputs: dict[str, Any],
+        all_tool_outputs: dict[str, dict[str, Any]],
+    ) -> dict[str, Any]:
+        """Use the LLM to resolve or verify tool inputs from session context.
+
+        Called for parameters that are either truly unresolved (None) or
+        that have decomposition-guessed values which may need overriding
+        by actual computed results from prior tools.
+        """
+        context_lines: list[str] = []
+        for src_tool, result in all_tool_outputs.items():
+            outputs = result.get("outputs", {})
+            if outputs:
+                context_lines.append(f"  {src_tool}: {json.dumps(outputs)}")
+        if not context_lines:
+            return {}
+
+        # Include current value (if any) so the LLM can decide to keep or override
+        params_info: dict[str, Any] = {}
+        for p in params_to_resolve:
+            info: dict[str, Any] = {
+                k: v
+                for k, v in schema_props.get(p, {}).items()
+                if k in ("type", "description", "minimum", "maximum")
+            }
+            cur = current_inputs.get(p)
+            if cur is not None:
+                info["current_value"] = cur
+            params_info[p] = info
+
+        prompt = (
+            "###TASK:RESOLVE_INPUTS###\n"
+            f"Tool: {tool_name}\n"
+            f"Parameters to resolve: {json.dumps(params_info)}\n"
+            f"Known inputs: {json.dumps({k: v for k, v in current_inputs.items() if v is not None})}\n\n"
+            "Previous tool outputs:\n" + "\n".join(context_lines) + "\n\n"
+            "For each parameter, determine the correct value from the prior "
+            "tool outputs.  If a parameter has a current_value, override it "
+            "if a prior tool computed a more accurate value (e.g. "
+            "'governing_class' from section_classification maps to "
+            "'section_class').  Return ONLY a JSON object of "
+            "{param_name: value}.  Omit any that cannot be determined."
+        )
+        try:
+            raw = self.orchestrator_llm.generate(
+                system_prompt=(
+                    "You resolve tool input parameters from available "
+                    "session data. Return only valid JSON."
+                ),
+                user_prompt=prompt,
+                temperature=0.0,
+                max_tokens=2000,
+            )
+            result = parse_json_loose(raw)
+            if isinstance(result, dict):
+                return result
+        except Exception as exc:
+            logger.warning(
+                "LLM input resolution failed for %s: %s", tool_name, exc,
+            )
+        return {}
 
     def _plan_tools_after_retrieval(
         self,
@@ -1325,10 +1499,36 @@ class CentralIntelligenceOrchestrator:
         if not base:
             base = {**extraction.assumed_inputs, **extraction.user_inputs}
 
-        for input_key, (src_tool, output_path, default) in _CHAIN_MAPPINGS.get(tool_name, {}).items():
-            if base.get(input_key) is None:
-                val = _resolve_nested(tool_outputs.get(src_tool, {}), output_path)
-                base[input_key] = val if val is not None else default
+        # Auto-resolve from accumulated session outputs.
+        # Computed values OVERRIDE extraction guesses.
+        flat = _flatten_tool_outputs(tool_outputs)
+        extraction_guesses = set(
+            extraction.tool_inputs.get(tool_name, {}).keys()
+        ) | set(extraction.assumed_inputs.keys())
+        entry = self.tool_registry.get(tool_name)
+        if entry:
+            props = entry.input_schema.get("properties", {})
+
+            # Phase 1: exact-name match — override with computed values
+            phase1_resolved: set[str] = set()
+            for param in props:
+                if param in flat:
+                    base[param] = flat[param]
+                    phase1_resolved.add(param)
+
+            # Phase 2: LLM resolution for unresolved + unverified guesses
+            needs_llm: list[str] = []
+            for p in props:
+                if base.get(p) is None:
+                    needs_llm.append(p)
+                elif p in extraction_guesses and p not in phase1_resolved:
+                    needs_llm.append(p)
+
+            if needs_llm and flat and self.orchestrator_llm.available:
+                resolved = self._llm_resolve_inputs(
+                    tool_name, props, needs_llm, base, tool_outputs,
+                )
+                base.update(resolved)
 
         return {k: v for k, v in base.items() if v is not None}
 

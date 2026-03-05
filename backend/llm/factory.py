@@ -14,6 +14,7 @@ def get_orchestrator_provider(settings: Settings) -> LLMProvider:
             api_key=settings.orchestrator_api_key,
             model=settings.orchestrator_model,
             base_url=settings.orchestrator_base_url,
+            default_reasoning_effort=settings.orchestrator_reasoning_effort or None,
         )
     if provider == "openrouter":
         return OpenRouterProvider(
@@ -34,7 +35,16 @@ def get_tool_writer_provider(settings: Settings) -> LLMProvider:
     base_url = settings.tool_writer_base_url or settings.orchestrator_base_url
 
     if provider == "gemini":
-        return GeminiProvider(api_key=api_key, model=model, base_url=base_url)
+        effort = (
+            settings.tool_writer_reasoning_effort
+            or settings.orchestrator_reasoning_effort
+        ) or None
+        return GeminiProvider(
+            api_key=api_key,
+            model=model,
+            base_url=base_url,
+            default_reasoning_effort=effort,
+        )
     if provider == "openrouter":
         return OpenRouterProvider(api_key=api_key, model=model, base_url=base_url)
     if provider == "mock":
@@ -55,6 +65,7 @@ def get_search_provider(settings: Settings) -> LLMProvider:
             api_key=settings.search_api_key,
             model=settings.search_model,
             base_url=settings.search_base_url,
+            default_reasoning_effort=settings.search_reasoning_effort or None,
         )
     if provider == "mock":
         return MockProvider()

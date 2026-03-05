@@ -19,12 +19,14 @@ class OpenAICompatProvider(LLMProvider):
         api_key: str,
         model: str,
         timeout_s: float = 30.0,
+        default_reasoning_effort: str | None = None,
     ) -> None:
         self.provider_name = provider_name
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
         self.timeout_s = timeout_s
+        self.default_reasoning_effort = default_reasoning_effort
 
     @property
     def available(self) -> bool:
@@ -52,8 +54,9 @@ class OpenAICompatProvider(LLMProvider):
         # keeps the thinking budget small so more of max_tokens is available
         # for the actual output — critical for lightweight calls like
         # classification and greetings.
-        if reasoning_effort is not None:
-            payload["reasoning_effort"] = reasoning_effort
+        effective = reasoning_effort if reasoning_effort is not None else self.default_reasoning_effort
+        if effective:
+            payload["reasoning_effort"] = effective
 
         url = f"{self.base_url}/chat/completions"
         headers = {
@@ -86,7 +89,7 @@ class OpenAICompatProvider(LLMProvider):
                 "model": self.model,
                 "finish_reason": finish_reason,
                 "max_tokens": max_tokens,
-                "reasoning_effort": reasoning_effort,
+                "reasoning_effort": effective,
                 "prompt_tokens": usage.get("prompt_tokens"),
                 "completion_tokens": usage.get("completion_tokens"),
                 "total_tokens": usage.get("total_tokens"),
