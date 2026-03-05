@@ -119,6 +119,7 @@ class AgentLoop:
     ) -> None:
         self.cio = orchestrator
         self.settings = settings
+        self._current_tasks: list[_TaskSpec] = []
 
     # ── Public API ──────────────────────────────────────────────────
 
@@ -183,6 +184,7 @@ class AgentLoop:
         yield ("thinking", {"content": "Analyzing your question..."})
 
         tasks = self._decompose(query, selected_mode)
+        self._current_tasks = tasks  # Store for plan context in LLM resolution
         logger.info(
             "agent_tasks_decomposed",
             extra={"task_count": len(tasks), "summaries": [t.summary for t in tasks]},
@@ -742,11 +744,9 @@ class AgentLoop:
     ) -> dict[str, Any]:
         """Build inputs for a tool using the full session context.
 
-        Resolution order:
-        1. Values extracted from the user query (task.inputs)
-        2. Settings defaults (section_name, steel_grade, gamma_m0)
-        3. Exact-name match against all accumulated tool outputs
-        4. LLM resolution for remaining unresolved parameters
+        Resolution:
+        1. Values extracted from the user query (task.inputs) + settings defaults
+        2. LLM resolves ALL expected params when prior tool outputs exist
         """
         # Start with task-level extracted inputs
         base = dict(task.inputs)
@@ -759,38 +759,28 @@ class AgentLoop:
         if "gamma_m0" not in base:
             base["gamma_m0"] = self.settings.default_gamma_m0
 
-        # Auto-resolve from accumulated session outputs.
-        # Computed values OVERRIDE decomposition guesses — if a prior tool
-        # already calculated a value, that result is authoritative.
-        flat = _flatten_tool_outputs(all_tool_outputs)
-
         entry = self.cio.tool_registry.get(tool_name)
         if entry:
             props = entry.input_schema.get("properties", {})
             expected = set(props.keys())
 
-            # Phase 1: exact-name match — override with computed values
-            phase1_resolved: set[str] = set()
-            for param in expected:
-                if param in flat:
-                    base[param] = flat[param]
-                    phase1_resolved.add(param)
-
-            # Phase 2: LLM resolution for unresolved params AND
-            # decomposition guesses that weren't verified by Phase 1.
-            # If a param has a value from task.inputs but no matching
-            # computed output overrode it, the LLM checks whether a
-            # prior tool output maps to it semantically.
-            needs_llm: list[str] = []
-            for p in expected:
-                if base.get(p) is None:
-                    needs_llm.append(p)  # truly unresolved
-                elif p in task.inputs and p not in phase1_resolved:
-                    needs_llm.append(p)  # decomposition guess, unverified
-
-            if needs_llm and flat and self.cio.orchestrator_llm.available:
+            # LLM resolves ALL expected params when prior outputs exist
+            flat = _flatten_tool_outputs(all_tool_outputs)
+            if flat and self.cio.orchestrator_llm.available:
+                # Build plan context for LLM
+                plan_context = None
+                if self._current_tasks:
+                    plan_context = [
+                        {
+                            "step": idx + 1,
+                            "summary": t.summary,
+                            "tools": t.tools,
+                        }
+                        for idx, t in enumerate(self._current_tasks)
+                    ]
                 resolved = self.cio._llm_resolve_inputs(
-                    tool_name, props, needs_llm, base, all_tool_outputs,
+                    tool_name, props, list(expected), base,
+                    all_tool_outputs, plan_context=plan_context,
                 )
                 base.update(resolved)
 
@@ -837,8 +827,10 @@ class AgentLoop:
             raw = self.cio.orchestrator_llm.generate(
                 system_prompt=(
                     "You are a tool-input repair agent. A calculator tool failed due "
-                    "to invalid inputs. Fix the inputs and return ONLY a JSON object "
-                    "with corrected values. No explanation."
+                    "to invalid inputs. Return ONLY a JSON object containing the "
+                    "parameters that need to CHANGE to fix the error. Do NOT include "
+                    "parameters that are already correct — only the ones that caused "
+                    "the failure or need updating. No explanation."
                 ),
                 user_prompt=(
                     f"Tool: {tool_name}\n"
@@ -846,7 +838,7 @@ class AgentLoop:
                     f"Input schema:\n{schema_desc}\n\n"
                     f"Failed inputs: {json.dumps(failed_inputs, default=str)}\n"
                     f"Error: {error_msg}\n\n"
-                    "Return corrected JSON inputs only."
+                    "Return ONLY the parameters that need to change as JSON."
                 ),
                 temperature=0,
                 max_tokens=1024,
@@ -854,17 +846,22 @@ class AgentLoop:
             )
             fixed = parse_json_loose(raw)
             if isinstance(fixed, dict):
+                # Merge corrections into original inputs so that
+                # values resolved by the LLM (e.g. section_class)
+                # are preserved when the fix only changes a subset
+                # of parameters (e.g. section_name).
+                merged = {**failed_inputs, **fixed}
                 # Re-apply enum normalization
                 if entry:
                     props = entry.input_schema.get("properties", {})
-                    for k, v in list(fixed.items()):
+                    for k, v in list(merged.items()):
                         if isinstance(v, str) and k in props:
                             allowed = props[k].get("enum")
                             if allowed and v not in allowed:
                                 lower = v.lower()
                                 if lower in allowed:
-                                    fixed[k] = lower
-                return fixed
+                                    merged[k] = lower
+                return merged
         except Exception as exc:
             logger.warning("fix_tool_inputs_failed", extra={"error": str(exc)})
 

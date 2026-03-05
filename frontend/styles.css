@@ -402,23 +402,27 @@ body {
 
 .thinking-label {
   text-align: left; font-weight: 600;
-  transition: opacity 200ms ease;
+  font-size: 11px;
+  transition: opacity 200ms ease, color 200ms ease;
 }
 .thinking-label.phrase-fade { opacity: 0; }
-.thinking-dots { display: none; align-items: center; gap: 4px; margin-left: -5px; color: var(--accent-2); }
+.thinking-dots {
+  display: none; align-items: center; gap: 5px;
+  margin-left: 2px; color: var(--accent-2);
+}
 .thinking-dots span {
-  width: 4px;
-  height: 4px;
+  width: 3.5px;
+  height: 3.5px;
   border-radius: 50%;
   background: currentColor;
-  opacity: 0.25;
-  animation: thinking-dot 1.1s ease-in-out infinite;
+  opacity: 0.2;
+  animation: thinking-dot 1.4s ease-in-out infinite;
 }
-.thinking-dots span:nth-child(2) { animation-delay: 0.15s; }
-.thinking-dots span:nth-child(3) { animation-delay: 0.3s; }
+.thinking-dots span:nth-child(2) { animation-delay: 0.2s; }
+.thinking-dots span:nth-child(3) { animation-delay: 0.4s; }
 .thinking-panel.is-thinking .thinking-label { color: var(--accent-2); }
 .thinking-panel.is-thinking .thinking-dots { display: inline-flex; }
-.thinking-meta { margin-left: auto; font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+.thinking-meta { margin-left: auto; font-size: 10px; color: var(--muted); font-weight: 500; white-space: nowrap; }
 
 /* Flow graph — redesigned compact icon layout */
 .flow-graph {
@@ -432,7 +436,7 @@ body {
 .flow-svg { position: absolute; inset: 0; pointer-events: none; }
 
 .flow-edge {
-  stroke-width: 1.5; fill: none; stroke: #3d4149; opacity: 0.35;
+  stroke-width: 1; fill: none; stroke: #3d4149; opacity: 0.35;
   transition: stroke 200ms, opacity 200ms;
 }
 .flow-edge.done { stroke: var(--accent); opacity: 0.65; }
@@ -448,10 +452,10 @@ body {
 
 .flow-node {
   position: absolute;
-  border: 1px solid #3d4149; border-radius: var(--radius-sm);
+  border: 1px solid #3d4149; border-radius: 6px;
   background: var(--panel); color: var(--text-2);
-  padding: 8px 10px;
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  padding: 4px 5px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
   text-align: center;
   transition: all 180ms ease;
   overflow: hidden;
@@ -473,13 +477,13 @@ body {
   color: #ffcaca;
 }
 .flow-node-icon {
-  width: 22px; height: 22px; flex-shrink: 0;
+  width: 14px; height: 14px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
 }
-.flow-node-icon svg { width: 18px; height: 18px; }
+.flow-node-icon svg { width: 11px; height: 11px; }
 .flow-node-title {
   width: 100%;
-  font-size: 0.71rem; letter-spacing: 0.04em; text-transform: uppercase;
+  font-size: 0.5rem; letter-spacing: 0.03em; text-transform: uppercase;
   font-weight: 700; line-height: 1.1; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis;
 }
@@ -487,8 +491,8 @@ body {
 .flow-popups {
   position: absolute;
   display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
-  gap: 6px;
-  width: min(360px, calc(100vw - 60px));
+  gap: 4px;
+  width: min(280px, calc(100vw - 60px));
   pointer-events: none;
 }
 .flow-popups.above { transform: translate(-50%, -100%); }
@@ -498,11 +502,11 @@ body {
   border: 1px solid rgba(79, 156, 247, 0.35);
   background: rgba(79, 156, 247, 0.12);
   color: #d8e9ff;
-  font-size: 0.62rem;
+  font-size: 0.46rem;
   line-height: 1.1;
   letter-spacing: 0.02em;
   border-radius: 999px;
-  padding: 4px 8px;
+  padding: 2px 4px;
   max-width: calc(50% - 4px);
   white-space: nowrap;
   overflow: hidden;
@@ -590,6 +594,17 @@ body.pre-chat .composer-shell {
 }
 body.chat-started .composer-shell {
   bottom: 0;
+}
+body.chat-started .message {
+  margin-left: 0;
+  margin-right: auto;
+  width: min(820px, calc(100% - 310px));
+}
+body.chat-started .composer,
+body.chat-started .composer-meta {
+  margin-left: 0;
+  margin-right: auto;
+  width: min(820px, calc(100% - 310px));
 }
 .composer-meta {
   width: min(820px, calc(100% - 20px));
@@ -1182,8 +1197,8 @@ body.chat-started .attach-menu {
 @keyframes msg-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes edge-flow { to { stroke-dashoffset: -20; } }
 @keyframes thinking-dot {
-  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
-  40% { opacity: 1; transform: translateY(-1px); }
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.35); }
 }
 @keyframes pulse-glow {
   0%, 100% {
@@ -1238,7 +1253,6 @@ body.chat-started .attach-menu {
   .welcome { width: 92%; }
   .dev-panel { width: 100%; }
   .top-auth-btn { padding: 5px 10px; font-size: 0.74rem; }
-  .flow-canvas { transform: scale(0.72); transform-origin: top left; }
 }
 
 /* ── Message Panels ─────────────────────────────────────────────── */
@@ -1259,24 +1273,115 @@ body.chat-started .attach-menu {
   text-transform: uppercase;
   letter-spacing: 0.6px;
   color: var(--muted);
-  padding: 8px 12px 4px;
+  padding: 8px 12px 6px;
   font-family: var(--font-mono);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--panel-2);
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms;
+}
+.thinking-panel.scrolled > .panel-header {
+  border-bottom-color: var(--border);
 }
 
+/* Diagram as floating popup — sits between message boxes and right edge */
 .diagram-panel {
-  max-height: 280px;
-  overflow-y: auto;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  /* Fill gap between message column right edge and viewport right edge, 16px padding each side */
+  width: calc(100vw - 328px - min(820px, 100vw - 622px));
+  min-width: 220px;
+  max-width: 360px;
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  z-index: 30;
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  border-radius: 14px;
+  animation: diagram-pop-in 250ms ease-out;
+}
+.diagram-panel.hidden { display: none; }
+.diagram-panel .panel-header {
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  padding: 5px 8px;
+  cursor: move;
+  position: relative;
+}
+.diagram-close-btn {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+  transition: color 150ms, background 150ms;
+}
+.diagram-close-btn:hover {
+  color: var(--text);
+  background: rgba(255,255,255,0.06);
+}
+@keyframes diagram-pop-in {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .diagram-panel .flow-graph {
-  padding: 2px 8px 8px;
+  padding: 2px 4px 4px;
+  overflow: visible;
 }
 
 .thinking-panel {
-  max-height: 300px;
+  max-height: 360px;
   overflow-y: auto;
+  transition: max-height 300ms ease;
 }
-.thinking-panel:has(.activity-feed:empty) { display: none; }
+.thinking-panel.collapsed {
+  max-height: 38px;
+  overflow: hidden;
+  cursor: pointer;
+}
+.thinking-panel.collapsed .activity-feed,
+.thinking-panel.collapsed .machine-log-wrap {
+  opacity: 0;
+  pointer-events: none;
+}
+.thinking-panel.collapsed > .panel-header {
+  border-bottom-color: transparent;
+}
+/* Hide thinking panel only when feed is empty AND not actively thinking */
+.thinking-panel:has(.activity-feed:empty):not(.is-thinking) { display: none; }
+
+/* Collapse toggle button in panel-header */
+.panel-collapse-btn {
+  margin-left: 4px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: color 150ms, background 150ms, transform 300ms ease;
+}
+.panel-collapse-btn:hover {
+  color: var(--text-2);
+  background: rgba(255,255,255,0.05);
+}
+.thinking-panel.collapsed .panel-collapse-btn {
+  transform: rotate(180deg);
+}
 
 /* ── Activity Feed (Agent Mode) ─────────────────────────────────── */
 
@@ -1457,4 +1562,68 @@ body.chat-started .attach-menu {
   word-break: break-word;
   color: var(--text-2);
 }
+
+/* ── Streaming cursor ──────────────────────────────────────────── */
+@keyframes stream-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Blinking cursor on the last rendered element while streaming */
+.content.streaming > *:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1em;
+  background: var(--accent-2);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  animation: stream-blink 0.6s steps(2) infinite;
+  border-radius: 1px;
+}
+/* Fallback when content is empty (before first render) */
+.content.streaming:empty::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--accent-2);
+  animation: stream-blink 0.6s steps(2) infinite;
+  border-radius: 1px;
+}
+
+/* ── Diagram popup responsive ──────────────────────────────────── */
+/* Medium screens: shrink diagram so main content keeps space */
+@media (max-width: 1100px) {
+  .diagram-panel {
+    width: 200px;
+  }
+  body.chat-started .message,
+  body.chat-started .composer,
+  body.chat-started .composer-meta {
+    width: min(820px, calc(100% - 230px));
+  }
+}
+/* Small screens: diagram overlays content at reduced size */
+@media (max-width: 900px) {
+  .diagram-panel {
+    width: 160px;
+    opacity: 0.92;
+  }
+  body.chat-started .message,
+  body.chat-started .composer,
+  body.chat-started .composer-meta {
+    width: calc(100% - 20px);
+  }
+}
+/* Mobile: diagram on top, full width */
+@media (max-width: 768px) {
+  .diagram-panel {
+    width: calc(100vw - 16px);
+    right: 8px;
+    top: 12px;
+    opacity: 1;
+  }
+}
+
 

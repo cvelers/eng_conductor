@@ -563,18 +563,18 @@ function renderThreadList() {
 
 // ---- Flow graph ----
 const GRID = {
-  colW: 186,
-  rowH: 112,
-  padX: 28,
-  padY: 44,
-  nodeW: 156,
-  nodeH: 62,
-  popupGap: 10,
+  colW: 90,
+  rowH: 56,
+  padX: 12,
+  padY: 20,
+  nodeW: 74,
+  nodeH: 34,
+  popupGap: 5,
   popupMaxRows: 2,
   popupMaxItems: 20,
-  popupRowH: 22,
-  popupRowGap: 6,
-  edgePadY: 12,
+  popupRowH: 14,
+  popupRowGap: 3,
+  edgePadY: 5,
 };
 
 function popupLaneReserve() {
@@ -638,8 +638,53 @@ function initFlowGraph(msgNode, prompt) {
   const thinkingPanel = msgNode.querySelector(".thinking-panel");
   const graph = msgNode.querySelector(".flow-graph");
   if (!graph) return;
+
+  // Move diagram panel to body level so it floats as a popup
+  if (diagramPanel && diagramPanel.parentNode === msgNode) {
+    document.body.appendChild(diagramPanel);
+  }
   if (diagramPanel) diagramPanel.classList.remove("hidden");
-  if (thinkingPanel) thinkingPanel.classList.remove("hidden");
+  if (thinkingPanel) {
+    thinkingPanel.classList.remove("hidden");
+    thinkingPanel.classList.add("collapsed");
+  }
+
+  // Wire up close button
+  const closeBtn = diagramPanel?.querySelector(".diagram-close-btn");
+  if (closeBtn && !closeBtn.__wired) {
+    closeBtn.__wired = true;
+    closeBtn.addEventListener("click", () => {
+      diagramPanel.classList.add("hidden");
+    });
+  }
+
+  // Wire up collapse button on thinking panel
+  const collapseBtn = msgNode.querySelector(".panel-collapse-btn");
+  if (collapseBtn && !collapseBtn.__wired) {
+    collapseBtn.__wired = true;
+    collapseBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      thinkingPanel.classList.toggle("collapsed");
+    });
+  }
+  // Clicking the collapsed panel header also expands it
+  if (thinkingPanel && !thinkingPanel.__clickWired) {
+    thinkingPanel.__clickWired = true;
+    thinkingPanel.addEventListener("click", (e) => {
+      if (thinkingPanel.classList.contains("collapsed") && !e.target.closest(".panel-collapse-btn")) {
+        thinkingPanel.classList.remove("collapsed");
+      }
+    });
+  }
+
+  // Add scroll detection for sticky header border
+  if (thinkingPanel && !thinkingPanel.__scrollWired) {
+    thinkingPanel.__scrollWired = true;
+    thinkingPanel.addEventListener("scroll", () => {
+      thinkingPanel.classList.toggle("scrolled", thinkingPanel.scrollTop > 2);
+    });
+  }
+
   setThinkingState(msgNode, true);
   graph.innerHTML = "";
 
@@ -672,8 +717,8 @@ function initFlowGraph(msgNode, prompt) {
     marker.setAttribute("viewBox", "0 0 10 10");
     marker.setAttribute("refX", "9");
     marker.setAttribute("refY", "5");
-    marker.setAttribute("markerWidth", "6");
-    marker.setAttribute("markerHeight", "6");
+    marker.setAttribute("markerWidth", "5");
+    marker.setAttribute("markerHeight", "5");
     marker.setAttribute("orient", "auto-start-reverse");
     const arrow = document.createElementNS(svgNS, "path");
     arrow.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
@@ -741,6 +786,7 @@ function initFlowGraph(msgNode, prompt) {
     nodeEls,
     popupLanes: { docs: docPopups, tools: toolPopups },
     popupRefs: { docs: new Map(), tools: new Map() },
+    diagramPanel,
   };
   msgNode.__thinkStart = Date.now();
   msgNode.__stepCount = 0;
@@ -829,7 +875,9 @@ function applyFlow(n) {
     el.classList.remove("idle", "active", "done", "error");
     el.classList.add(s);
   }
-  n.querySelectorAll(".flow-edge").forEach(e => {
+  // flow-edge elements are inside diagramPanel which may be at body level
+  const edgeContainer = f.diagramPanel || n;
+  edgeContainer.querySelectorAll(".flow-edge").forEach(e => {
     const s = f.es[e.dataset.edge] || "idle";
     e.classList.remove("idle", "active", "done", "error");
     e.classList.add(s);
@@ -1109,7 +1157,7 @@ function finalizeThinking(msgNode, payload) {
   const elapsed = ((Date.now() - (msgNode.__thinkStart || Date.now())) / 1000).toFixed(1);
   const steps = msgNode.__stepCount || 0;
   const meta = msgNode.querySelector(".thinking-meta");
-  if (meta) meta.textContent = `${steps} steps · ${elapsed}s`;
+  if (meta) meta.textContent = `${steps} steps \u00B7 ${elapsed}s`;
   updateThinkingLabel(msgNode, "Reasoning complete. Expand to review steps.");
 }
 
@@ -1156,12 +1204,22 @@ function _makeCard(type, label, body) {
   return card;
 }
 
+function _autoScrollThinkingPanel(msgNode) {
+  const panel = msgNode.querySelector(".thinking-panel");
+  if (panel && !panel.classList.contains("collapsed")) {
+    requestAnimationFrame(() => {
+      panel.scrollTop = panel.scrollHeight;
+    });
+  }
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
 function appendThinkingCard(msgNode, content) {
   const feed = _getActivityFeed(msgNode);
   if (!feed) return;
   const card = _makeCard("thinking", "Thinking", escHtml(content));
   feed.appendChild(card);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  _autoScrollThinkingPanel(msgNode);
 }
 
 function renderPlanCard(msgNode, steps) {
@@ -1172,7 +1230,7 @@ function renderPlanCard(msgNode, steps) {
   ).join("");
   const card = _makeCard("plan", "Plan", `<div class="plan-checklist">${items}</div>`);
   feed.appendChild(card);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  _autoScrollThinkingPanel(msgNode);
 }
 
 function updatePlanStep(msgNode, stepId, status) {
@@ -1203,7 +1261,7 @@ function appendToolCard(msgNode, toolName, args, status) {
   card.dataset.toolName = toolName;
   card.innerHTML += `<div class="card-status ${statusClass}">${statusIcon}</div>`;
   feed.appendChild(card);
-  messagesEl.scrollTop = messagesEl.scrollHeight;
+  _autoScrollThinkingPanel(msgNode);
 }
 
 function updateToolCard(msgNode, toolName, result, status, summary) {
@@ -1424,6 +1482,7 @@ function editAndResubmit(userMsgNode) {
     }
 
     // Create assistant node and stream response
+    _cleanupFloatingDiagrams();
     const assistantNode = createMsg("assistant", "", { showThinking: true, prompt: fullPrompt });
 
     try {
@@ -1432,7 +1491,9 @@ function editAndResubmit(userMsgNode) {
       const errMsg = `Error: ${err.message}`;
       setThinkingState(assistantNode, false);
       updateThinkingLabel(assistantNode, "Reasoning failed.");
-      assistantNode.querySelector(".content").innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
+      const editErrEl = assistantNode.querySelector(".content");
+      editErrEl.classList.remove("streaming");
+      editErrEl.innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
       appendLog(assistantNode, `Transport error: ${err.message}`);
       thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
       thread.updatedAt = now();
@@ -1462,7 +1523,13 @@ function editAndResubmit(userMsgNode) {
   });
 }
 
+function _cleanupFloatingDiagrams() {
+  // Remove any diagram panels that were moved to body level
+  document.querySelectorAll("body > .diagram-panel").forEach(el => el.remove());
+}
+
 function renderMessages() {
+  _cleanupFloatingDiagrams();
   messagesEl.innerHTML = "";
   const t = currentThread();
   if (!t) { updateWelcome(); return; }
@@ -1480,16 +1547,22 @@ function renderMessages() {
 async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinking", attachments = [], { isEdit = false } = {}) {
   const contentEl = assistantNode.querySelector(".content");
   contentEl.innerHTML = "";
+  contentEl.classList.add("streaming");
   let accumulated = "";
   let renderTimer = null;
+  let lastRenderLen = 0;
 
   function scheduleRender() {
     if (renderTimer) return;
+    // Shorter debounce for snappier token feel
     renderTimer = setTimeout(() => {
-      contentEl.innerHTML = renderMd(accumulated);
+      if (accumulated.length !== lastRenderLen) {
+        contentEl.innerHTML = renderMd(accumulated);
+        lastRenderLen = accumulated.length;
+      }
       messagesEl.scrollTop = messagesEl.scrollHeight;
       renderTimer = null;
-    }, 60);
+    }, 30);
   }
 
   const threadMsgs = thread.messages || [];
@@ -1578,6 +1651,7 @@ async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinkin
 
       if (event.type === "final") {
         if (renderTimer) { clearTimeout(renderTimer); renderTimer = null; }
+        contentEl.classList.remove("streaming");
         const payload = event.response;
         lastPayload = payload;
         contentEl.innerHTML = renderMd(payload.answer);
@@ -1610,6 +1684,7 @@ async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinkin
 
       if (event.type === "error") {
         if (renderTimer) { clearTimeout(renderTimer); renderTimer = null; }
+        contentEl.classList.remove("streaming");
         const errMsg = `Error: ${event.detail || "Unknown error"}`;
         setThinkingState(assistantNode, false);
         updateThinkingLabel(assistantNode, "Reasoning failed.");
@@ -2306,6 +2381,7 @@ async function initialize() {
     sendBtn.classList.add("stop-mode");
     setThinkingModeDisabled(true);
     createMsg("user", prompt, { attachments: currentAttachments });
+    _cleanupFloatingDiagrams();
     const assistantNode = createMsg("assistant", "", { showThinking: true, prompt: fullPrompt });
     updateWelcome();
 
@@ -2321,7 +2397,11 @@ async function initialize() {
         setThinkingState(assistantNode, false);
         updateThinkingLabel(assistantNode, "Stopped by user.");
         appendLog(assistantNode, "Stopped by user.");
+        // Clean up diagram popup
+        const abortFlow = assistantNode.__flow;
+        if (abortFlow?.diagramPanel) abortFlow.diagramPanel.classList.add("hidden");
         const contentEl = assistantNode.querySelector(".content");
+        contentEl.classList.remove("streaming");
         const partial = contentEl.innerHTML;
         if (!partial || partial === "<p></p>") {
           contentEl.innerHTML = '<div class="error-msg">Stopped.</div>';
@@ -2332,7 +2412,9 @@ async function initialize() {
         const errMsg = `Error: ${err.message}`;
         setThinkingState(assistantNode, false);
         updateThinkingLabel(assistantNode, "Reasoning failed.");
-        assistantNode.querySelector(".content").innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
+        const errContentEl = assistantNode.querySelector(".content");
+        errContentEl.classList.remove("streaming");
+        errContentEl.innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
         appendLog(assistantNode, `Transport error: ${err.message}`);
         thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
         thread.updatedAt = now();

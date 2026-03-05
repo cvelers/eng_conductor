@@ -915,12 +915,13 @@ class CentralIntelligenceOrchestrator:
         params_to_resolve: list[str],
         current_inputs: dict[str, Any],
         all_tool_outputs: dict[str, dict[str, Any]],
+        plan_context: list[dict] | None = None,
     ) -> dict[str, Any]:
-        """Use the LLM to resolve or verify tool inputs from session context.
+        """Use the LLM to resolve ALL tool inputs from session context.
 
-        Called for parameters that are either truly unresolved (None) or
-        that have decomposition-guessed values which may need overriding
-        by actual computed results from prior tools.
+        The LLM is the primary resolver — it sees the full execution plan,
+        all prior tool outputs, and the target tool's schema to semantically
+        map outputs to inputs (e.g. governing_class → section_class).
         """
         context_lines: list[str] = []
         for src_tool, result in all_tool_outputs.items():
@@ -930,37 +931,52 @@ class CentralIntelligenceOrchestrator:
         if not context_lines:
             return {}
 
-        # Include current value (if any) so the LLM can decide to keep or override
+        # Build param info with schema details + current values
         params_info: dict[str, Any] = {}
         for p in params_to_resolve:
             info: dict[str, Any] = {
                 k: v
                 for k, v in schema_props.get(p, {}).items()
-                if k in ("type", "description", "minimum", "maximum")
+                if k in ("type", "description", "minimum", "maximum", "default")
             }
             cur = current_inputs.get(p)
             if cur is not None:
                 info["current_value"] = cur
             params_info[p] = info
 
+        # Get tool description from registry
+        tool_desc = ""
+        entry = self.tool_registry.get(tool_name)
+        if entry:
+            tool_desc = entry.description
+
         prompt = (
             "###TASK:RESOLVE_INPUTS###\n"
             f"Tool: {tool_name}\n"
-            f"Parameters to resolve: {json.dumps(params_info)}\n"
+            f"Description: {tool_desc}\n\n"
+            f"Parameters to resolve:\n{json.dumps(params_info, indent=2)}\n\n"
             f"Known inputs: {json.dumps({k: v for k, v in current_inputs.items() if v is not None})}\n\n"
-            "Previous tool outputs:\n" + "\n".join(context_lines) + "\n\n"
+            "Previous tool executions and their outputs:\n"
+            + "\n".join(context_lines) + "\n\n"
+        )
+        if plan_context:
+            prompt += f"Execution plan:\n{json.dumps(plan_context, indent=2)}\n\n"
+        prompt += (
             "For each parameter, determine the correct value from the prior "
-            "tool outputs.  If a parameter has a current_value, override it "
-            "if a prior tool computed a more accurate value (e.g. "
-            "'governing_class' from section_classification maps to "
-            "'section_class').  Return ONLY a JSON object of "
-            "{param_name: value}.  Omit any that cannot be determined."
+            "tool outputs. Use SEMANTIC understanding — output names from prior "
+            "tools may differ from input parameter names (e.g., a classification "
+            "tool's output class should map to a resistance tool's class input). "
+            "Override current_value or schema defaults when a prior tool computed "
+            "a relevant result. Return ONLY a JSON object of "
+            "{param_name: value}. Omit any that cannot be determined."
         )
         try:
             raw = self.orchestrator_llm.generate(
                 system_prompt=(
                     "You resolve tool input parameters from available "
-                    "session data. Return only valid JSON."
+                    "session data. Use semantic understanding to map outputs "
+                    "from prior tools to input parameters, even when names "
+                    "differ. Return only valid JSON."
                 ),
                 user_prompt=prompt,
                 temperature=0.0,
@@ -1265,23 +1281,23 @@ class CentralIntelligenceOrchestrator:
         })
 
         if intent == "decline":
+            yield ("thinking", {"content": "Off-topic query — responding directly."})
             yield ("machine", {
                 "node": "intake", "status": "done",
                 "title": "Query Intake", "detail": "Off-topic query — quick response.",
             })
         elif intent == "greeting":
+            yield ("thinking", {"content": "Greeting received."})
             yield ("machine", {
                 "node": "intake", "status": "done",
                 "title": "Query Intake", "detail": "Greeting received.",
             })
         else:
+            yield ("thinking", {"content": "Answering directly — no database or tools needed."})
             yield ("machine", {
                 "node": "intake", "status": "done",
                 "title": "Query Intake", "detail": "Answering directly — no database or tools needed.",
             })
-
-        # We intentionally emit NO events for plan / retrieval / inputs / tools
-        # so those boxes stay idle in the UI.
 
         yield ("machine", {
             "node": "compose", "status": "active",
@@ -1499,34 +1515,16 @@ class CentralIntelligenceOrchestrator:
         if not base:
             base = {**extraction.assumed_inputs, **extraction.user_inputs}
 
-        # Auto-resolve from accumulated session outputs.
-        # Computed values OVERRIDE extraction guesses.
-        flat = _flatten_tool_outputs(tool_outputs)
-        extraction_guesses = set(
-            extraction.tool_inputs.get(tool_name, {}).keys()
-        ) | set(extraction.assumed_inputs.keys())
         entry = self.tool_registry.get(tool_name)
         if entry:
             props = entry.input_schema.get("properties", {})
+            expected = set(props.keys())
 
-            # Phase 1: exact-name match — override with computed values
-            phase1_resolved: set[str] = set()
-            for param in props:
-                if param in flat:
-                    base[param] = flat[param]
-                    phase1_resolved.add(param)
-
-            # Phase 2: LLM resolution for unresolved + unverified guesses
-            needs_llm: list[str] = []
-            for p in props:
-                if base.get(p) is None:
-                    needs_llm.append(p)
-                elif p in extraction_guesses and p not in phase1_resolved:
-                    needs_llm.append(p)
-
-            if needs_llm and flat and self.orchestrator_llm.available:
+            # LLM resolves ALL expected params when prior outputs exist
+            flat = _flatten_tool_outputs(tool_outputs)
+            if flat and self.orchestrator_llm.available:
                 resolved = self._llm_resolve_inputs(
-                    tool_name, props, needs_llm, base, tool_outputs,
+                    tool_name, props, list(expected), base, tool_outputs,
                 )
                 base.update(resolved)
 

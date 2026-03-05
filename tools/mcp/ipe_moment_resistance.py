@@ -50,7 +50,28 @@ def compute_ipe_moment_resistance(input_data: IPEMomentResistanceInput) -> dict:
 
     w_pl = float(row["wpl_y_cm3"])
     w_el = float(row["wel_y_cm3"])
-    w_used_cm3 = w_pl if section_class <= 2 else w_el
+
+    # EC3 EN 1993-1-1, Clause 6.2.5:
+    #   Class 1-2: plastic modulus Wpl
+    #   Class 3:   elastic modulus Wel
+    #   Class 4:   effective section modulus Weff (requires EN 1993-1-5)
+    #              — use Wel as conservative approximation with warning
+    if section_class <= 2:
+        w_used_cm3 = w_pl
+        resistance_basis = "Plastic modulus (Wpl) for Class 1-2."
+        class_note = "Plastic resistance basis"
+    elif section_class == 3:
+        w_used_cm3 = w_el
+        resistance_basis = "Elastic modulus (Wel) for Class 3."
+        class_note = "Elastic resistance basis"
+    else:  # Class 4
+        w_used_cm3 = w_el
+        resistance_basis = (
+            "Class 4: effective section modulus (Weff) required per EN 1993-1-5. "
+            "Using elastic modulus (Wel) as conservative approximation. "
+            "Actual Weff may be lower due to local buckling of the web."
+        )
+        class_note = "Elastic modulus approximation (Class 4 — Weff not computed)"
 
     w_used_mm3 = w_used_cm3 * 1000.0
     m_rd_knm = (w_used_mm3 * fy / gamma) / 1_000_000.0
@@ -76,14 +97,12 @@ def compute_ipe_moment_resistance(input_data: IPEMomentResistanceInput) -> dict:
         "intermediate": {
             "w_used_cm3": round(w_used_cm3, 3),
             "w_used_mm3": round(w_used_mm3, 3),
-            "resistance_basis": "Plastic modulus for Class 1-2, elastic modulus for Class 3-4.",
+            "resistance_basis": resistance_basis,
         },
         "outputs": {
             "M_Rd_kNm": round(m_rd_knm, 3),
             "formula": "M_Rd = W * f_y / gamma_M0",
-            "section_class_interpretation": (
-                "Plastic resistance basis" if section_class <= 2 else "Elastic resistance basis"
-            ),
+            "section_class_interpretation": class_note,
         },
         "clause_references": [
             {

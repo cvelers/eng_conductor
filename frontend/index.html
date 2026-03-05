@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Eurocodes Chatbot (EC3)</title>
-    <link rel="stylesheet" href="/static/styles.css?v=7" />
+    <link rel="stylesheet" href="/static/styles.css?v=16" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
@@ -279,7 +279,10 @@
           </div>
         </div>
         <section class="msg-panel diagram-panel hidden">
-          <div class="panel-header">Diagram</div>
+          <div class="panel-header">
+            <span>Diagram</span>
+            <button class="diagram-close-btn" type="button" aria-label="Close diagram">&times;</button>
+          </div>
           <div class="flow-graph" aria-hidden="true"></div>
         </section>
         <section class="msg-panel thinking-panel hidden">
@@ -289,6 +292,9 @@
               <span></span><span></span><span></span>
             </span>
             <span class="thinking-meta"></span>
+            <button class="panel-collapse-btn" type="button" aria-label="Collapse panel">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 15 12 9 18 15"/></svg>
+            </button>
           </div>
           <div class="activity-feed"></div>
           <div class="machine-log-wrap hidden">
@@ -307,6 +313,6 @@
       </article>
     </template>
 
-    <script src="/static/app.js?v=7" defer></script>
+    <script src="/static/app.js?v=16" defer></script>
   </body>
 </html>

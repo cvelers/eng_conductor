@@ -69,7 +69,20 @@ def compute_resistance(input_data: MemberResistanceInput) -> dict:
     gamma = float(input_data.gamma_M0)
     section_class = int(input_data.section_class)
 
-    w_used_cm3 = float(input_data.wpl_y_cm3) if section_class <= 2 else float(input_data.wel_y_cm3)
+    # EC3 EN 1993-1-1, Clause 6.2.5:
+    #   Class 1-2: plastic modulus Wpl
+    #   Class 3:   elastic modulus Wel
+    #   Class 4:   effective section modulus Weff (use Wel as approximation)
+    if section_class <= 2:
+        w_used_cm3 = float(input_data.wpl_y_cm3)
+        bending_basis = "M_Rd = Wpl * f_y / gamma_M0"
+    else:
+        w_used_cm3 = float(input_data.wel_y_cm3)
+        bending_basis = (
+            "M_Rd = Wel * f_y / gamma_M0"
+            if section_class == 3
+            else "M_Rd = Wel * f_y / gamma_M0 (Class 4 approx — Weff required per EN 1993-1-5)"
+        )
 
     w_used_mm3 = w_used_cm3 * 1000.0
     area_mm2 = float(input_data.area_cm2) * 100.0
@@ -99,7 +112,7 @@ def compute_resistance(input_data: MemberResistanceInput) -> dict:
             "M_Rd_kNm": round(mrd_knm, 3),
             "N_Rd_kN": round(nrd_kn, 3),
             "V_Rd_kN": round(vrd_kn, 3),
-            "bending_formula_basis": "M_Rd = W * f_y / gamma_M0",
+            "bending_formula_basis": bending_basis,
             "axial_formula_basis": "N_Rd = A * f_y / gamma_M0",
             "shear_formula_basis": "V_Rd = A_v * f_y / (sqrt(3) * gamma_M0)",
         },
