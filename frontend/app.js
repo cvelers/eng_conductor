@@ -56,6 +56,9 @@ const fileInput = $("#file-input");
 const attachmentsPreview = $("#attachments-preview");
 
 
+const SEND_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="6 11 12 5 18 11"></polyline></svg>';
+const STOP_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="none"><rect x="6" y="6" width="12" height="12" rx="2"></rect></svg>';
+
 const state = {
   threads: [],
   activeThreadId: null,
@@ -64,6 +67,7 @@ const state = {
   devMode: false,
   thinkingMode: "thinking",
   attachments: [],
+  abortController: null,
 };
 
 function uid() {
@@ -87,10 +91,42 @@ function clamp(v, max = 42) {
 }
 
 function renderMd(text) {
-  if (typeof marked !== "undefined") {
-    try { return marked.parse(text || ""); } catch { /* fall through */ }
+  if (typeof marked === "undefined") return `<pre>${escHtml(text || "")}</pre>`;
+  let input = text || "";
+  const mathBlocks = [];
+
+  // Extract display math $$...$$ before Marked can mangle underscores/braces
+  input = input.replace(/\$\$([\s\S]*?)\$\$/g, (_m, tex) => {
+    const id = `\x00MATH${mathBlocks.length}\x00`;
+    mathBlocks.push({ id, tex, display: true });
+    return id;
+  });
+  // Extract inline math $...$
+  input = input.replace(/\$([^\$\n]+?)\$/g, (_m, tex) => {
+    const id = `\x00MATH${mathBlocks.length}\x00`;
+    mathBlocks.push({ id, tex, display: false });
+    return id;
+  });
+
+  let html;
+  try { html = marked.parse(input); } catch { return `<pre>${escHtml(text || "")}</pre>`; }
+
+  // Replace placeholders with KaTeX-rendered HTML
+  for (const b of mathBlocks) {
+    let rendered;
+    if (typeof katex !== "undefined") {
+      try {
+        rendered = katex.renderToString(b.tex.trim(), {
+          displayMode: b.display,
+          throwOnError: false,
+        });
+      } catch { rendered = `<code>${escHtml(b.tex)}</code>`; }
+    } else {
+      rendered = `<code>${escHtml(b.tex)}</code>`;
+    }
+    html = html.split(b.id).join(rendered);
   }
-  return `<pre>${escHtml(text || "")}</pre>`;
+  return html;
 }
 
 function escHtml(s) {
@@ -535,7 +571,7 @@ const GRID = {
   nodeH: 62,
   popupGap: 10,
   popupMaxRows: 2,
-  popupMaxItems: 4,
+  popupMaxItems: 20,
   popupRowH: 22,
   popupRowGap: 6,
   edgePadY: 12,
@@ -1371,6 +1407,9 @@ async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinkin
     data_url: a.isImage ? (a.dataUrl || null) : null,
   }));
 
+  const abortController = new AbortController();
+  state.abortController = abortController;
+
   const res = await fetchWithAuth("/api/chat/stream", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -1381,6 +1420,7 @@ async function streamChat(prompt, assistantNode, thread, thinkingMode = "thinkin
       attachments: apiAttachments,
       is_edit: isEdit,
     }),
+    signal: abortController.signal,
   });
   if (!res.ok || !res.body) throw new Error(`Request failed: ${res.status}`);
 
@@ -2078,6 +2118,11 @@ async function initialize() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
+    // If streaming, treat submit as stop
+    if (state.abortController) {
+      state.abortController.abort();
+      return;
+    }
     const prompt = input.value.trim();
     const hasAttachments = state.attachments.length > 0;
     if (!prompt && !hasAttachments) return;
@@ -2124,7 +2169,10 @@ async function initialize() {
     input.value = "";
     clearAttachments();
     closeAttachMenu();
-    sendBtn.disabled = true;
+    sendBtn.disabled = false;
+    sendBtn.innerHTML = STOP_ICON;
+    sendBtn.setAttribute("aria-label", "Stop");
+    sendBtn.classList.add("stop-mode");
     setThinkingModeDisabled(true);
     createMsg("user", prompt, { attachments: currentAttachments });
     const assistantNode = createMsg("assistant", "", { showThinking: true, prompt: fullPrompt });
@@ -2138,22 +2186,40 @@ async function initialize() {
     try {
       await streamChat(fullPrompt, assistantNode, thread, state.thinkingMode, currentAttachments);
     } catch (err) {
-      const errMsg = `Error: ${err.message}`;
-      setThinkingState(assistantNode, false);
-      updateThinkingLabel(assistantNode, "Reasoning failed.");
-      assistantNode.querySelector(".content").innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
-      appendLog(assistantNode, `Transport error: ${err.message}`);
-      thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
-      thread.updatedAt = now();
+      if (err.name === "AbortError") {
+        setThinkingState(assistantNode, false);
+        updateThinkingLabel(assistantNode, "Stopped by user.");
+        appendLog(assistantNode, "Stopped by user.");
+        const contentEl = assistantNode.querySelector(".content");
+        const partial = contentEl.innerHTML;
+        if (!partial || partial === "<p></p>") {
+          contentEl.innerHTML = '<div class="error-msg">Stopped.</div>';
+        }
+        thread.messages.push({ id: uid(), role: "assistant", content: contentEl.textContent || "Stopped.", responsePayload: null, createdAt: now() });
+        thread.updatedAt = now();
+      } else {
+        const errMsg = `Error: ${err.message}`;
+        setThinkingState(assistantNode, false);
+        updateThinkingLabel(assistantNode, "Reasoning failed.");
+        assistantNode.querySelector(".content").innerHTML = `<div class="error-msg">${escHtml(errMsg)}</div>`;
+        appendLog(assistantNode, `Transport error: ${err.message}`);
+        thread.messages.push({ id: uid(), role: "assistant", content: errMsg, responsePayload: null, createdAt: now() });
+        thread.updatedAt = now();
+      }
       if (canUseStoredThreads()) {
         if (auth.threadsSync) {
-          await addMessageToApi(thread.id, "assistant", errMsg, null);
+          const lastMsg = thread.messages[thread.messages.length - 1];
+          await addMessageToApi(thread.id, "assistant", lastMsg.content, null);
         } else {
           save();
         }
       }
       renderThreadList();
     } finally {
+      state.abortController = null;
+      sendBtn.innerHTML = SEND_ICON;
+      sendBtn.setAttribute("aria-label", "Send");
+      sendBtn.classList.remove("stop-mode");
       sendBtn.disabled = false;
       setThinkingModeDisabled(false);
       input.focus();

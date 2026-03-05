@@ -29,23 +29,26 @@ class Settings:
     orchestrator_model: str = "gemini-3.1-pro"
     orchestrator_api_key: str = ""
     orchestrator_base_url: str = "https://generativelanguage.googleapis.com/v1beta/openai"
+    orchestrator_reasoning_effort: str = ""  # Gemini only: low, medium, high
 
     search_provider: str = "openrouter"
     search_model: str = "moonshotai/kimi-k2.5"
     search_api_key: str = ""
     search_base_url: str = "https://openrouter.ai/api/v1"
     search_decompose_max_tokens: int = 1200
+    search_reasoning_effort: str = ""  # Gemini only: low, medium, high
 
     tool_writer_provider: str = ""
     tool_writer_model: str = ""
     tool_writer_api_key: str = ""
     tool_writer_base_url: str = ""
+    tool_writer_reasoning_effort: str = ""  # Gemini only: low, medium, high
 
     agentic_search_enabled: bool = True
     recursive_retrieval_enabled: bool = False
     embeddings_enabled: bool = False
     max_retrieval_iters: int = 3
-    top_k_clauses: int = 6
+    top_k_clauses: int = 20
 
     default_steel_grade: str = "S355"
     default_section_name: str = "IPE300"
@@ -97,6 +100,9 @@ class Settings:
                 "ORCHESTRATOR_BASE_URL",
                 "https://generativelanguage.googleapis.com/v1beta/openai",
             ),
+            orchestrator_reasoning_effort=(
+                os.getenv("ORCHESTRATOR_REASONING_EFFORT", "").strip() or ""
+            ),
             search_provider=os.getenv("SEARCH_PROVIDER", "openrouter"),
             search_model=os.getenv("SEARCH_MODEL", "moonshotai/kimi-k2.5"),
             search_api_key=os.getenv("SEARCH_API_KEY", ""),
@@ -104,10 +110,16 @@ class Settings:
             search_decompose_max_tokens=_to_int(
                 os.getenv("SEARCH_DECOMPOSE_MAX_TOKENS"), 1200
             ),
+            search_reasoning_effort=(
+                os.getenv("SEARCH_REASONING_EFFORT", "").strip() or ""
+            ),
             tool_writer_provider=os.getenv("TOOL_WRITER_PROVIDER", ""),
             tool_writer_model=os.getenv("TOOL_WRITER_MODEL", ""),
             tool_writer_api_key=os.getenv("TOOL_WRITER_API_KEY", ""),
             tool_writer_base_url=os.getenv("TOOL_WRITER_BASE_URL", ""),
+            tool_writer_reasoning_effort=(
+                os.getenv("TOOL_WRITER_REASONING_EFFORT", "").strip() or ""
+            ),
             agentic_search_enabled=_to_bool(os.getenv("AGENTIC_SEARCH_ENABLED"), True),
             recursive_retrieval_enabled=_to_bool(
                 os.getenv("RECURSIVE_RETRIEVAL_ENABLED"), False

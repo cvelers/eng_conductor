@@ -197,7 +197,7 @@ class CentralIntelligenceOrchestrator:
                     "retrieved_count": len(retrieved),
                     "top_clauses": [
                         {"doc_id": i.clause.doc_id, "clause_id": i.clause.clause_id, "title": i.clause.clause_title, "pointer": i.clause.pointer}
-                        for i in retrieved[:5]
+                        for i in retrieved
                     ],
                 },
             })
@@ -385,7 +385,7 @@ class CentralIntelligenceOrchestrator:
             "meta": {
                 "supported": supported,
                 "used_tools": [s.tool_name for s in tool_trace if s.status == "ok"],
-                "used_sources": [{"doc_id": s.doc_id, "clause_id": s.clause_id, "pointer": s.pointer} for s in sources[:8]],
+                "used_sources": [{"doc_id": s.doc_id, "clause_id": s.clause_id, "pointer": s.pointer} for s in sources],
             },
         })
 
@@ -1363,9 +1363,9 @@ class CentralIntelligenceOrchestrator:
             return self._build_fallback_narrative(query, plan, retrieved, tool_outputs)
 
         clause_evidence = []
-        for c in retrieved[:5]:
-            snippet = c.clause.text.strip()[:300]
-            clause_evidence.append(f"[{c.clause.clause_id} — {c.clause.clause_title}]: {snippet}")
+        for c in retrieved:
+            clause_text = c.clause.text.strip()
+            clause_evidence.append(f"[{c.clause.clause_id} — {c.clause.clause_title}]: {clause_text}")
 
         tool_evidence: dict[str, Any] = {}
         for tname, tout in tool_outputs.items():
@@ -1378,25 +1378,38 @@ class CentralIntelligenceOrchestrator:
         try:
             raw = self.orchestrator_llm.generate(
                 system_prompt=(
-                    "You are a senior structural engineer giving a concise answer to a colleague. "
-                    "Rules:\n"
-                    "1. First sentence: state the key result with its value and units. Example: 'The design bending resistance is **M_Rd = 223.08 kNm**'.\n"
-                    "2. Then 1-2 sentences on the method/formula used. Mention a governing clause ONLY when explicit EC clause evidence is provided.\n"
-                    "3. Bold **key numerical results** with their engineering symbols.\n"
+                    "You are a senior structural engineer answering a colleague's question at a desk review.\n\n"
+                    "FORMATTING — CRITICAL:\n"
+                    "- All formulas and math expressions MUST be wrapped in dollar signs: $F_{v,Rd}$, $\\frac{a}{b}$, $\\gamma_{M2}$.\n"
+                    "- Inline math uses single dollars: $F_{v,Rd} = 94.08$ kN.\n"
+                    "- Never write bare LaTeX commands without dollar-sign delimiters.\n"
+                    "- Bold **key numerical results**: e.g. **$F_{v,Rd}$ = 94.08 kN**.\n"
+                    "- Ensure markdown emphasis is balanced (never leave dangling '**').\n\n"
+                    "CONTENT:\n"
+                    "1. First sentence MUST directly answer the colleague's question. Start with a capital letter.\n"
+                    "   - If they asked for a calculation: state what you calculated, for what parameters, and the result.\n"
+                    "     Example: 'For an M20 Grade 8.8 bolt in single shear through the threaded portion, the design shear resistance is **$F_{v,Rd}$ = 94.08 kN** per bolt.'\n"
+                    "   - If they asked a conceptual question: lead with a direct answer.\n"
+                    "   - If default values were assumed, name them in the first sentence.\n"
+                    "2. Explain the method, formula, and key parameters in detail. Show the formula with values substituted in where available.\n"
+                    "3. Mention governing EC clauses ONLY when explicit clause evidence is provided below.\n"
                     "4. Use ONLY the provided evidence. Never invent values.\n"
-                    "5. Keep it to 2-4 sentences total. No sections, no bullet lists, no 'Sources' or 'Assumptions'.\n"
-                    "6. Write naturally, as if explaining at a desk review. Always finish your sentences.\n"
-                    "7. Ensure markdown emphasis is balanced (never leave dangling '**').\n"
-                    "8. If there is no EC clause evidence, do not reference EN 1993 or clause numbers."
+                    "5. If there is no EC clause evidence, do not reference EN 1993 or clause numbers.\n"
+                    "6. Write as much detail as the evidence supports. Cover the full engineering context — what the check is, why it matters, what parameters govern the result, and any important caveats or follow-up checks.\n\n"
+                    "STRUCTURE:\n"
+                    "- Use markdown structure: paragraphs, bullet points, and line breaks to organise the response.\n"
+                    "- Break different aspects into separate paragraphs (result, method, parameters, caveats).\n"
+                    "- Use bullet points for lists of parameters, checks, or conditions.\n"
+                    "- Display key formulas on their own line using $$...$$ display math."
                 ),
                 user_prompt=(
-                    f"Question: {query}\n\n"
+                    f"Colleague's question: {query}\n\n"
                     f"Retrieved EC3 clauses:\n" + "\n".join(clause_evidence) + "\n\n"
                     f"Tool results:\n{json.dumps(tool_evidence, default=str)}\n\n"
-                    "Write a concise answer starting with the result."
+                    "Give a detailed engineering answer. Wrap ALL math in $...$ delimiters."
                 ),
                 temperature=0.15,
-                max_tokens=4000,
+                max_tokens=16384,
             )
             return self._polish_narrative(
                 raw.strip(),
@@ -1516,7 +1529,9 @@ class CentralIntelligenceOrchestrator:
         else:
             context = ""
 
-        return f"{context}the {quantity} is **{symbol} = {value_text}**."
+        sentence = f"{context}the {quantity} is **{symbol} = {value_text}**."
+        # Ensure headline starts with a capital letter
+        return sentence[0].upper() + sentence[1:] if sentence else ""
 
     def _compose_clause_basis_sentence(
         self,
@@ -1752,7 +1767,7 @@ class CentralIntelligenceOrchestrator:
                 lines.append("")
                 seen_refs: set[str] = set()
                 ref_idx = 0
-                for s in relevant[:8]:
+                for s in relevant:
                     ref_key = self._normalize_clause_id(s.clause_id)
                     if ref_key in seen_refs:
                         continue
@@ -1820,13 +1835,11 @@ class CentralIntelligenceOrchestrator:
             return f"Cl. {cid}"
         return cid
 
-    def _format_clause_text_for_display(self, text: str, max_length: int = 1400) -> str:
-        """Format clause text for clean display: trim, escape HTML, preserve paragraphs."""
+    def _format_clause_text_for_display(self, text: str) -> str:
+        """Format clause text for clean display: escape HTML, preserve paragraphs."""
         t = (text or "").strip()
         if not t:
             return ""
-        if len(t) > max_length:
-            t = t[:max_length].rstrip() + " …"
         t = t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         paragraphs = re.split(r"\n\s*\n", t)
         blocks = [f"<p class=\"clause-p\">{p.strip().replace(chr(10), '<br>')}</p>" for p in paragraphs if p.strip()]

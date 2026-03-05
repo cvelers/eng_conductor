@@ -1043,6 +1043,8 @@ body.chat-started .attach-menu {
 }
 .composer button[type="submit"]:hover { background: var(--accent-2); transform: scale(1.04); }
 .composer button[type="submit"]:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.composer button[type="submit"].stop-mode { background: #e53e3e; opacity: 1; cursor: pointer; }
+.composer button[type="submit"].stop-mode:hover { background: #c53030; }
 
 /* Dev panel */
 .dev-panel {

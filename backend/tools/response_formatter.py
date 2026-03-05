@@ -59,6 +59,8 @@ _NARRATIVE_SUB_RE: list[tuple[re.Pattern[str], str]] = [
     (re.compile(r"α_?v\b"), "α<sub>v</sub>"),
 ]
 
+_LATEX_BLOCK_RE = re.compile(r"(\$\$[\s\S]*?\$\$|\$[^\$\n]+?\$)")
+
 _DANGLING_TAIL_RE = re.compile(
     r"(?:\b(?:and|or|with|because|for|to|of|in|on|at|from|that|which|where|when|if|while|as)\b[\s,;:]*)+$",
     re.IGNORECASE,
@@ -79,16 +81,17 @@ class ResponseFormatterTool:
         headline: str = "",
         basis: str = "",
     ) -> str:
-        text = re.sub(r"\s+", " ", (narrative or "")).strip()
+        # Normalize horizontal whitespace within lines but preserve line breaks
+        text = re.sub(r"[^\S\n]+", " ", (narrative or "")).strip()
         if not text:
-            text = "Results computed from the available tools and EC3 database."
-
-        text = self._ensure_sentence_complete(text)
-        text = self._sanitize_bold_markers(text)
-
-        if headline and not self._has_unitized_headline(text):
-            replaced = self._replace_leading_result_sentence(text, headline)
-            text = replaced if replaced else f"{headline} {text}".strip()
+            text = headline if headline else "Results computed from the available tools and EC3 database."
+            text = self._ensure_sentence_complete(text)
+            text = self._sanitize_bold_markers(text)
+        else:
+            text = self._ensure_sentence_complete(text)
+            text = self._sanitize_bold_markers(text)
+            # Do NOT override the LLM's first sentence with a generated headline.
+            # The LLM prompt already produces a well-structured opening sentence.
 
         if basis and "Cl." not in text:
             text = f"{text} {basis}".strip()
@@ -97,9 +100,17 @@ class ResponseFormatterTool:
 
     def format_markdown(self, text: str) -> str:
         formatted = text or ""
-        for pattern, replacement in _NARRATIVE_SUB_RE:
-            formatted = pattern.sub(replacement, formatted)
-        return formatted
+        # Split on LaTeX blocks so regex substitutions don't corrupt formulas
+        parts = _LATEX_BLOCK_RE.split(formatted)
+        result = []
+        for part in parts:
+            if _LATEX_BLOCK_RE.fullmatch(part):
+                result.append(part)  # LaTeX — preserve as-is
+            else:
+                for pattern, replacement in _NARRATIVE_SUB_RE:
+                    part = pattern.sub(replacement, part)
+                result.append(part)
+        return "".join(result)
 
     def strip_unit_suffix(self, key: str) -> str:
         for suffix, _ in _UNIT_SUFFIXES:
