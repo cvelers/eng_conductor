@@ -44,8 +44,6 @@ class Settings:
     tool_writer_base_url: str = ""
     tool_writer_reasoning_effort: str = ""  # Gemini only: low, medium, high
 
-    agent_mode_enabled: bool = True
-
     agentic_search_enabled: bool = True
     recursive_retrieval_enabled: bool = False
     embeddings_enabled: bool = False
@@ -122,7 +120,6 @@ class Settings:
             tool_writer_reasoning_effort=(
                 os.getenv("TOOL_WRITER_REASONING_EFFORT", "").strip() or ""
             ),
-            agent_mode_enabled=_to_bool(os.getenv("AGENT_MODE_ENABLED"), True),
             agentic_search_enabled=_to_bool(os.getenv("AGENTIC_SEARCH_ENABLED"), True),
             recursive_retrieval_enabled=_to_bool(
                 os.getenv("RECURSIVE_RETRIEVAL_ENABLED"), False

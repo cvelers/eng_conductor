@@ -18,7 +18,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterator
 
 from backend.config import Settings
-from backend.orchestrator.engine import (
+from backend.orchestrator.core import (
     CentralIntelligenceOrchestrator,
     PlanResult,
     _flatten_tool_outputs,

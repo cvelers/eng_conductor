@@ -19,7 +19,7 @@ from backend.threads import create_threads_router
 from backend.llm.factory import get_orchestrator_provider, get_search_provider, get_tool_writer_provider
 from backend.logging_config import configure_logging
 from backend.orchestrator.agent_loop import AgentLoop
-from backend.orchestrator.engine import CentralIntelligenceOrchestrator
+from backend.orchestrator.core import CentralIntelligenceOrchestrator
 from backend.registries.document_registry import load_all_clauses, load_document_registry
 from backend.registries.tool_registry import load_tool_registry
 from backend.retrieval.agentic_search import AgenticRetriever
@@ -28,12 +28,6 @@ from backend.tools.runner import MCPToolRunner
 from backend.tools.writer import ToolWriter
 
 logger = logging.getLogger(__name__)
-
-
-def _chunk_text(value: str, size: int = 36) -> list[str]:
-    if not value:
-        return []
-    return [value[idx : idx + size] for idx in range(0, len(value), size)]
 
 
 def _append_thread_log(settings: Settings, payload: dict) -> None:
@@ -153,21 +147,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.post("/api/chat", response_model=ChatResponse)
     async def chat(request: ChatRequest) -> ChatResponse:
         request_id = uuid4().hex
-        machine_events: list[dict] = []
+        all_events: list[dict] = []
         final_response: ChatResponse | None = None
         error_detail: str | None = None
         try:
-            for event_type, payload in orchestrator.run_stream(
+            for event_type, payload in agent_loop.run_stream(
                 request.message,
                 history=request.history,
                 thinking_mode=request.thinking_mode,
                 attachments=request.attachments,
                 is_edit=request.is_edit,
             ):
-                if event_type == "machine":
-                    machine_events.append(payload)
-                elif event_type == "response":
+                if event_type == "response":
                     final_response = payload
+                elif isinstance(payload, dict):
+                    all_events.append({"event_type": event_type, **payload})
             if final_response is None:
                 raise RuntimeError("No response generated.")
             return final_response
@@ -188,7 +182,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                         "thinking_mode": request.thinking_mode,
                         "is_edit": request.is_edit,
                     },
-                    "machine_events": machine_events,
+                    "events": all_events,
                     "response": final_response.model_dump() if final_response else None,
                     "error": error_detail,
                 },
@@ -196,10 +190,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.post("/api/chat/stream")
     async def chat_stream(request: ChatRequest) -> StreamingResponse:
-        use_agent = active_settings.agent_mode_enabled
 
-        async def _agent_generator():
-            """Agent-mode streaming: progressive task decomposition."""
+        async def _stream_generator():
             request_id = uuid4().hex
             all_events: list[dict] = []
             final_response: ChatResponse | None = None
@@ -214,10 +206,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 ):
                     if event_type == "response":
                         final_response = payload
-                        # Emit final event
                         yield json.dumps({"type": "final", "response": payload.model_dump()}) + "\n"
                     elif event_type == "machine":
-                        # Backward-compat pipeline events from direct-response paths
                         all_events.append(payload)
                         yield json.dumps({"type": "machine", **payload}) + "\n"
                     elif isinstance(payload, dict):
@@ -228,7 +218,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     await asyncio.sleep(0.005)
             except Exception as exc:
                 error_detail = str(exc)
-                logger.exception("agent_stream_failed")
+                logger.exception("chat_stream_failed")
                 yield json.dumps({"type": "error", "detail": str(exc)}) + "\n"
             else:
                 if final_response is None:
@@ -241,7 +231,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                         "ts": datetime.now(timezone.utc).isoformat(),
                         "request_id": request_id,
                         "endpoint": "/api/chat/stream",
-                        "mode": "agent",
                         "request": {
                             "message": request.message,
                             "history": _history_payload(request.history),
@@ -254,61 +243,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     },
                 )
 
-        async def _pipeline_generator():
-            """Legacy pipeline streaming (original behavior)."""
-            request_id = uuid4().hex
-            machine_events: list[dict] = []
-            final_response: ChatResponse | None = None
-            error_detail: str | None = None
-            try:
-                for event_type, payload in orchestrator.run_stream(
-                    request.message,
-                    history=request.history,
-                    thinking_mode=request.thinking_mode,
-                    attachments=request.attachments,
-                    is_edit=request.is_edit,
-                ):
-                    if event_type == "machine":
-                        machine_events.append(payload)
-                        yield json.dumps({"type": "machine", **payload}) + "\n"
-                        await asyncio.sleep(0.005)
-                    elif event_type == "response":
-                        final_response = payload
-            except Exception as exc:
-                error_detail = str(exc)
-                logger.exception("chat_stream_failed")
-                yield json.dumps({"type": "error", "detail": str(exc)}) + "\n"
-            else:
-                if final_response is None:
-                    error_detail = "No response generated."
-                    yield json.dumps({"type": "error", "detail": "No response generated."}) + "\n"
-                else:
-                    for piece in _chunk_text(final_response.answer, size=32):
-                        yield json.dumps({"type": "delta", "delta": piece}) + "\n"
-                        await asyncio.sleep(0.006)
-                    yield json.dumps({"type": "final", "response": final_response.model_dump()}) + "\n"
-            finally:
-                _append_thread_log(
-                    active_settings,
-                    {
-                        "ts": datetime.now(timezone.utc).isoformat(),
-                        "request_id": request_id,
-                        "endpoint": "/api/chat/stream",
-                        "mode": "pipeline",
-                        "request": {
-                            "message": request.message,
-                            "history": _history_payload(request.history),
-                            "thinking_mode": request.thinking_mode,
-                            "is_edit": request.is_edit,
-                        },
-                        "machine_events": machine_events,
-                        "response": final_response.model_dump() if final_response else None,
-                        "error": error_detail,
-                    },
-                )
-
-        gen = _agent_generator() if use_agent else _pipeline_generator()
-        return StreamingResponse(gen, media_type="application/x-ndjson")
+        return StreamingResponse(_stream_generator(), media_type="application/x-ndjson")
 
     @app.post("/api/tools/generate")
     async def generate_tool(request: ToolGenerateRequest):
