@@ -1301,13 +1301,14 @@ body.chat-started .attach-menu {
   background: var(--panel);
   border: 1px solid var(--border-2);
   border-radius: 14px;
+  padding: 14px 16px;
   animation: diagram-pop-in 250ms ease-out;
 }
 .diagram-panel.hidden { display: none; }
 .diagram-panel .panel-header {
   background: var(--panel);
   border-bottom: 1px solid var(--border);
-  padding: 5px 8px;
+  padding: 0 0 8px 0;
   cursor: move;
   position: relative;
 }
@@ -1357,6 +1358,8 @@ body.chat-started .attach-menu {
 }
 .thinking-panel.collapsed > .panel-header {
   border-bottom-color: transparent;
+  min-height: 38px;
+  align-items: center;
 }
 /* Hide thinking panel only when feed is empty AND not actively thinking */
 .thinking-panel:has(.activity-feed:empty):not(.is-thinking) { display: none; }
@@ -1493,6 +1496,13 @@ body.chat-started .attach-menu {
 .tool-card .card-icon { color: var(--warning); }
 .tool-card.search-tool .card-icon,
 .search-card .card-icon { color: var(--accent); }
+
+/* No box around any activity cards inside the thinking panel */
+.thinking-panel .activity-card {
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
 
 .tool-args {
   display: block;
